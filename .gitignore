@@ -30,7 +30,9 @@
 *.exe
 *.out
 *.app
-
+zelda-*
+zquest-*
+romview-*
 
 #Folders
 DEPRECATED
