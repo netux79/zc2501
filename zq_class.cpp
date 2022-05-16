@@ -204,6 +204,7 @@ bool zmap::reset_templates(bool validate)
     
     //int ret;
     word version, build, dummy, sversion=0;
+    long32 ldummy;
     //long section_size;
     word temp_map_count;
     mapscr temp_mapscr;
@@ -231,7 +232,7 @@ bool zmap::reset_templates(bool validate)
     }
     
     //section size
-    if(!p_igetl(&dummy,f,true))
+    if(!p_igetl(&ldummy,f,true))
     {
         return false;
     }

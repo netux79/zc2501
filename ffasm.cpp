@@ -948,7 +948,7 @@ int parse_script_file(ffscript **script, const char *path, bool report_success)
 
 int set_argument(char *argbuf, ffscript **script, int com, int argument)
 {
-    long *arg;
+    int *arg;
     
     if(argument)
     {

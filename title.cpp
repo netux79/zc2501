@@ -810,10 +810,10 @@ int readsaves(gamedata *savedata, PACKFILE *f)
     //  long templong;
     word tempword;
     dword tempdword;
-    long section_id=0;
+    int section_id=0;
     word section_version=0;
     word section_cversion=0;
-    dword section_size;
+    int section_size;
     
     //section id
     if(!p_mgetl(&section_id,f,true))

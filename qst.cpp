@@ -333,7 +333,7 @@ bool find_section(PACKFILE *f, long section_id_requested)
         return false;
     }
     
-    long section_id_read;
+    int section_id_read;
     bool catchup=false;
     word dummy;
     byte tempbyte;
@@ -1390,7 +1390,7 @@ static MIDI *read_midi(PACKFILE *f, bool)
     MIDI *m;
     int c;
     short divisions=0;
-    long len=0;
+    int len=0;
     
     m = (MIDI*)_AL_MALLOC(sizeof(MIDI));
     
@@ -7761,7 +7761,7 @@ int readffscript(PACKFILE *f, zquestheader *Header, bool keepdata)
     
     if(s_version > 2)
     {
-        long bufsize;
+        int bufsize;
         p_igetl(&bufsize, f, true);
         char * buf = new char[bufsize+1];
         pfread(buf, bufsize, f, true);
@@ -7943,7 +7943,7 @@ int read_one_ffscript(PACKFILE *f, zquestheader *, bool keepdata, int , word s_v
     //Please also update loadquest() when modifying this method -DD
     ffscript temp_script;
     temp_script.ptr=NULL;
-    long num_commands=1000;
+    int num_commands=1000;
     
     if(s_version>=2)
     {
@@ -8038,7 +8038,7 @@ int readsfx(PACKFILE *f, zquestheader *Header, bool keepdata)
     //these are here to bypass compiler warnings about unused arguments
     Header=Header;
     
-    long dummy;
+    int dummy;
     word s_version=0, s_cversion=0;
     //int ret;
     SAMPLE temp_sample;
@@ -11785,7 +11785,7 @@ int readtiles(PACKFILE *f, tiledata *buf, zquestheader *Header, word version, wo
 int readtunes(PACKFILE *f, zquestheader *Header, zctune *tunes /*zcmidi_ *midis*/, bool keepdata)
 {
     byte *mf=midi_flags;
-    long dummy;
+    int dummy;
     word dummy2;
     // zcmidi_ temp_midi;
     int tunes_to_read;

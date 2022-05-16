@@ -4908,7 +4908,7 @@ void do_allocatemem(const bool v, const bool local, const byte i)
         
         if(ptrval >= game->globalRAM.size())
         {
-            al_trace("Invalid pointer value of %ld passed to global allocate\n", ptrval);
+            al_trace("Invalid pointer value of %d passed to global allocate\n", ptrval);
             //this shouldn't happen, unless people are putting ALLOCATEGMEM in their ZASM scripts where they shouldn't be
         }
         
@@ -5020,7 +5020,7 @@ void do_div(const bool v)
     if(temp == 0)
     {
         Z_scripterrlog("Script attempted to divide %ld by zero!\n", temp2);
-        set_register(sarg1, long(sign(temp2) * LONG_MAX));
+        set_register(sarg1, long(sign(temp2) * INT_MAX));
     }
     else
     {
@@ -5111,7 +5111,7 @@ void do_log10(const bool v)
     else if(temp == 0)
     {
         Z_eventlog("Script tried to calculate log of 0\n");
-        set_register(sarg1, -LONG_MAX);
+        set_register(sarg1, -INT_MAX);
     }
     else
     {
@@ -5129,7 +5129,7 @@ void do_naturallog(const bool v)
     else if(temp == 0)
     {
         Z_eventlog("Script tried to calculate ln of 0\n");
-        set_register(sarg1, -LONG_MAX);
+        set_register(sarg1, -INT_MAX);
     }
     else
     {
@@ -5692,7 +5692,7 @@ void do_loadlweapon(const bool v)
     long index = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkLWeaponIndex(index, "Screen->LoadLWeapon") != SH::_NoError)
-        ri->lwpn = LONG_MAX;
+        ri->lwpn = INT_MAX;
     else
     {
         ri->lwpn = Lwpns.spr(index)->getUID();
@@ -5706,7 +5706,7 @@ void do_loadeweapon(const bool v)
     long index = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkEWeaponIndex(index, "Screen->LoadEWeapon") != SH::_NoError)
-        ri->ewpn = LONG_MAX;
+        ri->ewpn = INT_MAX;
     else
     {
         ri->ewpn = Ewpns.spr(index)->getUID();
@@ -5719,7 +5719,7 @@ void do_loaditem(const bool v)
     long index = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkItemIndex(index, "Screen->LoadItem") != SH::_NoError)
-        ri->itemref = LONG_MAX;
+        ri->itemref = INT_MAX;
     else
     {
         ri->itemref = items.spr(index)->getUID();
@@ -5744,7 +5744,7 @@ void do_loadnpc(const bool v)
     long index = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkGuyIndex(index, "Screen->LoadNPC") != SH::_NoError)
-        ri->guyref = LONG_MAX;
+        ri->guyref = INT_MAX;
     else
     {
         ri->guyref = guys.spr(index)->getUID();
@@ -5763,7 +5763,7 @@ void do_createlweapon(const bool v)
     
     if(Lwpns.Count() < 1)
     {
-        ri->lwpn = LONG_MAX;
+        ri->lwpn = INT_MAX;
         Z_scripterrlog("Couldn't create lweapon %ld, screen lweapon limit reached\n", ID);
     }
     else
@@ -5784,7 +5784,7 @@ void do_createeweapon(const bool v)
     
     if(Ewpns.Count() < 1)
     {
-        ri->ewpn = LONG_MAX;
+        ri->ewpn = INT_MAX;
         Z_scripterrlog("Couldn't create eweapon %ld, screen eweapon limit reached\n", ID);
     }
     else
@@ -5805,7 +5805,7 @@ void do_createitem(const bool v)
     
     if(items.Count() < 1)
     {
-        ri->itemref = LONG_MAX;
+        ri->itemref = INT_MAX;
         Z_scripterrlog("Couldn't create item \"%s\", screen item limit reached\n", item_string[ID]);
     }
     else
@@ -5827,7 +5827,7 @@ void do_createnpc(const bool v)
     
     if(numcreated == 0)
     {
-        ri->guyref = LONG_MAX;
+        ri->guyref = INT_MAX;
         Z_scripterrlog("Couldn't create NPC \"%s\", screen NPC limit reached\n", guy_string[ID]);
     }
     else

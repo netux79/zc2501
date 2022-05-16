@@ -240,7 +240,8 @@ extern int CSET_SHFT;
 
 typedef unsigned char        byte;                               //0-                       255  ( 8 bits)
 typedef unsigned short       word;                               //0-                    65,535  (16 bits)
-typedef unsigned long        dword;                              //0-             4,294,967,295  (32 bits)
+typedef unsigned int         dword;                              //0-             4,294,967,295  (32 bits)
+typedef int                  long32;                             //-2147,483,648  2,147,483,647  (32 bits)  
 typedef unsigned long long   qword;                              //0-18,446,744,073,709,551,616  (64 bits)
 
 extern int readsize, writesize;
@@ -974,7 +975,7 @@ struct itemdata
     byte frames;                                              // animation frame count
     byte speed;                                               // animation speed
     byte delay;                                               // extra delay factor (-1) for first frame
-    long ltm;                                                 // Link Tile Modifier
+    long32 ltm;                                                 // Link Tile Modifier
     byte family;												// What family the item is in
     byte fam_type;											// What type in this family the item is
     byte power;	// Damage, height, etc.
@@ -1000,7 +1001,7 @@ struct itemdata
     byte playsound;
     word collect_script;
 //  byte exp[10];                                             // not used
-    long initiald[8];
+    long32 initiald[8];
     byte initiala[2];
     byte wpn;
     byte wpn2;
@@ -1013,16 +1014,16 @@ struct itemdata
     byte wpn9;
     byte wpn10;
     byte pickup_hearts;
-    long misc1;
-    long misc2;
-    long misc3;
-    long misc4;
-    long misc5;
-    long misc6;
-    long misc7;
-    long misc8;
-    long misc9;
-    long misc10;
+    long32 misc1;
+    long32 misc2;
+    long32 misc3;
+    long32 misc4;
+    long32 misc5;
+    long32 misc6;
+    long32 misc7;
+    long32 misc8;
+    long32 misc9;
+    long32 misc10;
     byte magic; // Magic usage!
     byte usesound;
 };
@@ -1166,7 +1167,7 @@ struct guydata
     short  dp, wdp, weapon;
     
     short  rate, hrate, step, homing, grumble, item_set;
-    long   misc1, misc2, misc3, misc4, misc5, misc6, misc7, misc8, misc9, misc10, misc11, misc12, misc13, misc14, misc15;
+    long32   misc1, misc2, misc3, misc4, misc5, misc6, misc7, misc8, misc9, misc10, misc11, misc12, misc13, misc14, misc15;
     short  bgsfx, bosspal, extend;
     byte defense[edefLAST];
     //  short  startx, starty;
@@ -1180,8 +1181,8 @@ public:
     //word script; //script number
     dword pc; //current command offset
     
-    long d[8]; //d registers
-    long a[2]; //a regsisters (reference to another ffc on screen)
+    long32 d[8]; //d registers
+    long32 a[2]; //a regsisters (reference to another ffc on screen)
     byte sp; //stack pointer for current script
     dword scriptflag; //stores whether various operations were true/false etc.
     
@@ -1194,7 +1195,7 @@ public:
     {
         pc = 0, sp = 0, scriptflag = 0;
         ffcref = 0, idata = 0, itemref = 0, guyref = 0, lwpn = 0, ewpn = 0;
-        memset(d, 0, 8 * sizeof(long));
+        memset(d, 0, 8 * sizeof(long32));
         a[0] = a[1] = 0;
     }
     
@@ -1213,8 +1214,8 @@ public:
         pc = rhs.pc, sp = rhs.sp, scriptflag = rhs.scriptflag;
         ffcref = rhs.ffcref, idata = rhs.idata;
         itemref = rhs.itemref, guyref = rhs.guyref, lwpn = rhs.lwpn, ewpn = rhs.ewpn;
-        memcpy(d, rhs.d, 8 * sizeof(long));
-        memcpy(a, rhs.a, 2 * sizeof(long));
+        memcpy(d, rhs.d, 8 * sizeof(long32));
+        memcpy(a, rhs.a, 2 * sizeof(long32));
         return *this;
     }
 };
@@ -1299,27 +1300,27 @@ struct mapscr
     word ffdata[32];
     byte ffcset[32];
     word ffdelay[32];
-    long ffx[32];
-    long ffy[32];
-    long ffxdelta[32];
-    long ffydelta[32];
-    long ffxdelta2[32];
-    long ffydelta2[32];
+    long32 ffx[32];
+    long32 ffy[32];
+    long32 ffxdelta[32];
+    long32 ffydelta[32];
+    long32 ffxdelta2[32];
+    long32 ffydelta2[32];
     dword ffflags[32];
     byte ffwidth[32];
     byte ffheight[32];
     byte fflink[32];
-    long ffmisc[32][16];
+    long32 ffmisc[32][16];
     
     //ffc script attachments
     word ffscript[32];
-    long initd[32][8];
-    long inita[32][2];
+    long32 initd[32][8];
+    long32 inita[32][2];
     bool initialized[32];
     
     refInfo scriptData[32];
-    /*long d[32][8];
-    long a[32][2];
+    /*long32 d[32][8];
+    long32 a[32][2];
     word pc[32];
     dword scriptflag[32];
     byte sp[32]; //stack pointer
@@ -1333,8 +1334,8 @@ struct mapscr
     //byte ewpnclass[32]; Not implemented
     //byte guyclass[32]; Not implemented
     
-    /*long map_stack[256];
-    long map_d[8];
+    /*long32 map_stack[256];
+    long32 map_d[8];
     word map_pc;
     dword map_scriptflag;
     byte map_sp;
@@ -1538,8 +1539,8 @@ struct mapscr
 struct ffscript
 {
     word command;
-    long arg1;
-    long arg2;
+    long32 arg1;
+    long32 arg2;
     char *ptr;
 };
 
@@ -1566,19 +1567,19 @@ struct comboclass
     short conveyor_y_speed;               //  f
     word  create_enemy;                   //  g
     byte  create_enemy_when;              //  h
-    long  create_enemy_change;            //  i
+    long32  create_enemy_change;            //  i
     byte  directional_change_type;        //  j
-    long  distance_change_tiles;          //  k
+    long32  distance_change_tiles;          //  k
     short dive_item;                      //  l
     byte  dock;                           //  m
     byte  fairy;                          //  n
     byte  ff_combo_attr_change;           //  o
-    long  foot_decorations_tile;          //  p
+    long32  foot_decorations_tile;          //  p
     byte  foot_decorations_type;          //  q
     byte  hookshot_grab_point;            //  r
     byte  ladder_pass;                    //  s
     byte  lock_block_type;                //  t
-    long  lock_block_change;              //  u
+    long32  lock_block_change;              //  u
     byte  magic_mirror_type;              //  v
     short modify_hp_amount;               //  w
     byte  modify_hp_delay;                //  x
@@ -1602,11 +1603,11 @@ struct comboclass
     byte  slow_movement;                  // ap
     byte  statue_type;                    // aq
     byte  step_type;                      // ar
-    long  step_change_to;                 // as
+    long32  step_change_to;                 // as
     byte  strike_weapons[32];             // at
-    long  strike_remnants;                // au
+    long32  strike_remnants;                // au
     byte  strike_remnants_type;           // av
-    long  strike_change;                  // aw
+    long32  strike_change;                  // aw
     short strike_item;                    // ax
     short touch_item;                     // ay
     byte  touch_stairs;                   // az
@@ -1896,7 +1897,7 @@ struct dmap
     //204
     byte disableditems[iMax];
     // 460
-    long flags;
+    long32 flags;
 };
 
 // DMap flags
@@ -2056,9 +2057,9 @@ public:
 
     char title[36];
     //20
-    long start;
-    long loop_start;
-    long loop_end;
+    long32 start;
+    long32 loop_start;
+    long32 loop_end;
     //32
     short loop;
     short volume;
@@ -2076,7 +2077,7 @@ public:
         reset();
     }
     
-    zctune(char _title[36], long _start, long _loop_start, long _loop_end, short _loop,short _volume, void *_data, byte _format)
+    zctune(char _title[36], long32 _start, long32 _loop_start, long32 _loop_end, short _loop,short _volume, void *_data, byte _format)
         : start(_start), loop_start(_loop_start), loop_end(_loop_end), loop(_loop), volume(_volume), data(_data), format(_format)
     {
         //memcpy(title, _title, 20); //NOT SAFE for short strings
@@ -2133,9 +2134,9 @@ public:
 {
   char title[20];
   //20
-  long start;
-  long loop_start;
-  long loop_end;
+  long32 start;
+  long32 loop_start;
+  long32 loop_end;
   //32
   short loop;
   short volume;
@@ -2288,9 +2289,9 @@ struct gamedata
     char  qstpath[2048];
     byte  icon[128];
     byte  pal[48];
-    long  screen_d[MAXDMAPS*MAPSCRSNORMAL][8];                // script-controlled screen variables
-    long  global_d[256];                                      // script-controlled global variables
-    std::vector< ZCArray <long> > globalRAM;
+    long32  screen_d[MAXDMAPS*MAPSCRSNORMAL][8];                // script-controlled screen variables
+    long32  global_d[256];                                      // script-controlled global variables
+    std::vector< ZCArray <long32> > globalRAM;
     
     byte awpn, bwpn;											// Currently selected weapon slots
     
@@ -2777,7 +2778,7 @@ INLINE bool p_iputw(int c,PACKFILE *f)
 INLINE bool p_igetl(void *p,PACKFILE *f,bool keepdata)
 {
     dword *cp = (dword *)p;
-    long c;
+    long32 c;
     
     if(!f) return false;
     
@@ -2814,7 +2815,7 @@ INLINE bool p_igetl(void *p,PACKFILE *f,bool keepdata)
 
 INLINE bool p_igetd(void *p, PACKFILE *f, bool keepdata)
 {
-    long temp;
+    long32 temp;
     bool result = p_igetl(&temp,f,keepdata);
     *(int *)p=(int)temp;
     return result;
@@ -2969,7 +2970,7 @@ INLINE bool p_mputw(int c,PACKFILE *f)
 INLINE bool p_mgetl(void *p,PACKFILE *f,bool keepdata)
 {
     dword *cp = (dword *)p;
-    long c;
+    long32 c;
     
     if(!f) return false;
     
