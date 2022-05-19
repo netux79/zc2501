@@ -1624,7 +1624,7 @@ void show_details()
 {
     //textprintf_ex(framebuf,font,-3,-5,WHITE,BLACK,"%-4d",whistleclk);
     textprintf_ex(framebuf,font,0,8,WHITE,BLACK,"dlvl:%-2d dngn:%d", dlevel, isdungeon());
-    textprintf_ex(framebuf,font,0,176,WHITE,BLACK,"%ld %s",game->get_time(),time_str_long(game->get_time()));
+    textprintf_ex(framebuf,font,0,176,WHITE,BLACK,"%d %s",game->get_time(),time_str_long(game->get_time()));
     
 //    textprintf_ex(framebuf,font,200,16,WHITE,BLACK,"%3d",Link.getPushing());
 //    for(int i=0; i<Lwpns.Count(); i++)
@@ -3810,7 +3810,7 @@ void __zc_always_assert(bool e, const char* expression, const char* file, int li
     {
         //for best results set a breakpoint in here.
         char buf[1024];
-        sprintf("ASSERTION FAILED! : %s, %s line %i\n", expression, file, line);
+        sprintf(buf, "ASSERTION FAILED! : %s, %s line %i\n", expression, file, line);
         
         al_trace("%s", buf);
         set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);

@@ -6090,7 +6090,7 @@ void do_set_dmap_enh_music(const bool v)
         
         
     ArrayH::getString(arrayptr, filename_str, 256);
-    strncpy(DMaps[ID].tmusic, filename_str.c_str(), 255);
+    strncpy(DMaps[ID].tmusic, filename_str.c_str(), sizeof(DMaps[ID].tmusic));
     DMaps[ID].tmusic[255]='\0';
     DMaps[ID].tmusictrack=track;
 }

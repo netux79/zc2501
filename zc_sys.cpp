@@ -78,7 +78,7 @@ static  const char *qst_dir_name = "linux_qst_dir";
 static  const char *qst_dir_name = "macosx_qst_dir";
 #endif
 #ifdef ALLEGRO_LINUX
-static  const char *samplepath = "samplesoundset/patches.dat";
+static  const char *samplepath = "patches.dat";
 #endif
 
 #ifdef _MSC_VER
@@ -329,10 +329,12 @@ void load_game_configs()
     
     if(strlen(qstdir)==0)
     {
-        getcwd(qstdir,2048);
-        fix_filename_case(qstdir);
-        fix_filename_slashes(qstdir);
-        put_backslash(qstdir);
+        if(getcwd(qstdir,2048))
+        {
+            fix_filename_case(qstdir);
+            fix_filename_slashes(qstdir);
+            put_backslash(qstdir);
+        }
     }
     else
     {
@@ -6066,7 +6068,7 @@ int onSound()
     return D_O_K;
 }
 
-int queding(const char *s1,char *s2,char *s3)
+int queding(const char *s1,const char *s2,const char *s3)
 {
     return jwin_alert(ZC_str,s1,s2,s3,"&Yes","&No",'y','n',lfont);
 }

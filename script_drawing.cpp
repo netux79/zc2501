@@ -1742,7 +1742,7 @@ void do_drawquad3dr(BITMAP *bmp, int i, int *sdci, int xoffset, int yoffset)
     //sdci[7]=tile/combo
     //sdci[8]=polytype
     
-    std::vector<long>* v_ptr = (std::vector<long>*)script_drawing_commands[i].GetPtr();
+    std::vector<int>* v_ptr = (std::vector<int>*)script_drawing_commands[i].GetPtr();
     
     if(!v_ptr)
     {
@@ -1750,15 +1750,15 @@ void do_drawquad3dr(BITMAP *bmp, int i, int *sdci, int xoffset, int yoffset)
         return;
     }
     
-    std::vector<long> &v = *v_ptr;
+    std::vector<int> &v = *v_ptr;
     
     if(v.empty())
         return;
         
-    long* pos = &v[0];
-    long* uv = &v[12];
-    long* col = &v[20];
-    long* size = &v[24];
+    int* pos = &v[0];
+    int* uv = &v[12];
+    int* col = &v[20];
+    int* size = &v[24];
     
     int w = size[0]; //magic numerical constants... yuck.
     int h = size[1];
@@ -1821,7 +1821,7 @@ void do_drawtriangle3dr(BITMAP *bmp, int i, int *sdci, int xoffset, int yoffset)
     //sdci[7]=tile/combo
     //sdci[8]=polytype
     
-    std::vector<long>* v_ptr = (std::vector<long>*)script_drawing_commands[i].GetPtr();
+    std::vector<int>* v_ptr = (std::vector<int>*)script_drawing_commands[i].GetPtr();
     
     if(!v_ptr)
     {
@@ -1829,15 +1829,15 @@ void do_drawtriangle3dr(BITMAP *bmp, int i, int *sdci, int xoffset, int yoffset)
         return;
     }
     
-    std::vector<long> &v = *v_ptr;
+    std::vector<int> &v = *v_ptr;
     
     if(v.empty())
         return;
         
-    long* pos = &v[0];
-    long* uv = &v[9];
-    long* col = &v[15];
-    long* size = &v[18];
+    int* pos = &v[0];
+    int* uv = &v[9];
+    int* col = &v[15];
+    int* size = &v[18];
     
     int w = size[0]; //magic numerical constants... yuck.
     int h = size[1];

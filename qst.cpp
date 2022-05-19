@@ -125,7 +125,7 @@ void delete_combo_aliases()
 
 char *VerStr(int version)
 {
-    static char ver_str[12];
+    static char ver_str[16];
     sprintf(ver_str,"v%d.%02X",version>>8,version&0xFF);
     return ver_str;
 }
@@ -1906,7 +1906,8 @@ bool check_questpwd(zquestheader *Header, char *pwd)
 
 int readheader(PACKFILE *f, zquestheader *Header, bool keepdata)
 {
-    int dummy;
+    word dummyw;
+    long32 dummyl;
     zquestheader tempheader;
     memcpy(&tempheader, Header, sizeof(tempheader));
     char dummybuf[80];
@@ -2154,7 +2155,7 @@ int readheader(PACKFILE *f, zquestheader *Header, bool keepdata)
     else
     {
         //section id
-        if(!p_mgetl(&dummy,f,true))
+        if(!p_mgetl(&dummyl,f,true))
         {
             return qe_invalid;
         }
@@ -2165,13 +2166,13 @@ int readheader(PACKFILE *f, zquestheader *Header, bool keepdata)
             return qe_invalid;
         }
         
-        if(!p_igetw(&dummy,f,true))
+        if(!p_igetw(&dummyw,f,true))
         {
             return qe_invalid;
         }
         
         //section size
-        if(!p_igetl(&dummy,f,true))
+        if(!p_igetl(&dummyl,f,true))
         {
             return qe_invalid;
         }
@@ -2319,7 +2320,8 @@ int readheader(PACKFILE *f, zquestheader *Header, bool keepdata)
 
 int readrules(PACKFILE *f, zquestheader *Header, bool keepdata)
 {
-    int dummy;
+    int dummyl;
+    word dummyw;
     zquestheader tempheader;
     word s_version=0;
     
@@ -2333,13 +2335,13 @@ int readrules(PACKFILE *f, zquestheader *Header, bool keepdata)
             return qe_invalid;
         }
         
-        if(!p_igetw(&dummy,f,true))
+        if(!p_igetw(&dummyw,f,true))
         {
             return qe_invalid;
         }
         
         //section size
-        if(!p_igetl(&dummy,f,true))
+        if(!p_igetl(&dummyl,f,true))
         {
             return qe_invalid;
         }
@@ -2889,7 +2891,7 @@ int readdoorcombosets(PACKFILE *f, zquestheader *Header, bool keepdata)
     word temp_door_combo_set_count=0;
     DoorComboSet tempDoorComboSet;
     word dummy_word;
-    long dummy_long;
+    long32 dummy_long;
     byte padding;
     
     if(keepdata==true)
@@ -6827,72 +6829,79 @@ int read_one_subscreen(PACKFILE *f, zquestheader *, bool keepdata, int i, word s
             return qe_invalid;
         }
         
-        if(!p_igetd(&(temp_sub->d1),f,keepdata))
+        if(!p_igetl(&(temp_sub->d1),f,keepdata))
         {
             return qe_invalid;
         }
         
-        if(!p_igetd(&(temp_sub->d2),f,keepdata))
+        if(!p_igetl(&(temp_sub->d2),f,keepdata))
         {
             return qe_invalid;
         }
         
-        if(!p_igetd(&(temp_sub->d3),f,keepdata))
+        if(!p_igetl(&(temp_sub->d3),f,keepdata))
         {
             return qe_invalid;
         }
         
-        if(!p_igetd(&(temp_sub->d4),f,keepdata))
+        if(!p_igetl(&(temp_sub->d4),f,keepdata))
         {
             return qe_invalid;
         }
         
-        if(!p_igetd(&(temp_sub->d5),f,keepdata))
+        if(!p_igetl(&(temp_sub->d5),f,keepdata))
         {
             return qe_invalid;
         }
         
-        if(!p_igetd(&(temp_sub->d6),f,keepdata))
+        if(!p_igetl(&(temp_sub->d6),f,keepdata))
         {
             return qe_invalid;
         }
         
-        if(!p_igetd(&(temp_sub->d7),f,keepdata))
+        if(!p_igetl(&(temp_sub->d7),f,keepdata))
         {
             return qe_invalid;
         }
         
-        if(!p_igetd(&(temp_sub->d8),f,keepdata))
+        if(!p_igetl(&(temp_sub->d8),f,keepdata))
         {
             return qe_invalid;
         }
         
-        if(!p_igetd(&(temp_sub->d9),f,keepdata))
+        if(!p_igetl(&(temp_sub->d9),f,keepdata))
         {
             return qe_invalid;
         }
         
-        if(!p_igetd(&(temp_sub->d10),f,keepdata))
+        if(!p_igetl(&(temp_sub->d10),f,keepdata))
         {
             return qe_invalid;
         }
         
         if(s_version < 2)
         {
-            if(!p_igetl(&(temp_sub->speed),f,keepdata))
+            dword temp;
+            if(!p_igetl(&temp,f,keepdata))
             {
                 return qe_invalid;
             }
             
-            if(!p_igetl(&(temp_sub->delay),f,keepdata))
+            temp_sub->speed = (byte)temp;
+            
+            if(!p_igetl(&temp,f,keepdata))
             {
                 return qe_invalid;
             }
             
-            if(!p_igetl(&(temp_sub->frame),f,keepdata))
+            temp_sub->delay = (byte)temp;
+            
+            if(!p_igetl(&temp,f,keepdata))
             {
                 return qe_invalid;
             }
+            
+            temp_sub->frame = (byte)temp;
         }
         else
         {
@@ -8039,6 +8048,7 @@ int readsfx(PACKFILE *f, zquestheader *Header, bool keepdata)
     Header=Header;
     
     int dummy;
+    dword dummyd;
     word s_version=0, s_cversion=0;
     //int ret;
     SAMPLE temp_sample;
@@ -8176,25 +8186,33 @@ int readsfx(PACKFILE *f, zquestheader *Header, bool keepdata)
         
         (temp_sample.priority) = dummy;
         
-        if(!p_igetl(&(temp_sample.len),f,true))
+        if(!p_igetl(&dummyd,f,true))
         {
             return qe_invalid;
         }
         
-        if(!p_igetl(&(temp_sample.loop_start),f,keepdata))
+        (temp_sample.len) = dummyd;
+        
+        if(!p_igetl(&dummyd,f,keepdata))
         {
             return qe_invalid;
         }
         
-        if(!p_igetl(&(temp_sample.loop_end),f,keepdata))
+        (temp_sample.loop_start) = dummyd;
+        
+        if(!p_igetl(&dummyd,f,keepdata))
         {
             return qe_invalid;
         }
         
-        if(!p_igetl(&(temp_sample.param),f,keepdata))
+        (temp_sample.loop_end) = dummyd;
+        
+        if(!p_igetl(&dummyd,f,keepdata))
         {
             return qe_invalid;
         }
+        
+        (temp_sample.param) = dummyd;
         
         // al_trace("F%i: L%i\n",i,temp_sample.len);
 //    temp_sample.data = new byte[(temp_sample.bits==8?1:2)*temp_sample.len];
