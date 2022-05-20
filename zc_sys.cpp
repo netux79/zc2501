@@ -77,9 +77,6 @@ static  const char *qst_dir_name = "linux_qst_dir";
 #elif defined(ALLEGRO_MACOSX)
 static  const char *qst_dir_name = "macosx_qst_dir";
 #endif
-#ifdef ALLEGRO_LINUX
-static  const char *samplepath = "patches.dat";
-#endif
 
 #ifdef _MSC_VER
 #define getcwd _getcwd
@@ -434,10 +431,6 @@ void save_game_configs()
     set_config_int("graphics","disable_direct_updating",disable_direct_updating);
     set_config_int("zeldadx","use_dwm_flush",use_dwm_flush);
 	set_config_int("zeldadx","midi_patch_fix",midi_patch_fix);
-#endif
-    
-#ifdef ALLEGRO_LINUX
-    set_config_string("sound","patches",samplepath); // set to sample sound path set for DIGMIDI driver in Linux ~ Takuya
 #endif
     
     set_config_int(cfg_sect,"save_indicator",use_save_indicator);
