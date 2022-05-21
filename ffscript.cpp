@@ -54,8 +54,8 @@ extern int skipcont;
 extern std::map<int, std::pair<string,string> > ffcmap;
 
 //We gain some speed by not passing as arguments
-long sarg1 = 0;
-long sarg2 = 0;
+long32 sarg1 = 0;
+long32 sarg2 = 0;
 refInfo *ri = NULL;
 ffscript *curscript = NULL;
 
@@ -68,19 +68,19 @@ bool global_wait = false;
 refInfo itemScriptData;
 
 //The stacks
-long(*stack)[256] = NULL;
-long ffc_stack[32][256];
-long global_stack[256];
-long item_stack[256];
+long32(*stack)[256] = NULL;
+long32 ffc_stack[32][256];
+long32 global_stack[256];
+long32 item_stack[256];
 
 void clear_ffc_stack(const byte i)
 {
-    memset(ffc_stack[i], 0, 256 * sizeof(long));
+    memset(ffc_stack[i], 0, 256 * sizeof(long32));
 }
 
 void clear_global_stack()
 {
-    memset(global_stack, 0, 256 * sizeof(long));
+    memset(global_stack, 0, 256 * sizeof(long32));
 }
 
 //ScriptHelper
@@ -105,13 +105,13 @@ public:
 #define INVALIDARRAY localRAM[0]  //localRAM[0] is never used
     
     //only if the player is messing with their pointers...
-    static ZScriptArray& InvalidError(const long ptr)
+    static ZScriptArray& InvalidError(const long32 ptr)
     {
         Z_scripterrlog("Invalid pointer (%i) passed to array (don't change the values of your array pointers)\n", ptr);
         return INVALIDARRAY;
     }
     
-    static void write_stack(const int stackoffset, const long value)
+    static void write_stack(const int stackoffset, const long32 value)
     {
         if(stackoffset == 0)
         {
@@ -122,7 +122,7 @@ public:
         (*stack)[stackoffset] = value;
     }
     
-    static long read_stack(const int stackoffset)
+    static long32 read_stack(const int stackoffset)
     {
         if(stackoffset == 0)
         {
@@ -133,7 +133,7 @@ public:
         return (*stack)[stackoffset];
     }
     
-    static INLINE long get_arg(long arg, bool v)
+    static INLINE long32 get_arg(long32 arg, bool v)
     {
         return v ? arg : get_register(arg);
     }
@@ -159,7 +159,7 @@ int ornextflag(bool flag)
     return f;
 }
 
-long get_screenflags(mapscr *m, int flagset)
+long32 get_screenflags(mapscr *m, int flagset)
 {
     int f=0;
     flagpos = 0;
@@ -216,7 +216,7 @@ long get_screenflags(mapscr *m, int flagset)
     return f*10000;
 }
 
-long get_screeneflags(mapscr *m, int flagset)
+long32 get_screeneflags(mapscr *m, int flagset)
 {
     int f=0;
     flagpos = 0;
@@ -251,7 +251,7 @@ class BC : public SH
 {
 public:
 
-    static INLINE int checkMapID(const long ID, const char * const str)
+    static INLINE int checkMapID(const long32 ID, const char * const str)
     {
         //return checkBounds(ID, 0, map_count-1, str);
         if(ID < 0 || ID > map_count-1)
@@ -263,92 +263,92 @@ public:
         return _NoError;
     }
     
-    static INLINE int checkDMapID(const long ID, const char * const str)
+    static INLINE int checkDMapID(const long32 ID, const char * const str)
     {
         return checkBounds(ID, 0, MAXDMAPS-1, str);
     }
     
-    static INLINE int checkComboPos(const long pos, const char * const str)
+    static INLINE int checkComboPos(const long32 pos, const char * const str)
     {
         return checkBounds(pos, 0, 175, str);
     }
     
-    static INLINE int checkTile(const long pos, const char * const str)
+    static INLINE int checkTile(const long32 pos, const char * const str)
     {
         return checkBounds(pos, 0, NEWMAXTILES-1, str);
     }
     
-    static INLINE int checkCombo(const long pos, const char * const str)
+    static INLINE int checkCombo(const long32 pos, const char * const str)
     {
         return checkBounds(pos, 0, MAXCOMBOS-1, str);
     }
     
-    static INLINE int checkMisc(const long a, const char * const str)
+    static INLINE int checkMisc(const long32 a, const char * const str)
     {
         return checkBounds(a, 0, 15, str);
     }
     
-    static INLINE int checkMessage(const long ID, const char * const str)
+    static INLINE int checkMessage(const long32 ID, const char * const str)
     {
         return checkBounds(ID, 0, msg_strings_size-1, str);
     }
     
-    static INLINE int checkLayer(const long layer, const char * const str)
+    static INLINE int checkLayer(const long32 layer, const char * const str)
     {
         return checkBounds(layer, 0, 6, str);
     }
     
-    static INLINE int checkFFC(const long ffc, const char * const str)
+    static INLINE int checkFFC(const long32 ffc, const char * const str)
     {
         return checkBounds(ffc, 0, MAXFFCS-1, str);
     }
     
-    static INLINE int checkGuyIndex(const long index, const char * const str)
+    static INLINE int checkGuyIndex(const long32 index, const char * const str)
     {
         return checkBounds(index, 0, guys.Count()-1, str);
     }
     
-    static INLINE int checkItemIndex(const long index, const char * const str)
+    static INLINE int checkItemIndex(const long32 index, const char * const str)
     {
         return checkBounds(index, 0, items.Count()-1, str);
     }
     
-    static INLINE int checkEWeaponIndex(const long index, const char * const str)
+    static INLINE int checkEWeaponIndex(const long32 index, const char * const str)
     {
         return checkBounds(index, 0, Ewpns.Count()-1, str);
     }
     
-    static INLINE int checkLWeaponIndex(const long index, const char * const str)
+    static INLINE int checkLWeaponIndex(const long32 index, const char * const str)
     {
         return checkBounds(index, 0, Lwpns.Count()-1, str);
     }
     
-    static INLINE int checkGuyID(const long ID, const char * const str)
+    static INLINE int checkGuyID(const long32 ID, const char * const str)
     {
         return checkBounds(ID, 0, MAXGUYS-1, str);
     }
     
-    static INLINE int checkItemID(const long ID, const char * const str)
+    static INLINE int checkItemID(const long32 ID, const char * const str)
     {
         return checkBounds(ID, 0, ITEMCNT-1, str);
     }
     
-    static INLINE int checkWeaponID(const long ID, const char * const str)
+    static INLINE int checkWeaponID(const long32 ID, const char * const str)
     {
         return checkBounds(ID, 0, WPNCNT-1, str);
     }
     
-    static INLINE int checkWeaponMiscSprite(const long ID, const char * const str)
+    static INLINE int checkWeaponMiscSprite(const long32 ID, const char * const str)
     {
         return checkBounds(ID, 0, MAXWPNS-1, str);
     }
     
-    static INLINE int checkSFXID(const long ID, const char * const str)
+    static INLINE int checkSFXID(const long32 ID, const char * const str)
     {
         return checkBounds(ID, 0, WAV_COUNT-1, str);
     }
     
-    static INLINE int checkBounds(const long n, const long boundlow, const long boundup, const char * const funcvar)
+    static INLINE int checkBounds(const long32 n, const long32 boundlow, const long32 boundup, const char * const funcvar)
     {
         if(n < boundlow || n > boundup)
         {
@@ -359,9 +359,9 @@ public:
         return _NoError;
     }
     
-    static INLINE int checkUserArrayIndex(const long index, const dword size)
+    static INLINE int checkUserArrayIndex(const long32 index, const dword size)
     {
-        if(index < 0 || index >= long(size))
+        if(index < 0 || index >= long32(size))
         {
             Z_scripterrlog("Invalid index (%ld) to local array of size %ld\n", index, size);
             return _OutOfBounds;
@@ -381,7 +381,7 @@ class GuyH : public SH
 {
 
 public:
-    static int loadNPC(const long eid, const char * const funcvar)
+    static int loadNPC(const long32 eid, const char * const funcvar)
     {
         tempenemy = (enemy *) guys.getByUID(eid);
         
@@ -406,7 +406,7 @@ public:
     
     // Currently only used in a context where the enemy is known to be valid,
     // so there's no need to print an error
-    static int getNPCIndex(const long eid)
+    static int getNPCIndex(const long32 eid)
     {
         for(word i = 0; i < guys.Count(); i++)
         {
@@ -417,7 +417,7 @@ public:
         return -1;
     }
     
-    static long getNPCDMisc(const byte a)
+    static long32 getNPCDMisc(const byte a)
     {
         switch(a)
         {
@@ -472,7 +472,7 @@ public:
         return false;
     }
     
-    static long getMFlags()
+    static long32 getMFlags()
     {
         flagpos = 5;
         // Must be in the same order as in the Enemy Editor pane
@@ -505,7 +505,7 @@ class ItemH : public SH
 {
 
 public:
-    static int loadItem(const long iid, const char * const funcvar)
+    static int loadItem(const long32 iid, const char * const funcvar)
     {
         tempitem = (item *) items.getByUID(iid);
         
@@ -545,7 +545,7 @@ class LwpnH : public SH
 {
 
 public:
-    static int loadWeapon(const long wid, const char * const funcvar)
+    static int loadWeapon(const long32 wid, const char * const funcvar)
     {
         tempweapon = (weapon *) Lwpns.getByUID(wid);
         
@@ -585,7 +585,7 @@ class EwpnH : public SH
 {
 
 public:
-    static int loadWeapon(const long wid, const char * const funcvar)
+    static int loadWeapon(const long32 wid, const char * const funcvar)
     {
         tempweapon = (weapon *) Ewpns.getByUID(wid);
         
@@ -638,7 +638,7 @@ class ArrayH : public SH
 public:
 
     //Returns a reference to the correct array based on pointer passed
-    static ZScriptArray& getArray(const long ptr)
+    static ZScriptArray& getArray(const long32 ptr)
     {
         if(ptr <= 0)
             return InvalidError(ptr);
@@ -661,7 +661,7 @@ public:
         }
     }
     
-    static size_t getSize(const long ptr)
+    static size_t getSize(const long32 ptr)
     {
         ZScriptArray& a = getArray(ptr);
         
@@ -672,7 +672,7 @@ public:
     }
     
     //Can't you get the std::string and then check its length?
-    static int strlen(const long ptr)
+    static int strlen(const long32 ptr)
     {
         ZScriptArray& a = getArray(ptr);
         
@@ -687,7 +687,7 @@ public:
     }
     
     //Returns values of a zscript array as an std::string.
-    static void getString(const long ptr, string &str, word num_chars = 256)
+    static void getString(const long32 ptr, string &str, word num_chars = 256)
     {
         ZScriptArray& a = getArray(ptr);
         
@@ -707,7 +707,7 @@ public:
     }
     
     //Like getString but for an array of longs instead of chars. *(arrayPtr is not checked for validity)
-    static void getValues(const long ptr, long* arrayPtr, word num_values)
+    static void getValues(const long32 ptr, long32* arrayPtr, word num_values)
     {
         ZScriptArray& a = getArray(ptr);
         
@@ -722,7 +722,7 @@ public:
     }
     
     //Get element from array
-    static INLINE long getElement(const long ptr, const long offset)
+    static INLINE long32 getElement(const long32 ptr, const long32 offset)
     {
         ZScriptArray& a = getArray(ptr);
         
@@ -736,7 +736,7 @@ public:
     }
     
     //Set element in array
-    static INLINE void setElement(const long ptr, const long offset, const long value)
+    static INLINE void setElement(const long32 ptr, const long32 offset, const long32 value)
     {
         ZScriptArray& a = getArray(ptr);
         
@@ -749,19 +749,19 @@ public:
     
     //Puts values of a zscript array into a client <type> array. returns 0 on success. Overloaded
     template <typename T>
-    static int getArray(const long ptr, T *refArray)
+    static int getArray(const long32 ptr, T *refArray)
     {
         return getArray(ptr, getArray(ptr).Size(), 0, 0, 0, refArray);
     }
     
     template <typename T>
-    static int getArray(const long ptr, const word size, T *refArray)
+    static int getArray(const long32 ptr, const word size, T *refArray)
     {
         return getArray(ptr, size, 0, 0, 0, refArray);
     }
     
     template <typename T>
-    static int getArray(const long ptr, const word size, word userOffset, const word userStride, const word refArrayOffset, T *refArray)
+    static int getArray(const long32 ptr, const word size, word userOffset, const word userStride, const word refArrayOffset, T *refArray)
     {
         ZScriptArray& a = getArray(ptr);
         
@@ -792,7 +792,7 @@ public:
     }
     
     
-    static int setArray(const long ptr, const string s2)
+    static int setArray(const long32 ptr, const string s2)
     {
         ZScriptArray &a = getArray(ptr);
         
@@ -821,13 +821,13 @@ public:
     
     //Puts values of a client <type> array into a zscript array. returns 0 on success. Overloaded
     template <typename T>
-    static int setArray(const long ptr, const word size, T *refArray)
+    static int setArray(const long32 ptr, const word size, T *refArray)
     {
         return setArray(ptr, size, 0, 0, 0, refArray);
     }
     
     template <typename T>
-    static int setArray(const long ptr, const word size, word userOffset, const word userStride, const word refArrayOffset, T *refArray)
+    static int setArray(const long32 ptr, const word size, word userOffset, const word userStride, const word refArrayOffset, T *refArray)
     {
         ZScriptArray& a = getArray(ptr);
         
@@ -848,7 +848,7 @@ public:
                 k--;
             else if(BC::checkUserArrayIndex(i, a.Size()) == _NoError)
             {
-                a[i] = long(refArray[j + refArrayOffset]) * 10000;
+                a[i] = long32(refArray[j + refArrayOffset]) * 10000;
                 k = userStride;
                 j++;
             }
@@ -859,7 +859,7 @@ public:
 };
 
 // Called when leaving a screen; deallocate arrays created by FFCs that aren't carried over
-void deallocateArray(const long ptrval)
+void deallocateArray(const long32 ptrval)
 {
     if(ptrval<=0 || ptrval >= MAX_ZCARRAY_SIZE)
         Z_scripterrlog("Script tried to deallocate memory at invalid address %ld\n", ptrval);
@@ -881,7 +881,7 @@ void deallocateArray(const long ptrval)
     }
 }
 
-item *checkItem(long iid)
+item *checkItem(long32 iid)
 {
     item *s = (item *)items.getByUID(iid);
     
@@ -902,7 +902,7 @@ item *checkItem(long iid)
     return s;
 }
 
-weapon *checkLWpn(long eid, const char *what)
+weapon *checkLWpn(long32 eid, const char *what)
 {
     weapon *s = (weapon *)Lwpns.getByUID(eid);
     
@@ -924,7 +924,7 @@ weapon *checkLWpn(long eid, const char *what)
     return s;
 }
 
-weapon *checkEWpn(long eid, const char *what)
+weapon *checkEWpn(long32 eid, const char *what)
 {
     weapon *s = (weapon *)Ewpns.getByUID(eid);
     
@@ -947,7 +947,7 @@ weapon *checkEWpn(long eid, const char *what)
 }
 
 
-int get_screen_d(long index1, long index2)
+int get_screen_d(long32 index1, long32 index2)
 {
     if(index2 < 0 || index2 > 7)
     {
@@ -958,7 +958,7 @@ int get_screen_d(long index1, long index2)
     return game->screen_d[index1][index2];
 }
 
-void set_screen_d(long index1, long index2, int val)
+void set_screen_d(long32 index1, long32 index2, int val)
 {
     if(index2 < 0 || index2 > 7)
     {
@@ -970,7 +970,7 @@ void set_screen_d(long index1, long index2, int val)
 }
 
 // If scr is currently being used as a layer, return that layer no.
-int whichlayer(long scr)
+int whichlayer(long32 scr)
 {
     for(int i = 0; i < 6; i++)
     {
@@ -985,9 +985,9 @@ sprite *s;
 
 
 
-long get_register(const long arg)
+long32 get_register(const long32 arg)
 {
-    long ret = 0;
+    long32 ret = 0;
     
     switch(arg)
     {
@@ -1082,19 +1082,19 @@ long get_register(const long arg)
 ///----------------------------------------------------------------------------------------------------//
 //Link's Variables
     case LINKX:
-        ret = long(Link.getX()) * 10000;
+        ret = long32(Link.getX()) * 10000;
         break;
         
     case LINKY:
-        ret = long(Link.getY()) * 10000;
+        ret = long32(Link.getY()) * 10000;
         break;
         
     case LINKZ:
-        ret = long(Link.getZ()) * 10000;
+        ret = long32(Link.getZ()) * 10000;
         break;
         
     case LINKJUMP:
-        ret = long((-Link.getFall() / fix(100.0)) * 10000);
+        ret = long32((-Link.getFall() / fix(100.0)) * 10000);
         break;
         
     case LINKDIR:
@@ -1415,7 +1415,7 @@ long get_register(const long arg)
     case ITEMJUMP:
         if(0!=(s=checkItem(ri->itemref)))
         {
-            ret = long((-((item*)(s))->fall / fix(100.0))  * 10000);
+            ret = long32((-((item*)(s))->fall / fix(100.0))  * 10000);
         }
         
         break;
@@ -1780,7 +1780,7 @@ long get_register(const long arg)
 	if(GuyH::loadNPC(ri->guyref, str) != SH::_NoError) \
 		ret = -10000; \
 	else \
-		ret = (long(GuyH::getNPC()->member) * 10000); \
+		ret = (long32(GuyH::getNPC()->member) * 10000); \
 }
 
     case NPCX:
@@ -1807,7 +1807,7 @@ long get_register(const long arg)
         if(GuyH::loadNPC(ri->guyref, "npc->Jump") != SH::_NoError)
             ret = -10000;
         else
-            ret = (long(-GuyH::getNPC()->fall / fix(100.0)) * 10000);
+            ret = (long32(-GuyH::getNPC()->fall / fix(100.0)) * 10000);
             
         break;
         
@@ -1815,7 +1815,7 @@ long get_register(const long arg)
         if(GuyH::loadNPC(ri->guyref, "npc->Step") != SH::_NoError)
             ret = -10000;
         else
-            ret = long(GuyH::getNPC()->step * fix(100.0)) * 10000;
+            ret = long32(GuyH::getNPC()->step * fix(100.0)) * 10000;
             
         break;
         
@@ -1895,7 +1895,7 @@ long get_register(const long arg)
         
     case LWPNJUMP:
         if(0!=(s=checkLWpn(ri->lwpn,"Jump")))
-            ret = long((-((weapon*)(s))->fall / fix(100.0)) * 100000);
+            ret = long32((-((weapon*)(s))->fall / fix(100.0)) * 100000);
             
         break;
         
@@ -2120,7 +2120,7 @@ long get_register(const long arg)
         
     case EWPNJUMP:
         if(0!=(s=checkEWpn(ri->ewpn, "Jump")))
-            ret = long((-((weapon*)(s))->fall / fix(100.0)) * 100000);
+            ret = long32((-((weapon*)(s))->fall / fix(100.0)) * 100000);
             
         break;
         
@@ -2586,7 +2586,7 @@ else \
         int pos = (ri->d[0])/10000;
         int sc = (ri->d[2]/10000);
         int m = zc_max((ri->d[1]/10000)-1,0);
-        long scr = zc_max(m*MAPSCRS+sc,0);
+        long32 scr = zc_max(m*MAPSCRS+sc,0);
         int layr = whichlayer(scr);
         
         if(pos >= 0 && pos < 176 && scr >= 0 && sc < MAPSCRS && m < map_count)
@@ -2607,7 +2607,7 @@ else \
         int pos = (ri->d[0])/10000;
         int sc = (ri->d[2]/10000);
         int m = zc_max((ri->d[1]/10000)-1,0);
-        long scr = zc_max(m*MAPSCRS+sc,0);
+        long32 scr = zc_max(m*MAPSCRS+sc,0);
         int layr = whichlayer(scr);
         
         if(pos >= 0 && pos < 176 && scr >= 0 && sc < MAPSCRS && m < map_count)
@@ -2628,7 +2628,7 @@ else \
         int pos = (ri->d[0])/10000;
         int sc = (ri->d[2]/10000);
         int m = zc_max((ri->d[1]/10000)-1,0);
-        long scr = zc_max(m*MAPSCRS+sc,0);
+        long32 scr = zc_max(m*MAPSCRS+sc,0);
         int layr = whichlayer(scr);
         
         if(pos >= 0 && pos < 176 && scr >= 0 && sc < MAPSCRS && m < map_count)
@@ -2649,7 +2649,7 @@ else \
         int pos = (ri->d[0])/10000;
         int sc = (ri->d[2]/10000);
         int m = zc_max((ri->d[1]/10000)-1,0);
-        long scr = zc_max(m*MAPSCRS+sc,0);
+        long32 scr = zc_max(m*MAPSCRS+sc,0);
         int layr = whichlayer(scr);
         
         if(pos >= 0 && pos < 176 && scr >= 0 && sc < MAPSCRS && m < map_count)
@@ -2671,7 +2671,7 @@ else \
         int pos = (ri->d[0])/10000;
         int sc = (ri->d[2]/10000);
         int m = zc_max((ri->d[1]/10000)-1,0);
-        long scr = zc_max(m*MAPSCRS+sc,0);
+        long32 scr = zc_max(m*MAPSCRS+sc,0);
         int layr = whichlayer(scr);
         
         if(pos >= 0 && pos < 176 && scr >= 0 && sc < MAPSCRS && m < map_count)
@@ -2692,7 +2692,7 @@ else \
         int pos = (ri->d[0])/10000;
         int sc = (ri->d[2]/10000);
         int m = zc_max((ri->d[1]/10000)-1,0);
-        long scr = zc_max(m*MAPSCRS+sc,0);
+        long32 scr = zc_max(m*MAPSCRS+sc,0);
         int layr = whichlayer(scr);
         
         if(pos >= 0 && pos < 176 && scr >= 0 && sc < MAPSCRS && m < map_count)
@@ -2846,7 +2846,7 @@ else \
 
 
 
-void set_register(const long arg, const long value)
+void set_register(const long32 arg, const long32 value)
 {
 
     switch(arg)
@@ -2858,7 +2858,7 @@ void set_register(const long arg, const long value)
         break;
         
     case FFSCRIPT:
-        for(long i = 1; i < MAX_ZCARRAY_SIZE; i++)
+        for(long32 i = 1; i < MAX_ZCARRAY_SIZE; i++)
         {
             if(arrayOwner[i]==ri->ffcref)
                 deallocateArray(i);
@@ -4242,7 +4242,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
 //Bounds on value
     case NPCTXSZ:
     {
-        long height = value / 10000;
+        long32 height = value / 10000;
         
         if(GuyH::loadNPC(ri->guyref, "npc->TileWidth") == SH::_NoError &&
                 BC::checkBounds(height, 0, 20, "npc->TileWidth") == SH::_NoError)
@@ -4252,7 +4252,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
     
     case NPCTYSZ:
     {
-        long width = value / 10000;
+        long32 width = value / 10000;
         
         if(GuyH::loadNPC(ri->guyref, "npc->TileHeight") == SH::_NoError &&
                 BC::checkBounds(width, 0, 20, "npc->TileHeight") == SH::_NoError)
@@ -4262,7 +4262,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
     
     case NPCOTILE:
     {
-        long tile = value / 10000;
+        long32 tile = value / 10000;
         
         if(GuyH::loadNPC(ri->guyref, "npc->OriginalTile") == SH::_NoError &&
                 BC::checkTile(tile, "npc->OriginalTile") == SH::_NoError)
@@ -4272,7 +4272,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
     
     case NPCTILE:
     {
-        long tile = value / 10000;
+        long32 tile = value / 10000;
         
         if(GuyH::loadNPC(ri->guyref, "npc->Tile") == SH::_NoError &&
                 BC::checkTile(tile, "npc->Tile") == SH::_NoError)
@@ -4282,7 +4282,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
     
     case NPCWEAPON:
     {
-        long weapon = value / 10000;
+        long32 weapon = value / 10000;
         
         if(GuyH::loadNPC(ri->guyref, "npc->Weapon") == SH::_NoError &&
                 BC::checkBounds(weapon, 0, MAXWPNS-1, "npc->Weapon") == SH::_NoError)
@@ -4293,7 +4293,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
 //Indexed
     case NPCDEFENSED:
     {
-        long a = ri->d[0] / 10000;
+        long32 a = ri->d[0] / 10000;
         
         if(GuyH::loadNPC(ri->guyref, "npc->Defense") == SH::_NoError &&
                 BC::checkBounds(a, 0, edefSCRIPT, "npc->Defense") == SH::_NoError)
@@ -4303,7 +4303,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
     
     case NPCMISCD:
     {
-        long a = ri->d[0] / 10000;
+        long32 a = ri->d[0] / 10000;
         
         if(GuyH::loadNPC(ri->guyref, "npc->Misc") == SH::_NoError &&
                 BC::checkMisc(a, "npc->Misc") == SH::_NoError)
@@ -4557,7 +4557,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
         int pos = (ri->d[0])/10000;
         int sc = (ri->d[2]/10000);
         int m = zc_max((ri->d[1]/10000)-1,0);
-        long scr = zc_max(m*MAPSCRS+sc,0);
+        long32 scr = zc_max(m*MAPSCRS+sc,0);
         
         if(!(pos >= 0 && pos < 176 && scr >= 0 && sc < MAPSCRS && m < map_count)) break;
         
@@ -4590,7 +4590,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
         int pos = (ri->d[0])/10000;
         int sc = (ri->d[2]/10000);
         int m = zc_max((ri->d[1]/10000)-1,0);
-        long scr = zc_max(m*MAPSCRS+sc,0);
+        long32 scr = zc_max(m*MAPSCRS+sc,0);
         
         if(!(pos >= 0 && pos < 176 && scr >= 0 && sc < MAPSCRS && m < map_count)) break;
         
@@ -4611,7 +4611,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
         int pos = (ri->d[0])/10000;
         int sc = (ri->d[2]/10000);
         int m = zc_max((ri->d[1]/10000)-1,0);
-        long scr = zc_max(m*MAPSCRS+sc,0);
+        long32 scr = zc_max(m*MAPSCRS+sc,0);
         
         if(!(pos >= 0 && pos < 176 && scr >= 0 && sc < MAPSCRS && m < map_count)) break;
         
@@ -4632,7 +4632,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
         int pos = (ri->d[0])/10000;
         int sc = (ri->d[2]/10000);
         int m = zc_max((ri->d[1]/10000)-1,0);
-        long scr = zc_max(m*MAPSCRS+sc,0);
+        long32 scr = zc_max(m*MAPSCRS+sc,0);
         
         if(!(pos >= 0 && pos < 176 && scr >= 0 && sc < MAPSCRS && m < map_count))
             break;
@@ -4665,7 +4665,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
         int pos = (ri->d[0])/10000;
         int sc = (ri->d[2]/10000);
         int m = zc_max((ri->d[1]/10000)-1,0);
-        long scr = zc_max(m*MAPSCRS+sc,0);
+        long32 scr = zc_max(m*MAPSCRS+sc,0);
         
         if(!(pos >= 0 && pos < 176 && scr >= 0 && sc < MAPSCRS && m < map_count))
             break;
@@ -4677,7 +4677,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
     case COMBOSDM:
     {
         int pos = (ri->d[0])/10000;
-        long scr = (ri->d[1]/10000)*MAPSCRS+(ri->d[2]/10000);
+        long32 scr = (ri->d[1]/10000)*MAPSCRS+(ri->d[2]/10000);
         
         if(pos < 0 || pos >= 176 || scr < 0) break;
         
@@ -4815,35 +4815,35 @@ void do_set(const bool v, byte whichFFC)
     if(sarg1==FFSCRIPT && ri->ffcref==whichFFC)
         return;
         
-    long temp = SH::get_arg(sarg2, v);
+    long32 temp = SH::get_arg(sarg2, v);
     set_register(sarg1, temp);
 }
 
 void do_push(const bool v)
 {
-    const long value = SH::get_arg(sarg1, v);
+    const long32 value = SH::get_arg(sarg1, v);
     ri->sp--;
     SH::write_stack(ri->sp, value);
 }
 
 void do_pop()
 {
-    const long value = SH::read_stack(ri->sp);
+    const long32 value = SH::read_stack(ri->sp);
     ri->sp++;
     set_register(sarg1, value);
 }
 
 void do_loadi()
 {
-    const long stackoffset = get_register(sarg2) / 10000;
-    const long value = SH::read_stack(stackoffset);
+    const long32 stackoffset = get_register(sarg2) / 10000;
+    const long32 value = SH::read_stack(stackoffset);
     set_register(sarg1, value);
 }
 
 void do_storei()
 {
-    const long stackoffset = get_register(sarg2) / 10000;
-    const long value = get_register(sarg1);
+    const long32 stackoffset = get_register(sarg2) / 10000;
+    const long32 value = get_register(sarg1);
     SH::write_stack(stackoffset, value);
 }
 
@@ -4856,8 +4856,8 @@ void do_dequeue(const bool)
 
 void do_comp(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v);
-    long temp2 = get_register(sarg1);
+    long32 temp = SH::get_arg(sarg2, v);
+    long32 temp2 = get_register(sarg1);
     
     if(temp2 >= temp)   ri->scriptflag |= MOREFLAG;
     else                ri->scriptflag &= ~MOREFLAG;
@@ -4868,7 +4868,7 @@ void do_comp(const bool v)
 
 void do_allocatemem(const bool v, const bool local, const byte i)
 {
-    const long size = SH::get_arg(sarg2, v) / 10000;
+    const long32 size = SH::get_arg(sarg2, v) / 10000;
     dword ptrval;
     
     if(size <= 0)
@@ -4932,7 +4932,7 @@ void do_allocatemem(const bool v, const bool local, const byte i)
 
 void do_deallocatemem()
 {
-    const long ptrval = get_register(sarg1) / 10000;
+    const long32 ptrval = get_register(sarg1) / 10000;
     
     deallocateArray(ptrval);
 }
@@ -4945,12 +4945,12 @@ void do_loada(const byte a)
         return;
     }
     
-    long ffcref = (ri->a[a] / 10000) - 1; //FFC 2
+    long32 ffcref = (ri->a[a] / 10000) - 1; //FFC 2
     
     if(BC::checkFFC(ffcref, "LOAD%i") != SH::_NoError)
         return;
         
-    long reg = get_register(sarg2); //Register in FFC 2
+    long32 reg = get_register(sarg2); //Register in FFC 2
     
     if(reg >= D(0) || reg <= D(7))
         set_register(sarg1, tmpscr->scriptData[ffcref].d[reg - D(0)]); //get back the info into *sarg1
@@ -4970,12 +4970,12 @@ void do_seta(const byte a)
         return;
     }
     
-    long ffcref = (ri->a[a] / 10000) - 1; //FFC 2
+    long32 ffcref = (ri->a[a] / 10000) - 1; //FFC 2
     
     if(BC::checkFFC(ffcref, "SETA%i") != SH::_NoError)
         return;
         
-    long reg = get_register(sarg2); //Register in FFC 2
+    long32 reg = get_register(sarg2); //Register in FFC 2
     
     if(reg >= D(0) || reg <= D(7))
         tmpscr->scriptData[ffcref].d[reg - D(0)] = get_register(sarg1); //Set it to *sarg1
@@ -4990,48 +4990,48 @@ void do_seta(const byte a)
 
 void do_add(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v);
-    long temp2 = get_register(sarg1);
+    long32 temp = SH::get_arg(sarg2, v);
+    long32 temp2 = get_register(sarg1);
     
     set_register(sarg1, temp2 + temp);
 }
 
 void do_sub(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v);
-    long temp2 = get_register(sarg1);
+    long32 temp = SH::get_arg(sarg2, v);
+    long32 temp2 = get_register(sarg1);
     
     set_register(sarg1, temp2 - temp);
 }
 
 void do_mult(const bool v)
 {
-    long long temp = SH::get_arg(sarg2, v);
-    long temp2 = get_register(sarg1);
+    long32 temp = SH::get_arg(sarg2, v);
+    long32 temp2 = get_register(sarg1);
     
-    set_register(sarg1, long((temp * temp2) / 10000));
+    set_register(sarg1, long32((temp * temp2) / 10000));
 }
 
 void do_div(const bool v)
 {
-    long long temp = SH::get_arg(sarg2, v);
-    long long temp2 = get_register(sarg1);
+    long32 temp = SH::get_arg(sarg2, v);
+    long32 temp2 = get_register(sarg1);
     
     if(temp == 0)
     {
         Z_scripterrlog("Script attempted to divide %ld by zero!\n", temp2);
-        set_register(sarg1, long(sign(temp2) * INT_MAX));
+        set_register(sarg1, long32(sign(temp2) * INT_MAX));
     }
     else
     {
-        set_register(sarg1, long((temp2 * 10000) / temp));
+        set_register(sarg1, long32((temp2 * 10000) / temp));
     }
 }
 
 void do_mod(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v);
-    long temp2 = get_register(sarg1);
+    long32 temp = SH::get_arg(sarg2, v);
+    long32 temp2 = get_register(sarg1);
     
     if(temp == 0)
     {
@@ -5049,15 +5049,15 @@ void do_trig(const bool v, const byte type)
     switch(type)
     {
     case 0:
-        set_register(sarg1, long(sin(rangle) * 10000.0));
+        set_register(sarg1, long32(sin(rangle) * 10000.0));
         break;
         
     case 1:
-        set_register(sarg1, long(cos(rangle) * 10000.0));
+        set_register(sarg1, long32(cos(rangle) * 10000.0));
         break;
         
     case 2:
-        set_register(sarg1, long(tan(rangle) * 10000.0));
+        set_register(sarg1, long32(tan(rangle) * 10000.0));
         break;
     }
 }
@@ -5067,7 +5067,7 @@ void do_asin(const bool v)
     double temp = double(SH::get_arg(sarg2, v)) / 10000.0;
     
     if(temp >= -1 && temp <= 1)
-        set_register(sarg1, long(asin(temp) * 10000.0));
+        set_register(sarg1, long32(asin(temp) * 10000.0));
     else
     {
         Z_scripterrlog("Script attempted to pass %ld into ArcSin!\n",temp);
@@ -5080,7 +5080,7 @@ void do_acos(const bool v)
     double temp = double(SH::get_arg(sarg2, v)) / 10000.0;
     
     if(temp >= -1 && temp <= 1)
-        set_register(sarg1, long(acos(temp) * 10000.0));
+        set_register(sarg1, long32(acos(temp) * 10000.0));
     else
     {
         Z_scripterrlog("Script attempted to pass %ld into ArcCos!\n",temp);
@@ -5093,12 +5093,12 @@ void do_arctan()
     double xpos = ri->d[0] / 10000.0;
     double ypos = ri->d[1] / 10000.0;
     
-    set_register(sarg1, long(atan2(ypos, xpos) * 10000.0));
+    set_register(sarg1, long32(atan2(ypos, xpos) * 10000.0));
 }
 
 void do_abs(const bool v)
 {
-    long temp = SH::get_arg(sarg1, v);
+    long32 temp = SH::get_arg(sarg1, v);
     set_register(sarg1, abs(temp));
 }
 
@@ -5107,7 +5107,7 @@ void do_log10(const bool v)
     double temp = double(SH::get_arg(sarg1, v)) / 10000.0;
     
     if(temp > 0)
-        set_register(sarg1, long(log10(temp) * 10000.0));
+        set_register(sarg1, long32(log10(temp) * 10000.0));
     else if(temp == 0)
     {
         Z_eventlog("Script tried to calculate log of 0\n");
@@ -5125,7 +5125,7 @@ void do_naturallog(const bool v)
     double temp = double(SH::get_arg(sarg1, v)) / 10000.0;
     
     if(temp > 0)
-        set_register(sarg1, long(log(temp) * 10000.0));
+        set_register(sarg1, long32(log(temp) * 10000.0));
     else if(temp == 0)
     {
         Z_eventlog("Script tried to calculate ln of 0\n");
@@ -5140,15 +5140,15 @@ void do_naturallog(const bool v)
 
 void do_min(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v);
-    long temp2 = get_register(sarg1);
+    long32 temp = SH::get_arg(sarg2, v);
+    long32 temp2 = get_register(sarg1);
     set_register(sarg1, zc_min(temp2, temp));
 }
 
 void do_max(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v);
-    long temp2 = get_register(sarg1);
+    long32 temp = SH::get_arg(sarg2, v);
+    long32 temp2 = get_register(sarg1);
     
     set_register(sarg1, zc_max(temp2, temp));
 }
@@ -5156,7 +5156,7 @@ void do_max(const bool v)
 
 void do_rnd(const bool v)
 {
-	long temp = SH::get_arg(sarg2, v) / 10000;
+	long32 temp = SH::get_arg(sarg2, v) / 10000;
 
 	if(temp > 0)
 		set_register(sarg1, (rand() % temp) * 10000);
@@ -5168,7 +5168,7 @@ void do_rnd(const bool v)
 
 void do_factorial(const bool v)
 {
-    long temp;
+    long32 temp;
     
     if(v)
         return;  //must factorial a register, not a value (why is this exactly? ~Joe123)
@@ -5183,9 +5183,9 @@ void do_factorial(const bool v)
         }
     }
     
-    long temp2 = 1;
+    long32 temp2 = 1;
     
-    for(long temp3 = temp; temp > 1; temp--)
+    for(long32 temp3 = temp; temp > 1; temp--)
         temp2 *= temp3;
         
     set_register(sarg1, temp2 * 10000);
@@ -5203,7 +5203,7 @@ void do_power(const bool v)
         return;
     }
     
-    set_register(sarg1, long(pow(temp2, temp) * 10000.0));
+    set_register(sarg1, long32(pow(temp2, temp) * 10000.0));
 }
 
 void do_ipower(const bool v)
@@ -5218,7 +5218,7 @@ void do_ipower(const bool v)
         return;
     }
     
-    set_register(sarg1, long(pow(temp2, temp) * 10000.0));
+    set_register(sarg1, long32(pow(temp2, temp) * 10000.0));
 }
 
 void do_sqroot(const bool v)
@@ -5232,7 +5232,7 @@ void do_sqroot(const bool v)
         return;
     }
     
-    set_register(sarg1, long(sqrt(temp) * 10000.0));
+    set_register(sarg1, long32(sqrt(temp) * 10000.0));
 }
 
 ///----------------------------------------------------------------------------------------------------//
@@ -5240,69 +5240,69 @@ void do_sqroot(const bool v)
 
 void do_and(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v) / 10000;
-    long temp2 = get_register(sarg1) / 10000;
+    long32 temp = SH::get_arg(sarg2, v) / 10000;
+    long32 temp2 = get_register(sarg1) / 10000;
     set_register(sarg1, (temp2 & temp) * 10000);
 }
 
 void do_or(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v) / 10000;
-    long temp2 = get_register(sarg1) / 10000;
+    long32 temp = SH::get_arg(sarg2, v) / 10000;
+    long32 temp2 = get_register(sarg1) / 10000;
     set_register(sarg1, (temp2 | temp) * 10000);
 }
 
 void do_xor(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v) / 10000;
-    long temp2 = get_register(sarg1) / 10000;
+    long32 temp = SH::get_arg(sarg2, v) / 10000;
+    long32 temp2 = get_register(sarg1) / 10000;
     set_register(sarg1, (temp2 ^ temp) * 10000);
 }
 
 void do_nand(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v) / 10000;
-    long temp2 = get_register(sarg1) / 10000;
+    long32 temp = SH::get_arg(sarg2, v) / 10000;
+    long32 temp2 = get_register(sarg1) / 10000;
     set_register(sarg1, (~(temp2 & temp)) * 10000);
 }
 
 void do_nor(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v) / 10000;
-    long temp2 = get_register(sarg1) / 10000;
+    long32 temp = SH::get_arg(sarg2, v) / 10000;
+    long32 temp2 = get_register(sarg1) / 10000;
     set_register(sarg1, (~(temp2 | temp)) * 10000);
 }
 
 void do_xnor(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v) / 10000;
-    long temp2 = get_register(sarg1) / 10000;
+    long32 temp = SH::get_arg(sarg2, v) / 10000;
+    long32 temp2 = get_register(sarg1) / 10000;
     set_register(sarg1, (~(temp2 ^ temp)) * 10000);
 }
 
 void do_not(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v);
+    long32 temp = SH::get_arg(sarg2, v);
     set_register(sarg1, !temp);
 }
 
 void do_bitwisenot(const bool v)
 {
-    long temp = SH::get_arg(sarg1, v) / 10000;
+    long32 temp = SH::get_arg(sarg1, v) / 10000;
     set_register(sarg1, (~temp) * 10000);
 }
 
 void do_lshift(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v) / 10000;
-    long temp2 = get_register(sarg1) / 10000;
+    long32 temp = SH::get_arg(sarg2, v) / 10000;
+    long32 temp2 = get_register(sarg1) / 10000;
     set_register(sarg1, (temp2 << temp) * 10000);
 }
 
 void do_rshift(const bool v)
 {
-    long temp = SH::get_arg(sarg2, v) / 10000;
-    long temp2 = get_register(sarg1) / 10000;
+    long32 temp = SH::get_arg(sarg2, v) / 10000;
+    long32 temp2 = get_register(sarg1) / 10000;
     set_register(sarg1, (temp2 >> temp) * 10000);
 }
 
@@ -5328,7 +5328,7 @@ void do_pitwarp(bool v)
 
 void do_breakshield()
 {
-    long UID = get_register(sarg1);
+    long32 UID = get_register(sarg1);
     
     for(int j = 0; j < guys.Count(); j++)
         if(guys.spr(j)->getUID() == UID)
@@ -5393,10 +5393,10 @@ void do_issolid()
 
 void do_setsidewarp()
 {
-    long warp   = SH::read_stack(ri->sp + 3) / 10000;
-    long scrn = SH::read_stack(ri->sp + 2) / 10000;
-    long dmap   = SH::read_stack(ri->sp + 1) / 10000;
-    long type   = SH::read_stack(ri->sp + 0) / 10000;
+    long32 warp   = SH::read_stack(ri->sp + 3) / 10000;
+    long32 scrn = SH::read_stack(ri->sp + 2) / 10000;
+    long32 dmap   = SH::read_stack(ri->sp + 1) / 10000;
+    long32 type   = SH::read_stack(ri->sp + 0) / 10000;
     
     if(BC::checkBounds(warp, -1, 3, "Screen->SetSideWarp") != SH::_NoError ||
             BC::checkBounds(scrn, -1, 0x87, "Screen->SetSideWarp") != SH::_NoError ||
@@ -5416,10 +5416,10 @@ void do_setsidewarp()
 
 void do_settilewarp()
 {
-    long warp   = SH::read_stack(ri->sp + 3) / 10000;
-    long scrn = SH::read_stack(ri->sp + 2) / 10000;
-    long dmap   = SH::read_stack(ri->sp + 1) / 10000;
-    long type   = SH::read_stack(ri->sp + 0) / 10000;
+    long32 warp   = SH::read_stack(ri->sp + 3) / 10000;
+    long32 scrn = SH::read_stack(ri->sp + 2) / 10000;
+    long32 dmap   = SH::read_stack(ri->sp + 1) / 10000;
+    long32 type   = SH::read_stack(ri->sp + 0) / 10000;
     
     if(BC::checkBounds(warp, -1, 3, "Screen->SetTileWarp") != SH::_NoError ||
             BC::checkBounds(scrn, -1, 0x87, "Screen->SetTileWarp") != SH::_NoError ||
@@ -5439,7 +5439,7 @@ void do_settilewarp()
 
 void do_getsidewarpdmap(const bool v)
 {
-    long warp = SH::get_arg(sarg1, v) / 10000;
+    long32 warp = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkBounds(warp, -1, 3, "Screen->GetSideWarpDMap") != SH::_NoError)
     {
@@ -5452,7 +5452,7 @@ void do_getsidewarpdmap(const bool v)
 
 void do_getsidewarpscr(const bool v)
 {
-    long warp = SH::get_arg(sarg1, v) / 10000;
+    long32 warp = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkBounds(warp, -1, 3, "Screen->GetSideWarpScreen") != SH::_NoError)
     {
@@ -5465,7 +5465,7 @@ void do_getsidewarpscr(const bool v)
 
 void do_getsidewarptype(const bool v)
 {
-    long warp = SH::get_arg(sarg1, v) / 10000;
+    long32 warp = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkBounds(warp, -1, 3, "Screen->GetSideWarpType") != SH::_NoError)
     {
@@ -5478,7 +5478,7 @@ void do_getsidewarptype(const bool v)
 
 void do_gettilewarpdmap(const bool v)
 {
-    long warp = SH::get_arg(sarg1, v) / 10000;
+    long32 warp = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkBounds(warp, -1, 3, "Screen->GetTileWarpDMap") != SH::_NoError)
     {
@@ -5491,7 +5491,7 @@ void do_gettilewarpdmap(const bool v)
 
 void do_gettilewarpscr(const bool v)
 {
-    long warp = SH::get_arg(sarg1, v) / 10000;
+    long32 warp = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkBounds(warp, -1, 3, "Screen->GetTileWarpScreen") != SH::_NoError)
     {
@@ -5504,7 +5504,7 @@ void do_gettilewarpscr(const bool v)
 
 void do_gettilewarptype(const bool v)
 {
-    long warp = SH::get_arg(sarg1, v) / 10000;
+    long32 warp = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkBounds(warp, -1, 3, "Screen->GetTileWarpType") != SH::_NoError)
     {
@@ -5517,7 +5517,7 @@ void do_gettilewarptype(const bool v)
 
 void do_layerscreen()
 {
-    long layer = (get_register(sarg2) / 10000) - 1;
+    long32 layer = (get_register(sarg2) / 10000) - 1;
     
     if(BC::checkBounds(layer, 0, 5, "Screen->LayerScreen") != SH::_NoError ||
             tmpscr->layermap[layer] == 0)
@@ -5528,7 +5528,7 @@ void do_layerscreen()
 
 void do_layermap()
 {
-    long layer = (get_register(sarg2) / 10000) - 1;
+    long32 layer = (get_register(sarg2) / 10000) - 1;
     
     if(BC::checkBounds(layer, 0, 5, "Screen->LayerMap") != SH::_NoError ||
             tmpscr->layermap[layer] == 0)
@@ -5544,9 +5544,9 @@ void do_triggersecrets()
 
 void do_getscreenflags()
 {
-    long map     = (ri->d[2] / 10000) - 1;
-    long scrn  = ri->d[1] / 10000;
-    long flagset = ri->d[0] / 10000;
+    long32 map     = (ri->d[2] / 10000) - 1;
+    long32 scrn  = ri->d[1] / 10000;
+    long32 flagset = ri->d[0] / 10000;
     
     if(BC::checkMapID(map, "Game->GetScreenFlags") != SH::_NoError ||
             BC::checkBounds(scrn, 0, 0x87, "Game->GetScreenFlags") != SH::_NoError ||
@@ -5558,9 +5558,9 @@ void do_getscreenflags()
 
 void do_getscreeneflags()
 {
-    long map     = (ri->d[2] / 10000) - 1;
-    long scrn  = ri->d[1] / 10000;
-    long flagset = ri->d[0] / 10000;
+    long32 map     = (ri->d[2] / 10000) - 1;
+    long32 scrn  = ri->d[1] / 10000;
+    long32 flagset = ri->d[0] / 10000;
     
     if(BC::checkMapID(map, "Game->GetScreenEFlags") != SH::_NoError ||
             BC::checkBounds(scrn, 0, 0x87, "Game->GetScreenEFlags") != SH::_NoError ||
@@ -5575,7 +5575,7 @@ void do_getscreeneflags()
 
 void do_isvaliditem()
 {
-    long IID = get_register(sarg1);
+    long32 IID = get_register(sarg1);
     
     for(int j = 0; j < items.Count(); j++)
         if(items.spr(j)->getUID() == IID)
@@ -5589,7 +5589,7 @@ void do_isvaliditem()
 
 void do_isvalidnpc()
 {
-    long UID = get_register(sarg1);
+    long32 UID = get_register(sarg1);
     
     for(int j = 0; j < guys.Count(); j++)
         if(guys.spr(j)->getUID() == UID)
@@ -5603,7 +5603,7 @@ void do_isvalidnpc()
 
 void do_isvalidlwpn()
 {
-    long WID = get_register(sarg1);
+    long32 WID = get_register(sarg1);
     
     for(int j = 0; j < Lwpns.Count(); j++)
         if(Lwpns.spr(j)->getUID() == WID)
@@ -5617,7 +5617,7 @@ void do_isvalidlwpn()
 
 void do_isvalidewpn()
 {
-    long WID = get_register(sarg1);
+    long32 WID = get_register(sarg1);
     
     for(int j = 0; j < Ewpns.Count(); j++)
         if(Ewpns.spr(j)->getUID() == WID)
@@ -5631,7 +5631,7 @@ void do_isvalidewpn()
 
 void do_lwpnusesprite(const bool v)
 {
-    long ID = SH::get_arg(sarg1, v) / 10000;
+    long32 ID = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkWeaponMiscSprite(ID, "lweapon->UseSprite") != SH::_NoError)
         return;
@@ -5642,7 +5642,7 @@ void do_lwpnusesprite(const bool v)
 
 void do_ewpnusesprite(const bool v)
 {
-    long ID = SH::get_arg(sarg1, v) / 10000;
+    long32 ID = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkWeaponMiscSprite(ID, "eweapon->UseSprite") != SH::_NoError)
         return;
@@ -5653,7 +5653,7 @@ void do_ewpnusesprite(const bool v)
 
 void do_clearsprites(const bool v)
 {
-    long spritelist = SH::get_arg(sarg1, v) / 10000;
+    long32 spritelist = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkBounds(spritelist, 0, 5, "Screen->ClearSprites") != SH::_NoError)
         return;
@@ -5689,7 +5689,7 @@ void do_clearsprites(const bool v)
 
 void do_loadlweapon(const bool v)
 {
-    long index = SH::get_arg(sarg1, v) / 10000;
+    long32 index = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkLWeaponIndex(index, "Screen->LoadLWeapon") != SH::_NoError)
         ri->lwpn = INT_MAX;
@@ -5703,7 +5703,7 @@ void do_loadlweapon(const bool v)
 
 void do_loadeweapon(const bool v)
 {
-    long index = SH::get_arg(sarg1, v) / 10000;
+    long32 index = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkEWeaponIndex(index, "Screen->LoadEWeapon") != SH::_NoError)
         ri->ewpn = INT_MAX;
@@ -5716,7 +5716,7 @@ void do_loadeweapon(const bool v)
 
 void do_loaditem(const bool v)
 {
-    long index = SH::get_arg(sarg1, v) / 10000;
+    long32 index = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkItemIndex(index, "Screen->LoadItem") != SH::_NoError)
         ri->itemref = INT_MAX;
@@ -5729,7 +5729,7 @@ void do_loaditem(const bool v)
 
 void do_loaditemdata(const bool v)
 {
-    long ID = SH::get_arg(sarg1, v) / 10000;
+    long32 ID = SH::get_arg(sarg1, v) / 10000;
     
     //I *think* this is the right check ~Joe
     if(BC::checkItemID(ID, "Game->LoadItemData") != SH::_NoError)
@@ -5741,7 +5741,7 @@ void do_loaditemdata(const bool v)
 
 void do_loadnpc(const bool v)
 {
-    long index = SH::get_arg(sarg1, v) / 10000;
+    long32 index = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkGuyIndex(index, "Screen->LoadNPC") != SH::_NoError)
         ri->guyref = INT_MAX;
@@ -5754,7 +5754,7 @@ void do_loadnpc(const bool v)
 
 void do_createlweapon(const bool v)
 {
-    const long ID = SH::get_arg(sarg1, v) / 10000;
+    const long32 ID = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkWeaponID(ID, "Screen->CreateLWeapon") != SH::_NoError)
         return;
@@ -5775,7 +5775,7 @@ void do_createlweapon(const bool v)
 
 void do_createeweapon(const bool v)
 {
-    const long ID = SH::get_arg(sarg1, v) / 10000;
+    const long32 ID = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkWeaponID(ID, "Screen->CreateEWeapon") != SH::_NoError)
         return;
@@ -5796,7 +5796,7 @@ void do_createeweapon(const bool v)
 
 void do_createitem(const bool v)
 {
-    const long ID = SH::get_arg(sarg1, v) / 10000;
+    const long32 ID = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkItemID(ID, "Screen->CreateItem") != SH::_NoError)
         return;
@@ -5817,7 +5817,7 @@ void do_createitem(const bool v)
 
 void do_createnpc(const bool v)
 {
-    const long ID = SH::get_arg(sarg1, v) / 10000;
+    const long32 ID = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkGuyID(ID, "Screen->CreateNPC") != SH::_NoError)
         return;
@@ -5847,7 +5847,7 @@ void do_createnpc(const bool v)
 
 void do_message(const bool v)
 {
-    const long ID = SH::get_arg(sarg1, v) / 10000;
+    const long32 ID = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkMessage(ID, "Screen->Message") != SH::_NoError)
         return;
@@ -5958,13 +5958,13 @@ void do_drawing_command(const int script_command)
         
     case QUAD3DR:
     {
-        std::vector<long> *v = script_drawing_commands.GetVector();
+        std::vector<long32> *v = script_drawing_commands.GetVector();
         v->resize(26, 0);
         
-        long* pos = &v->at(0);
-        long* uv = &v->at(12);
-        long* col = &v->at(20);
-        long* size = &v->at(24);
+        long32* pos = &v->at(0);
+        long32* uv = &v->at(12);
+        long32* col = &v->at(20);
+        long32* size = &v->at(24);
         
         set_drawing_command_args(j, 8);
         ArrayH::getValues(script_drawing_commands[j][2] / 10000, pos, 12);
@@ -5978,13 +5978,13 @@ void do_drawing_command(const int script_command)
     
     case TRIANGLE3DR:
     {
-        std::vector<long> *v = script_drawing_commands.GetVector();
+        std::vector<long32> *v = script_drawing_commands.GetVector();
         v->resize(20, 0);
         
-        long* pos = &v->at(0);
-        long* uv = &v->at(9);
-        long* col = &v->at(15);
-        long* size = &v->at(18);
+        long32* pos = &v->at(0);
+        long32* uv = &v->at(9);
+        long32* col = &v->at(15);
+        long32* size = &v->at(18);
         
         set_drawing_command_args(j, 8);
         ArrayH::getValues(script_drawing_commands[j][2] / 10000, pos, 8);
@@ -6018,7 +6018,7 @@ void do_set_rendertarget(bool)
 
 void do_sfx(const bool v)
 {
-    long ID = SH::get_arg(sarg1, v) / 10000;
+    long32 ID = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkSFXID(ID, "Game->PlaySound") != SH::_NoError)
         return;
@@ -6028,7 +6028,7 @@ void do_sfx(const bool v)
 
 void do_midi(bool v)
 {
-    long MIDI = SH::get_arg(sarg1, v) / 10000;
+    long32 MIDI = SH::get_arg(sarg1, v) / 10000;
     
     if(MIDI == 0)
         music_stop();
@@ -6038,8 +6038,8 @@ void do_midi(bool v)
 
 void do_enh_music(bool v)
 {
-    long arrayptr = SH::get_arg(sarg1, v) / 10000;
-    long track = (SH::get_arg(sarg2, v) / 10000)-1;
+    long32 arrayptr = SH::get_arg(sarg1, v) / 10000;
+    long32 track = (SH::get_arg(sarg2, v) / 10000)-1;
     
     if(arrayptr == 0)
         music_stop();
@@ -6058,8 +6058,8 @@ void do_enh_music(bool v)
 
 void do_get_enh_music_filename(const bool v)
 {
-    long ID = SH::get_arg(sarg1, v) / 10000;
-    long arrayptr = get_register(sarg2) / 10000;
+    long32 ID = SH::get_arg(sarg1, v) / 10000;
+    long32 arrayptr = get_register(sarg2) / 10000;
     
     if(BC::checkDMapID(ID, "Game->GetDMapMusicFilename") != SH::_NoError)
         return;
@@ -6070,7 +6070,7 @@ void do_get_enh_music_filename(const bool v)
 
 void do_get_enh_music_track(const bool v)
 {
-    long ID = SH::get_arg(sarg1, v) / 10000;
+    long32 ID = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkDMapID(ID, "Game->GetDMapMusicTrack") != SH::_NoError)
         return;
@@ -6080,9 +6080,9 @@ void do_get_enh_music_track(const bool v)
 
 void do_set_dmap_enh_music(const bool v)
 {
-    long ID   = SH::read_stack(ri->sp + 2) / 10000;
-    long arrayptr = SH::read_stack(ri->sp + 1) / 10000;
-    long track = (SH::read_stack(ri->sp + 0) / 10000)-1;
+    long32 ID   = SH::read_stack(ri->sp + 2) / 10000;
+    long32 arrayptr = SH::read_stack(ri->sp + 1) / 10000;
+    long32 track = (SH::read_stack(ri->sp + 0) / 10000)-1;
     string filename_str;
     
     if(BC::checkDMapID(ID, "Game->SetDMapEnhancedMusic") != SH::_NoError)
@@ -6100,10 +6100,10 @@ void do_set_dmap_enh_music(const bool v)
 
 void do_trace(bool v)
 {
-    long temp = SH::get_arg(sarg1, v);
+    long32 temp = SH::get_arg(sarg1, v);
     
     char tmp[100];
-    sprintf(tmp, (temp < 0 ? "%06ld" : "%05ld"), temp);
+    sprintf(tmp, (temp < 0 ? "%06d" : "%05d"), temp);
     string s2(tmp);
     s2 = s2.substr(0, s2.size() - 4) + "." + s2.substr(s2.size() - 4, 4);
     al_trace("%s\n", s2.c_str());
@@ -6114,7 +6114,7 @@ void do_trace(bool v)
 
 void do_tracebool(const bool v)
 {
-    long temp = SH::get_arg(sarg1, v);
+    long32 temp = SH::get_arg(sarg1, v);
     
     al_trace("%s\n", temp ? "true": "false");
     
@@ -6124,7 +6124,7 @@ void do_tracebool(const bool v)
 
 void do_tracestring()
 {
-    long arrayptr = get_register(sarg1) / 10000;
+    long32 arrayptr = get_register(sarg1) / 10000;
     string str;
     ArrayH::getString(arrayptr, str, 512);
     al_trace("%s", str.c_str());
@@ -6146,7 +6146,7 @@ void do_cleartrace()
     zc_trace_clear();
 }
 
-string inttobase(word base, long x, word mindigits)
+string inttobase(word base, long32 x, word mindigits)
 {
     static const char coeff[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     
@@ -6163,9 +6163,9 @@ string inttobase(word base, long x, word mindigits)
 
 void do_tracetobase()
 {
-    long x = SH::read_stack(ri->sp + 2) / 10000;
-    unsigned long base = vbound(SH::read_stack(ri->sp + 1) / 10000, 2, 36);
-    unsigned long mindigits = zc_max(1, SH::read_stack(ri->sp) / 10000);
+    long32 x = SH::read_stack(ri->sp + 2) / 10000;
+    dword base = vbound(SH::read_stack(ri->sp + 1) / 10000, 2, 36);
+    dword mindigits = zc_max(1, SH::read_stack(ri->sp) / 10000);
     
     string s2 = x < 0 ? "-": "";
     
@@ -6211,13 +6211,13 @@ void do_tracetobase()
 
 void do_arraysize()
 {
-    long arrayptr = get_register(sarg1) / 10000;
+    long32 arrayptr = get_register(sarg1) / 10000;
     set_register(sarg1, ArrayH::getSize(arrayptr) * 10000);
 }
 
 void do_getsavename()
 {
-    long arrayptr = get_register(sarg1) / 10000;
+    long32 arrayptr = get_register(sarg1) / 10000;
     
     if(ArrayH::setArray(arrayptr, string(game->get_name())) == SH::_Overflow)
         Z_scripterrlog("Array supplied to 'Game->GetSaveName' not large enough\n");
@@ -6225,7 +6225,7 @@ void do_getsavename()
 
 void do_setsavename()
 {
-    long arrayptr = get_register(sarg1) / 10000;
+    long32 arrayptr = get_register(sarg1) / 10000;
     
     string str;
     ArrayH::getString(arrayptr, str);
@@ -6247,8 +6247,8 @@ void do_setsavename()
 
 void do_getmessage(const bool v)
 {
-    long ID = SH::get_arg(sarg1, v) / 10000;
-    long arrayptr = get_register(sarg2) / 10000;
+    long32 ID = SH::get_arg(sarg1, v) / 10000;
+    long32 arrayptr = get_register(sarg2) / 10000;
     
     if(BC::checkMessage(ID, "Game->GetMessage") != SH::_NoError)
         return;
@@ -6259,8 +6259,8 @@ void do_getmessage(const bool v)
 
 void do_getdmapname(const bool v)
 {
-    long ID = SH::get_arg(sarg1, v) / 10000;
-    long arrayptr = get_register(sarg2) / 10000;
+    long32 ID = SH::get_arg(sarg1, v) / 10000;
+    long32 arrayptr = get_register(sarg2) / 10000;
     
     if(BC::checkDMapID(ID, "Game->GetDMapName") != SH::_NoError)
         return;
@@ -6271,8 +6271,8 @@ void do_getdmapname(const bool v)
 
 void do_getdmaptitle(const bool v)
 {
-    long ID = SH::get_arg(sarg1, v) / 10000;
-    long arrayptr = get_register(sarg2) / 10000;
+    long32 ID = SH::get_arg(sarg1, v) / 10000;
+    long32 arrayptr = get_register(sarg2) / 10000;
     
     if(BC::checkDMapID(ID, "Game->GetDMapTitle") != SH::_NoError)
         return;
@@ -6283,8 +6283,8 @@ void do_getdmaptitle(const bool v)
 
 void do_getdmapintro(const bool v)
 {
-    long ID = SH::get_arg(sarg1, v) / 10000;
-    long arrayptr = get_register(sarg2) / 10000;
+    long32 ID = SH::get_arg(sarg1, v) / 10000;
+    long32 arrayptr = get_register(sarg2) / 10000;
     
     if(BC::checkDMapID(ID, "Game->GetDMapIntro") != SH::_NoError)
         return;
@@ -6295,7 +6295,7 @@ void do_getdmapintro(const bool v)
 
 void do_getitemname()
 {
-    long arrayptr = get_register(sarg1) / 10000;
+    long32 arrayptr = get_register(sarg1) / 10000;
     
     if(ArrayH::setArray(arrayptr, item_string[ri->idata]) == SH::_Overflow)
         Z_scripterrlog("Array supplied to 'itemdata->GetName' not large enough\n");
@@ -6303,7 +6303,7 @@ void do_getitemname()
 
 void do_getnpcname()
 {
-    long arrayptr = get_register(sarg1) / 10000;
+    long32 arrayptr = get_register(sarg1) / 10000;
     
     if(GuyH::loadNPC(ri->guyref, "npc->GetName") != SH::_NoError)
         return;
@@ -6316,7 +6316,7 @@ void do_getnpcname()
 
 void do_getffcscript()
 {
-    long arrayptr = get_register(sarg1) / 10000;
+    long32 arrayptr = get_register(sarg1) / 10000;
     string name;
     int num=-1;
     ArrayH::getString(arrayptr, name, 256); // What's the limit on name length?
@@ -6338,24 +6338,24 @@ void do_getffcscript()
 
 void do_copytile(const bool v, const bool v2)
 {
-    long tile = SH::get_arg(sarg1, v) / 10000;
-    long tile2 = SH::get_arg(sarg2, v2) / 10000;
+    long32 tile = SH::get_arg(sarg1, v) / 10000;
+    long32 tile2 = SH::get_arg(sarg2, v2) / 10000;
     
     copy_tile(newtilebuf, tile, tile2, false);
 }
 
 void do_swaptile(const bool v, const bool v2)
 {
-    long tile = SH::get_arg(sarg1, v) / 10000;
-    long tile2 = SH::get_arg(sarg2, v2) / 10000;
+    long32 tile = SH::get_arg(sarg1, v) / 10000;
+    long32 tile2 = SH::get_arg(sarg2, v2) / 10000;
     
     copy_tile(newtilebuf, tile, tile2, true);
 }
 
 void do_overlaytile(const bool v, const bool v2)
 {
-    long tile = SH::get_arg(sarg1, v) / 10000;
-    long tile2 = SH::get_arg(sarg2, v2) / 10000;
+    long32 tile = SH::get_arg(sarg1, v) / 10000;
+    long32 tile2 = SH::get_arg(sarg2, v2) / 10000;
     
     if(BC::checkTile(tile, "OverlayTile") != SH::_NoError ||
             BC::checkTile(tile2, "OverlayTile") != SH::_NoError)
@@ -6367,8 +6367,8 @@ void do_overlaytile(const bool v, const bool v2)
 
 void do_fliprotatetile(const bool v, const bool v2)
 {
-    long tile = SH::get_arg(sarg1, v) / 10000;
-    long tile2 = SH::get_arg(sarg2, v2) / 10000;
+    long32 tile = SH::get_arg(sarg1, v) / 10000;
+    long32 tile2 = SH::get_arg(sarg2, v2) / 10000;
     
     if(BC::checkTile(tile, "FlipRotateTile") != SH::_NoError ||
             BC::checkTile(tile2, "FlipRotateTile") != SH::_NoError)
@@ -6379,7 +6379,7 @@ void do_fliprotatetile(const bool v, const bool v2)
 
 void do_settilepixel(const bool v)
 {
-    long tile = SH::get_arg(sarg1, v) / 10000;
+    long32 tile = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkTile(tile, "SetTilePixel") != SH::_NoError)
         return;
@@ -6389,7 +6389,7 @@ void do_settilepixel(const bool v)
 
 void do_gettilepixel(const bool v)
 {
-    long tile = SH::get_arg(sarg1, v) / 10000;
+    long32 tile = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkTile(tile, "GetTilePixel") != SH::_NoError)
         return;
@@ -6399,8 +6399,8 @@ void do_gettilepixel(const bool v)
 
 void do_shifttile(const bool v, const bool v2)
 {
-    long tile = SH::get_arg(sarg1, v) / 10000;
-    long tile2 = SH::get_arg(sarg2, v2) / 10000;
+    long32 tile = SH::get_arg(sarg1, v) / 10000;
+    long32 tile2 = SH::get_arg(sarg2, v2) / 10000;
     
     if(BC::checkTile(tile, "ShiftTile") != SH::_NoError ||
             BC::checkTile(tile2, "ShiftTile") != SH::_NoError)
@@ -6411,7 +6411,7 @@ void do_shifttile(const bool v, const bool v2)
 
 void do_cleartile(const bool v)
 {
-    long tile = SH::get_arg(sarg1, v) / 10000;
+    long32 tile = SH::get_arg(sarg1, v) / 10000;
     
     if(BC::checkTile(tile, "ClearTile") != SH::_NoError)
         return;
@@ -6421,7 +6421,7 @@ void do_cleartile(const bool v)
 
 void do_combotile(const bool v)
 {
-    long combo = SH::get_arg(sarg2, v) / 10000;
+    long32 combo = SH::get_arg(sarg2, v) / 10000;
     
     if(BC::checkCombo(combo, "Game->ComboTile") != SH::_NoError)
         return;
@@ -6472,8 +6472,8 @@ int run_script(const byte type, const word script, const byte i)
         
         if(!tmpscr->initialized[i])
         {
-            memcpy(ri->d, tmpscr->initd[i], 8 * sizeof(long));
-            memcpy(ri->a, tmpscr->inita[i], 2 * sizeof(long));
+            memcpy(ri->d, tmpscr->initd[i], 8 * sizeof(long32));
+            memcpy(ri->a, tmpscr->inita[i], 2 * sizeof(long32));
         }
         
         ri->ffcref = i; //'this' pointer
@@ -6487,10 +6487,10 @@ int run_script(const byte type, const word script, const byte i)
         
         curscript = itemscripts[script];
         stack = &item_stack;
-        memset(stack, 0, 256 * sizeof(long)); //zero here too
+        memset(stack, 0, 256 * sizeof(long32)); //zero here too
         
-        memcpy(ri->d, itemsbuf[i].initiald, 8 * sizeof(long));
-        memcpy(ri->a, itemsbuf[i].initiala, 2 * sizeof(long));
+        memcpy(ri->d, itemsbuf[i].initiald, 8 * sizeof(long32));
+        memcpy(ri->a, itemsbuf[i].initiala, 2 * sizeof(long32));
         
         ri->idata = i; //'this' pointer
         

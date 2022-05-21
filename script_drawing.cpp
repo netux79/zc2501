@@ -3,12 +3,12 @@
 #include "precompiled.h" //always first
 
 #include <allegro.h>
-#include "script_drawing.h"
 #include "rendertarget.h"
 #include "maps.h"
 #include "tiles.h"
 #include "zelda.h"
 #include "ffscript.h"
+#include "script_drawing.h"
 #include <stdio.h>
 
 #define DegtoFix(d)     ((d)*0.7111111111111)

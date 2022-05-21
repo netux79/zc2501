@@ -5,13 +5,13 @@
 #include <string>
 #include <list>
 
-long get_register(const long arg);
+long32 get_register(const long32 arg);
 int run_script(const byte type, const word script, const byte i = -1); //Global scripts don't need 'i'
 int ffscript_engine(const bool preload);
 
 void clear_ffc_stack(const byte i);
 void clear_global_stack();
-void deallocateArray(const long ptrval);
+void deallocateArray(const long32 ptrval);
 void clearScriptHelperData();
 
 struct script_command
@@ -26,7 +26,7 @@ struct script_command
 struct script_variable
 {
     char name[16];
-    long id;
+    long32 id;
     word maxcount;
     byte multiple;
 };
