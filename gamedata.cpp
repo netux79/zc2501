@@ -590,7 +590,7 @@ void gamedata::set_time(dword t)
     _time=t;
     return;
 }
-void gamedata::change_time(long long t)
+void gamedata::change_time(long32 t)
 {
     _time+=t;
     return;

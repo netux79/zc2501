@@ -12412,7 +12412,7 @@ void LinkClass::scrollscr(int scrolldir, int destscr, int destdmap)
     //Preloaded ffc scripts
     if(destdmap >= 0)
     {
-        long dmap = currdmap; // Kludge
+        long32 dmap = currdmap; // Kludge
         currdmap = destdmap;
         ffscript_engine(true);
         currdmap = dmap;

@@ -1370,7 +1370,7 @@ int init_game()
         
     if(firstplay)
     {
-        memset(game->screen_d, 0, MAXDMAPS * 64 * 8 * sizeof(long));
+        memset(game->screen_d, 0, MAXDMAPS * 64 * 8 * sizeof(long32));
         ZScriptVersion::RunScript(SCRIPT_GLOBAL, GLOBAL_SCRIPT_INIT);
     }
     else

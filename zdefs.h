@@ -2396,7 +2396,7 @@ struct gamedata
     
     dword get_time();
     void set_time(dword t);
-    void change_time(long long t);
+    void change_time(long32 t);
     
     byte get_timevalid();
     void set_timevalid(byte t);

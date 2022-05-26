@@ -75,7 +75,7 @@ public:
     
     short  rate, hrate, homing;
     fix dstep;
-    long dmisc1, dmisc2, dmisc3, dmisc4, dmisc5, dmisc6, dmisc7, dmisc8, dmisc9, dmisc10, dmisc11, dmisc12, dmisc13, dmisc14, dmisc15;
+    long32 dmisc1, dmisc2, dmisc3, dmisc4, dmisc5, dmisc6, dmisc7, dmisc8, dmisc9, dmisc10, dmisc11, dmisc12, dmisc13, dmisc14, dmisc15;
     short bgsfx, bosspal;
     byte defense[edefLAST];
     byte hitsfx,deadsfx;

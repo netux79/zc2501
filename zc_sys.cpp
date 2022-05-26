@@ -2071,7 +2071,7 @@ int current_item_power(int itemtype)
 
 int item_tile_mod(bool)
 {
-    long tile=0;
+    int tile=0;
     int ret=0;
     
     ret=game->get_bombs();

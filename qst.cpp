@@ -5800,7 +5800,7 @@ void reset_itembuf(itemdata *item, int id)
         // Copy everything *EXCEPT* the tile, misc, cset, frames, speed, delay and ltm.
         word tile = item->tile;
         byte miscs = item->misc, cset = item->csets, frames = item->frames, speed = item->speed, delay = item->delay;
-        long ltm = item->ltm;
+        long32 ltm = item->ltm;
         
         memcpy(item,&default_items[id],sizeof(itemdata));
         item->tile = tile;

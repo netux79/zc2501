@@ -5006,7 +5006,7 @@ void do_sub(const bool v)
 
 void do_mult(const bool v)
 {
-    long32 temp = SH::get_arg(sarg2, v);
+    long long temp = SH::get_arg(sarg2, v);
     long32 temp2 = get_register(sarg1);
     
     set_register(sarg1, long32((temp * temp2) / 10000));
@@ -5014,8 +5014,8 @@ void do_mult(const bool v)
 
 void do_div(const bool v)
 {
-    long32 temp = SH::get_arg(sarg2, v);
-    long32 temp2 = get_register(sarg1);
+    long long temp = SH::get_arg(sarg2, v);
+    long long temp2 = get_register(sarg1);
     
     if(temp == 0)
     {
