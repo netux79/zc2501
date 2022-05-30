@@ -163,9 +163,6 @@ int bound(int &x,int low,int high)
 char *snapshotformat_str[ssfmtMAX][2]=
 {
     { (char *)"BMP", (char *)"bmp"},
-    { (char *)"GIF", (char *)"gif"},
-    { (char *)"JPG", (char *)"jpg"},
-    { (char *)"PNG", (char *)"png"},
     { (char *)"PCX", (char *)"pcx"},
     { (char *)"TGA", (char *)"tga"},
 };

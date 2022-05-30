@@ -3568,9 +3568,9 @@ int onSaveMapPic()
     do
     {
 #ifdef ALLEGRO_MACOSX
-        sprintf(buf, "../../../zelda%03d.png", ++num);
+        sprintf(buf, "../../../zelda%03d.bmp", ++num);
 #else
-        sprintf(buf, "zelda%03d.png", ++num);
+        sprintf(buf, "zelda%03d.bmp", ++num);
 #endif
     }
     while(num<999 && exists(buf));
@@ -6510,9 +6510,6 @@ static MENU title_menu[] =
 static MENU snapshot_format_menu[] =
 {
     { (char *)"&BMP",                      onSetSnapshotFormat,      NULL,                      0, NULL },
-    { (char *)"&GIF",                      onSetSnapshotFormat,      NULL,                      0, NULL },
-    { (char *)"&JPG",                      onSetSnapshotFormat,      NULL,                      0, NULL },
-    { (char *)"&PNG",                      onSetSnapshotFormat,      NULL,                      0, NULL },
     { (char *)"PC&X",                      onSetSnapshotFormat,      NULL,                      0, NULL },
     { (char *)"&TGA",                      onSetSnapshotFormat,      NULL,                      0, NULL },
     { NULL,                                NULL,                     NULL,                      0, NULL }
@@ -6728,18 +6725,6 @@ int onSetSnapshotFormat()
     {
     case 'B': //"&BMP"
         SnapshotFormat=0;
-        break;
-        
-    case 'G': //"&GIF"
-        SnapshotFormat=1;
-        break;
-        
-    case 'J': //"&JPG"
-        SnapshotFormat=2;
-        break;
-        
-    case 'P': //"&PNG"
-        SnapshotFormat=3;
         break;
         
     case 'C': //"PC&X"

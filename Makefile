@@ -1,5 +1,5 @@
 AUDIO_LIBS = -lgme -lalogg -lalmp3 -laldmb -ldumb
-IMAGE_LIBS = -ljpgal -lldpng -lpng -lz
+IMAGE_LIBS = 
 #LINKOPTS = -pg -g
 #LINKOPTS = -pg
 #OPTS = -pg -g
@@ -19,7 +19,7 @@ ZELDA_EXE = $(ZELDA_PREFIX)$(EXEEXT)
 ZQUEST_EXE = $(ZQUEST_PREFIX)$(EXEEXT)
 ROMVIEW_EXE = $(ROMVIEW_PREFIX)$(EXEEXT)
 
-ZELDA_OBJECTS = aglogo.o colors.o debug.o decorations.o defdata.o editbox.o EditboxModel.o EditboxView.o ending.o ffscript.o gamedata.o gui.o guys.o init.o items.o jwin.o jwinfsel.o link.o load_gif.o maps.o matrix.o md5.o midi.o pal.o particles.o qst.o save_gif.o script_drawing.o single_instance.o sprite.o subscr.o tab_ctl.o tiles.o title.o weapons.o win32.o zc_custom.o zc_init.o zc_items.o zc_sprite.o zc_subscr.o zc_sys.o zcmusic.o zelda.o zscriptversion.o zsys.o
+ZELDA_OBJECTS = aglogo.o colors.o debug.o decorations.o defdata.o editbox.o EditboxModel.o EditboxView.o ending.o ffscript.o gamedata.o gui.o guys.o init.o items.o jwin.o jwinfsel.o link.o maps.o matrix.o md5.o midi.o pal.o particles.o qst.o script_drawing.o single_instance.o sprite.o subscr.o tab_ctl.o tiles.o title.o weapons.o win32.o zc_custom.o zc_init.o zc_items.o zc_sprite.o zc_subscr.o zc_sys.o zcmusic.o zelda.o zscriptversion.o zsys.o
 
 .PHONY: default veryclean clean all msg linux done
 
@@ -80,8 +80,6 @@ jwinfsel.o: jwinfsel.cpp jwin.h jwinfsel.h tab_ctl.h zc_alleg.h
 	$(CC) $(OPTS) $(CFLAG) -c jwinfsel.cpp -o jwinfsel.o $(SFLAG)
 link.o: link.cpp aglogo.h colors.h decorations.h ffscript.h gamedata.h guys.h items.h jwin.h jwinfsel.h link.h maps.h matrix.h pal.h qst.h sfx.h sprite.h subscr.h tab_ctl.h tiles.h title.h weapons.h zc_alleg.h zc_custom.h zc_subscr.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c link.cpp -o link.o $(SFLAG)
-load_gif.o: load_gif.cpp load_gif.h zc_alleg.h
-	$(CC) $(OPTS) $(CFLAG) -c load_gif.cpp -o load_gif.o $(SFLAG)
 maps.o: maps.cpp aglogo.h colors.h ffscript.h gamedata.h guys.h items.h jwin.h jwinfsel.h link.h maps.h matrix.h pal.h particles.h qst.h sfx.h sprite.h subscr.h tab_ctl.h tiles.h weapons.h zc_alleg.h zc_custom.h zc_subscr.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) -O3 $(CFLAG) -c maps.cpp -o maps.o $(SFLAG)
 matrix.o: matrix.cpp gamedata.h matrix.h zc_alleg.h zc_sys.h zdefs.h
@@ -96,8 +94,6 @@ particles.o: particles.cpp gamedata.h particles.h sprite.h zc_alleg.h zdefs.h
 	$(CC) $(OPTS) $(CFLAG) -c particles.cpp -o particles.o $(SFLAG)
 qst.o: qst.cpp colors.h defdata.h font.h gamedata.h guys.h items.h jwin.h jwinfsel.h md5.h midi.h qst.h sfx.h sprite.h subscr.h tab_ctl.h tiles.h weapons.h zc_alleg.h zc_custom.h zcmusic.h zdefs.h zquest.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c qst.cpp -o qst.o $(SFLAG)
-save_gif.o: save_gif.cpp save_gif.h zc_alleg.h
-	$(CC) $(OPTS) $(CFLAG) -c save_gif.cpp -o save_gif.o $(SFLAG)
 script_drawing.o: script_drawing.cpp ffscript.h maps.h rendertarget.h script_drawing.h tiles.h zc_alleg.h zelda.h
 	$(CC) $(OPTS) $(CFLAG) -c script_drawing.cpp -o script_drawing.o $(SFLAG)
 single_instance.o: single_instance_unix.cpp single_instance.h
@@ -128,7 +124,7 @@ zc_sys.o: zc_sys.cpp aglogo.h colors.h debug.h gamedata.h gui.h guys.h init.h it
 	$(CC) $(OPTS) $(CFLAG) -c zc_sys.cpp -o zc_sys.o $(SFLAG)
 zcmusic.o: zcmusic.cpp nothread.h zc_alleg.h zcmusic.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c zcmusic.cpp -o zcmusic.o $(SFLAG)
-zelda.o: zelda.cpp aglogo.h colors.h ending.h ffscript.h fontsdat.h gamedata.h guys.h init.h items.h jwin.h jwinfsel.h link.h load_gif.h maps.h matrix.h pal.h particles.h qst.h save_gif.h sfx.h sprite.h subscr.h tab_ctl.h tiles.h title.h weapons.h zc_alleg.h zc_custom.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
+zelda.o: zelda.cpp aglogo.h colors.h ending.h ffscript.h fontsdat.h gamedata.h guys.h init.h items.h jwin.h jwinfsel.h link.h maps.h matrix.h pal.h particles.h qst.h sfx.h sprite.h subscr.h tab_ctl.h tiles.h title.h weapons.h zc_alleg.h zc_custom.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c zelda.cpp -o zelda.o $(SFLAG)
 zscriptversion.o: zscriptversion.cpp zscriptversion.h zelda.h link.h zdefs.h
 	$(CC) $(OPTS) $(CFLAG) -c zscriptversion.cpp -o zscriptversion.o $(SFLAG)

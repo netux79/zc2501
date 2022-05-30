@@ -22,12 +22,7 @@
 
 #include "zc_alleg.h"
 
-#include <png.h>
-#include <pngconf.h>
 #include <stdlib.h>
-
-#include <loadpng.h>
-#include <jpgalleg.h>
 
 #include "zc_malloc.h"
 #include "mem_debug.h"
@@ -44,8 +39,6 @@
 #include "matrix.h"
 #include "jwin.h"
 #include "jwinfsel.h"
-#include "save_gif.h"
-#include "load_gif.h" // not really needed; we're just saving GIF files in ZC.
 #include "fontsdat.h"
 #include "particles.h"
 #include "gamedata.h"
@@ -2731,10 +2724,6 @@ int main(int argc, char* argv[])
     three_finger_flag=false;
     //atexit(&dumb_exit);
     //dumb_register_stdfiles();
-    
-    register_bitmap_file_type("GIF",  load_gif, save_gif);
-    jpgalleg_init();
-    loadpng_init();
     
     // set and load game configurations
     set_config_file("ag.cfg");

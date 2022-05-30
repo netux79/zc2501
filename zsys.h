@@ -67,7 +67,7 @@ int anim_3_4(int clk, int speed);
 
 int bound(int &x,int low,int high);
 
-enum {ssfmtBMP, ssfmtGIF, ssfmtJPG, ssfmtPNG, ssfmtPCX, ssfmtTGA, ssfmtMAX };
+enum {ssfmtBMP, ssfmtPCX, ssfmtTGA, ssfmtMAX };
 extern char *snapshotformat_str[ssfmtMAX][2];
 extern const char *snapshotformatlist(int index, int *list_size);
 
