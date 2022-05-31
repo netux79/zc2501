@@ -178,7 +178,5 @@ void quit_game();
 int zc_trace_handler(const char *);
 void zc_trace_clear();
 
-extern bool zconsole;
-
 #endif                                                      // _ZSYS_H_
 

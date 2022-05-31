@@ -21,7 +21,6 @@
 #include "tiles.h"
 #include "colors.h"
 #include "pal.h"
-#include "aglogo.h"
 #include "zsys.h"
 #include "qst.h"
 #include "matrix.h"

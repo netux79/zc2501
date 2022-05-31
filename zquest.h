@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include "midi.h"
 #include "jwin.h"
 #include "jwinfsel.h"
 #include "zcmusic.h"
@@ -129,7 +128,6 @@ extern guydata  *guysbuf;
 extern item_drop_object    item_drop_sets[MAXITEMDROPSETS];
 extern newcombo curr_combo;
 extern PALETTE RAMpal;
-extern midi_info Midi_Info;
 extern bool zq_showpal;
 extern bool combo_cols;
 
@@ -833,7 +831,6 @@ int onDoorCombos();
 /*******************************/
 
 void edit_tune(int i);
-int d_midilist_proc(int msg,DIALOG *d,int c);
 int onMidis();
 
 /*******************************/

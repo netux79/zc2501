@@ -32,11 +32,9 @@
 #include "zsys.h"
 #include "qst.h"
 #include "zc_sys.h"
-#include "debug.h"
 #include "jwin.h"
 #include "jwinfsel.h"
 #include "gui.h"
-#include "mem_debug.h"
 
 /****************************/
 /**********  GUI  ***********/

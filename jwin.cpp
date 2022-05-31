@@ -35,7 +35,6 @@
 #include <iostream>
 #include "zsys.h"
 #include <stdio.h>
-#include "mem_debug.h"
 
 //#ifndef _MSC_VER
 #define zc_max(a,b)  ((a)>(b)?(a):(b))

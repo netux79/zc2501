@@ -22,7 +22,6 @@
 #include "ffscript.h"
 #include "gamedata.h"
 #include "defdata.h"
-#include "mem_debug.h"
 #include "zscriptversion.h"
 
 extern LinkClass   Link;

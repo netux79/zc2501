@@ -21,7 +21,6 @@
 #include <vector>
 #include <assert.h>
 
-#include "mem_debug.h"
 #include "zc_alleg.h"
 #include "zdefs.h"
 #include "colors.h"
@@ -31,10 +30,10 @@
 #include "zquest.h"
 #include "defdata.h"
 #include "subscr.h"
-#include "font.h"
 #include "zc_custom.h"
 #include "sfx.h"
 #include "md5.h"
+#include "gc.h"
 
 #ifndef _AL_MALLOC
 #define _AL_MALLOC(a) _al_malloc(a)
@@ -791,7 +790,7 @@ PACKFILE *open_quest_template(zquestheader *Header, char *deletefilename, bool v
     
     if(Header->templatepath[0]==0)
     {
-        filename=(char *)zc_malloc(23);
+        filename=(char *)malloc(23);
         sprintf(filename, "qst.dat#NESQST_NEW_QST");
     }
     else
@@ -803,7 +802,7 @@ PACKFILE *open_quest_template(zquestheader *Header, char *deletefilename, bool v
     
     if(Header->templatepath[0]==0)
     {
-        zc_free(filename);
+        free(filename);
     }
     
     if(!f)
@@ -1129,7 +1128,7 @@ int get_qst_buffers()
     memrequested+=(sizeof(zcmap)*MAXMAPS2);
     Z_message("Allocating combo buffer (%s)... ", byte_conversion2(sizeof(zcmap)*MAXMAPS2,memrequested,-1,-1));
     
-    if((ZCMaps=(zcmap*)zc_malloc(sizeof(zcmap)*MAXMAPS2))==NULL)
+    if((ZCMaps=(zcmap*)malloc(sizeof(zcmap)*MAXMAPS2))==NULL)
         return 0;
         
     Z_message("OK\n");
@@ -1144,7 +1143,7 @@ int get_qst_buffers()
     memrequested+=(sizeof(MsgStr)*msg_strings_size);
     Z_message("Allocating string buffer (%s)... ", byte_conversion2(sizeof(MsgStr)*msg_strings_size,memrequested,-1,-1));
     
-    if((MsgStrings=(MsgStr*)zc_malloc(sizeof(MsgStr)*msg_strings_size))==NULL)
+    if((MsgStrings=(MsgStr*)malloc(sizeof(MsgStr)*msg_strings_size))==NULL)
         return 0;
         
     memset(MsgStrings, 0, sizeof(MsgStr)*msg_strings_size);
@@ -1153,7 +1152,7 @@ int get_qst_buffers()
     memrequested+=(sizeof(DoorComboSet)*MAXDOORCOMBOSETS);
     Z_message("Allocating door combo buffer (%s)... ", byte_conversion2(sizeof(DoorComboSet)*MAXDOORCOMBOSETS,memrequested,-1,-1));
     
-    if((DoorComboSets=(DoorComboSet*)zc_malloc(sizeof(DoorComboSet)*MAXDOORCOMBOSETS))==NULL)
+    if((DoorComboSets=(DoorComboSet*)malloc(sizeof(DoorComboSet)*MAXDOORCOMBOSETS))==NULL)
         return 0;
         
     Z_message("OK\n");                                        // Allocating door combo buffer...
@@ -1161,7 +1160,7 @@ int get_qst_buffers()
     memrequested+=(sizeof(dmap)*MAXDMAPS);
     Z_message("Allocating dmap buffer (%s)... ", byte_conversion2(sizeof(dmap)*MAXDMAPS,memrequested,-1,-1));
     
-    if((DMaps=(dmap*)zc_malloc(sizeof(dmap)*MAXDMAPS))==NULL)
+    if((DMaps=(dmap*)malloc(sizeof(dmap)*MAXDMAPS))==NULL)
         return 0;
         
     memset(DMaps, 0, sizeof(dmap)*MAXDMAPS);
@@ -1170,7 +1169,7 @@ int get_qst_buffers()
     memrequested+=(sizeof(newcombo)*MAXCOMBOS);
     Z_message("Allocating combo buffer (%s)... ", byte_conversion2(sizeof(newcombo)*MAXCOMBOS,memrequested,-1,-1));
     
-    if((combobuf=(newcombo*)zc_malloc(sizeof(newcombo)*MAXCOMBOS))==NULL)
+    if((combobuf=(newcombo*)malloc(sizeof(newcombo)*MAXCOMBOS))==NULL)
         return 0;
         
     memset(combobuf, 0, sizeof(newcombo)*MAXCOMBOS);
@@ -1179,7 +1178,7 @@ int get_qst_buffers()
     memrequested+=(newerpsTOTAL);
     Z_message("Allocating color data buffer (%s)... ", byte_conversion2(newerpsTOTAL,memrequested,-1,-1));
     
-    if((colordata=(byte*)zc_malloc(newerpsTOTAL))==NULL)
+    if((colordata=(byte*)malloc(newerpsTOTAL))==NULL)
         return 0;
         
     Z_message("OK\n");                                        // Allocating color data buffer...
@@ -1187,7 +1186,7 @@ int get_qst_buffers()
     memrequested+=(NEWMAXTILES*(sizeof(tiledata)+tilesize(tf4Bit)));
     Z_message("Allocating tile buffer (%s)... ", byte_conversion2(NEWMAXTILES*(sizeof(tiledata)+tilesize(tf4Bit)),memrequested,-1,-1));
     
-    if((newtilebuf=(tiledata*)zc_malloc(NEWMAXTILES*sizeof(tiledata)))==NULL)
+    if((newtilebuf=(tiledata*)malloc(NEWMAXTILES*sizeof(tiledata)))==NULL)
         return 0;
         
     memset(newtilebuf, 0, NEWMAXTILES*sizeof(tiledata));
@@ -1199,7 +1198,7 @@ int get_qst_buffers()
         memrequested+=(NEWMAXTILES*(sizeof(tiledata)+tilesize(tf4Bit)));
         Z_message("Allocating tile grab buffer (%s)... ", byte_conversion2(NEWMAXTILES*sizeof(tiledata),memrequested,-1,-1));
         
-        if((grabtilebuf=(tiledata*)zc_malloc(NEWMAXTILES*sizeof(tiledata)))==NULL)
+        if((grabtilebuf=(tiledata*)malloc(NEWMAXTILES*sizeof(tiledata)))==NULL)
             return 0;
             
         memset(grabtilebuf, 0, NEWMAXTILES*sizeof(tiledata));
@@ -1210,7 +1209,7 @@ int get_qst_buffers()
     memrequested+=(100000);
     Z_message("Allocating trash buffer (%s)... ", byte_conversion2(100000,memrequested,-1,-1));
     
-    if((trashbuf=(byte*)zc_malloc(100000))==NULL)
+    if((trashbuf=(byte*)malloc(100000))==NULL)
         return 0;
         
     Z_message("OK\n");                                        // Allocating trash buffer...
@@ -1223,7 +1222,7 @@ int get_qst_buffers()
     memrequested+=(sizeof(itemdata)*(MAXITEMS+1));
     Z_message("Allocating item buffer (%s)... ", byte_conversion2(sizeof(itemdata)*(MAXITEMS+1),memrequested,-1,-1));
     
-    if((itemsbuf=(itemdata*)zc_malloc(sizeof(itemdata)*(MAXITEMS+1)))==NULL)
+    if((itemsbuf=(itemdata*)malloc(sizeof(itemdata)*(MAXITEMS+1)))==NULL)
         return 0;
         
     memset(itemsbuf,0,sizeof(itemdata)*(MAXITEMS+1));
@@ -1233,7 +1232,7 @@ int get_qst_buffers()
     memrequested+=(sizeof(wpndata)*MAXWPNS);
     Z_message("Allocating weapon buffer (%s)... ", byte_conversion2(sizeof(wpndata)*MAXWPNS,memrequested,-1,-1));
     
-    if((wpnsbuf=(wpndata*)zc_malloc(sizeof(wpndata)*MAXWPNS))==NULL)
+    if((wpnsbuf=(wpndata*)malloc(sizeof(wpndata)*MAXWPNS))==NULL)
         return 0;
         
     memset(wpnsbuf,0,sizeof(wpndata)*MAXWPNS);
@@ -1242,7 +1241,7 @@ int get_qst_buffers()
     memrequested+=(sizeof(guydata)*MAXGUYS);
     Z_message("Allocating guy buffer (%s)... ", byte_conversion2(sizeof(guydata)*MAXGUYS,memrequested,-1,-1));
     
-    if((guysbuf=(guydata*)zc_malloc(sizeof(guydata)*MAXGUYS))==NULL)
+    if((guysbuf=(guydata*)malloc(sizeof(guydata)*MAXGUYS))==NULL)
         return 0;
         
     memset(guysbuf,0,sizeof(guydata)*MAXGUYS);
@@ -1251,7 +1250,7 @@ int get_qst_buffers()
     memrequested+=(sizeof(comboclass)*cMAX);
     Z_message("Allocating combo class buffer (%s)... ", byte_conversion2(sizeof(comboclass)*cMAX,memrequested,-1,-1));
     
-    if((combo_class_buf=(comboclass*)zc_malloc(sizeof(comboclass)*cMAX))==NULL)
+    if((combo_class_buf=(comboclass*)malloc(sizeof(comboclass)*cMAX))==NULL)
         return 0;
         
     Z_message("OK\n");										// Allocating combo class buffer...
@@ -1266,9 +1265,9 @@ void free_newtilebuf()
     {
         for(int i=0; i<NEWMAXTILES; i++)
             if(newtilebuf[i].data)
-                zc_free(newtilebuf[i].data);
+                free(newtilebuf[i].data);
                 
-        zc_free(newtilebuf);
+        free(newtilebuf);
     }
 }
 
@@ -1279,9 +1278,9 @@ void free_grabtilebuf()
         if(grabtilebuf)
         {
             for(int i=0; i<NEWMAXTILES; i++)
-                if(grabtilebuf[i].data) zc_free(grabtilebuf[i].data);
+                if(grabtilebuf[i].data) free(grabtilebuf[i].data);
                 
-            zc_free(grabtilebuf);
+            free(grabtilebuf);
         }
     }
 }
@@ -1290,17 +1289,17 @@ void del_qst_buffers()
 {
     al_trace("Cleaning maps. \n");
     
-    if(ZCMaps) zc_free(ZCMaps);
+    if(ZCMaps) free(ZCMaps);
     
-    if(MsgStrings) zc_free(MsgStrings);
+    if(MsgStrings) free(MsgStrings);
     
-    if(DoorComboSets) zc_free(DoorComboSets);
+    if(DoorComboSets) free(DoorComboSets);
     
-    if(DMaps) zc_free(DMaps);
+    if(DMaps) free(DMaps);
     
-    if(combobuf) zc_free(combobuf);
+    if(combobuf) free(combobuf);
     
-    if(colordata) zc_free(colordata);
+    if(colordata) free(colordata);
     
     al_trace("Cleaning tile buffers. \n");
     free_newtilebuf();
@@ -1308,20 +1307,20 @@ void del_qst_buffers()
     
     al_trace("Cleaning misc. \n");
     
-    if(trashbuf) zc_free(trashbuf);
+    if(trashbuf) free(trashbuf);
     
     // See get_qst_buffers
     if(itemsbuf)
     {
         itemsbuf--;
-        zc_free(itemsbuf);
+        free(itemsbuf);
     }
     
-    if(wpnsbuf) zc_free(wpnsbuf);
+    if(wpnsbuf) free(wpnsbuf);
     
-    if(guysbuf) zc_free(guysbuf);
+    if(guysbuf) free(guysbuf);
     
-    if(combo_class_buf) zc_free(combo_class_buf);
+    if(combo_class_buf) free(combo_class_buf);
 }
 
 bool init_palnames()
@@ -8011,7 +8010,7 @@ int read_one_ffscript(PACKFILE *f, zquestheader *, bool keepdata, int , word s_v
                 // I'll comment this out until the whole routine is finished using ptr
                 //if(is_string_command(temp_script.command))
                 //{
-                //( *script)[j].ptr=(char *)zc_malloc(256);
+                //( *script)[j].ptr=(char *)malloc(256);
                 //memcpy((*script)[j].ptr, temp_script.ptr, 256);
                 //}
             }
@@ -8254,7 +8253,7 @@ int readsfx(PACKFILE *f, zquestheader *Header, bool keepdata)
             if(customsfxdata[i].data!=NULL)
             {
 //        delete [] customsfxdata[i].data;
-                zc_free(customsfxdata[i].data);
+                free(customsfxdata[i].data);
             }
             
 //      customsfxdata[i].data = new byte[(temp_sample.bits==8?1:2)*temp_sample.len];
@@ -8281,7 +8280,7 @@ int readsfx(PACKFILE *f, zquestheader *Header, bool keepdata)
             
         }
         
-        zc_free(temp_sample.data);
+        free(temp_sample.data);
     }
     
     sfxdat=0;
@@ -8313,7 +8312,7 @@ void setupsfx()
         if(customsfxdata[j].data!=NULL)
         {
 //    delete [] customsfxdata[j].data;
-            zc_free(customsfxdata[j].data);
+            free(customsfxdata[j].data);
         }
         
 //    customsfxdata[j].data = new byte[(temp_sample->bits==8?1:2)*temp_sample->len];
@@ -11730,11 +11729,11 @@ int readtiles(PACKFILE *f, tiledata *buf, zquestheader *Header, word version, wo
                 
                 if(buf[start_tile+i].data)
                 {
-                    zc_free(buf[start_tile+i].data);
+                    free(buf[start_tile+i].data);
                     buf[start_tile+i].data=NULL;
                 }
                 
-                buf[start_tile+i].data=(byte *)zc_malloc(tilesize(buf[start_tile+i].format));
+                buf[start_tile+i].data=(byte *)malloc(tilesize(buf[start_tile+i].format));
                 memcpy(buf[start_tile+i].data,temp_tile,tilesize(buf[start_tile+i].format));
             }
         }

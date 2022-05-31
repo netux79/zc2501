@@ -27,7 +27,6 @@
 #include "tiles.h"
 #include "pal.h"
 #include "link.h"
-#include "mem_debug.h"
 
 extern LinkClass Link;
 extern zinitdata zinit;

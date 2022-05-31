@@ -21,7 +21,6 @@
 #include <deque>
 #include <string>
 
-//#include "zc_math.h"
 #include "maps.h"
 #include "zelda.h"
 #include "tiles.h"
@@ -34,8 +33,6 @@
 #include "guys.h"
 #include "ffscript.h"
 #include "particles.h"
-#include "mem_debug.h"
-
 
 #define EPSILON 0.01 // Define your own tolerance
 #define FLOAT_EQ(x,v) (((v - EPSILON) < x) && (x <( v + EPSILON)))

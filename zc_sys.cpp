@@ -38,11 +38,9 @@
 #include "zsys.h"
 #include "qst.h"
 #include "zc_sys.h"
-#include "debug.h"
 #include "jwin.h"
 #include "jwinfsel.h"
 #include "gui.h"
-#include "midi.h"
 #include "subscr.h"
 #include "maps.h"
 #include "sprite.h"
@@ -50,7 +48,6 @@
 #include "link.h"
 #include "title.h"
 #include "particles.h"
-#include "mem_debug.h"
 
 static int sfx_voice[WAV_COUNT];
 int d_stringloader(int msg,DIALOG *d,int c);
@@ -189,7 +186,7 @@ void large_dialog(DIALOG *d, float RESIZE_AMT)
             continue;
             
         // Bigger font
-        bool bigfontproc = (d[i].proc != jwin_initlist_proc && d[i].proc != d_midilist_proc && d[i].proc != jwin_droplist_proc && d[i].proc != jwin_abclist_proc && d[i].proc != jwin_list_proc);
+        bool bigfontproc = (d[i].proc != jwin_initlist_proc && d[i].proc != jwin_droplist_proc && d[i].proc != jwin_abclist_proc && d[i].proc != jwin_list_proc);
         
         if(!d[i].dp2 && bigfontproc)
         {
@@ -5390,112 +5387,8 @@ const char *midilist(int index, int *list_size)
 /*  ------- MIDI info stuff -------- */
 
 char *text;
-midi_info *zmi;
 bool dialog_running;
 bool listening;
-
-void get_info(int index);
-
-int d_midilist_proc(int msg,DIALOG *d,int c)
-{
-    int d2 = d->d2;
-    int ret = jwin_droplist_proc(msg,d,c);
-    
-    if(d2!=d->d2)
-    {
-        get_info(d->d2);
-    }
-    
-    return ret;
-}
-
-int d_listen_proc(int msg,DIALOG *d,int c)
-{
-    /* 'd->d1' is offset from 'd' in DIALOG array to midilist proc */
-    
-    int ret = jwin_button_proc(msg,d,c);
-    
-    if(ret == D_CLOSE)
-    {
-        // get current midi index
-        int index = (d+(d->d1))->d2;
-        int i=0, m=0;
-        
-        while(m<=index && i<=MAXMIDIS)
-        {
-            if(tunes[i].data)
-                ++m;
-                
-            ++i;
-        }
-        
-        --i;
-        jukebox(i);
-        listening = true;
-        ret = D_O_K;
-    }
-    
-    return ret;
-}
-
-int d_savemidi_proc(int msg,DIALOG *d,int c)
-{
-    /* 'd->d1' is offset from 'd' in DIALOG array to midilist proc */
-    
-    int ret = jwin_button_proc(msg,d,c);
-    
-    if(ret == D_CLOSE)
-    {
-        // get current midi index
-        int index = (d+(d->d1))->d2;
-        int i=0, m=0;
-        
-        while(m<=index && i<=MAXMIDIS)
-        {
-            if(tunes[i].data)
-                ++m;
-                
-            ++i;
-        }
-        
-        --i;
-        
-        // get file name
-        
-        int  sel=0;
-        //struct ffblk f;
-        char title[40] = "Save MIDI: ";
-        static char fname[2048] = "";
-        static EXT_LIST list[] =
-        {
-            { (char *)"MIDI files (*.mid)", (char *)"mid" },
-            { (char *)"HTML files (*.html, *.html)", (char *)"htm html" },
-            { NULL,                                  NULL }
-        };
-        
-        strcpy(title+11, tunes[i].title);
-        
-        if(jwin_file_browse_ex(title, fname, list, &sel, 2048, -1, -1, lfont)==0)
-            goto done;
-            
-        if(exists(fname))
-        {
-            if(jwin_alert(title, fname, "already exists.", "Overwrite it?", "&Yes","&No",'y','n',lfont)==2)
-                goto done;
-        }
-        
-        // save midi i
-        
-        if(save_midi(fname, (MIDI*)tunes[i].data) != 0)
-            jwin_alert(title, "Error saving MIDI to", fname, NULL, "Darn", NULL,13,27,lfont);
-            
-done:
-        chop_path(fname);
-        ret = D_REDRAW;
-    }
-    
-    return ret;
-}
 
 static ListData midi_list(midilist, &font);
 
@@ -5504,87 +5397,11 @@ static DIALOG midi_dlg[] =
     /* (dialog proc)       (x)   (y)   (w)   (h)   (fg)     (bg)     (key)    (flags)    (d1)      (d2)     (dp)     (dp2) (dp3) */
     { jwin_win_proc,       8,    28,   304,  184,  0,       0,        0,       D_EXIT,    0,        0, (void *) "MIDI Info", NULL,  NULL },
     { jwin_text_proc,         32,   60,   40,   8,    vc(0),   vc(11),   0,       0,         0,        0, (void *) "Tune:", NULL,  NULL },
-    { d_midilist_proc,     80,   56,   192,  16,   0,       0,        0,       0,         0,        0, (void *) &midi_list, NULL,  NULL },
     { jwin_textbox_proc,   15,   80,   290,  96,   0,       0,        0,       0,         0,        0,       NULL, NULL,  NULL },
-    { d_listen_proc,       24,   183,  72,   21,   0,       0,        'l',     D_EXIT,    -2,       0, (void *) "&Listen", NULL,  NULL },
-    { d_savemidi_proc,     108,  183,  72,   21,   0,       0,        's',     D_EXIT,    -3,       0, (void *) "&Save", NULL,  NULL },
     { jwin_button_proc,    236,  183,  61,   21,   0,       0,        'k',     D_EXIT,    0,        0, (void *) "O&K", NULL,  NULL },
     { d_timer_proc,         0,    0,     0,    0,    0,       0,       0,       0,          0,          0,         NULL, NULL, NULL },
     { NULL,                 0,    0,    0,    0,   0,       0,       0,       0,          0,             0,       NULL,                           NULL,  NULL }
 };
-
-void get_info(int index)
-{
-    int i=0, m=0;
-    
-    while(m<=index && i<=MAXMIDIS)
-    {
-        if(tunes[i].data)
-            ++m;
-            
-        ++i;
-    }
-    
-    --i;
-    
-    if(i==MAXMIDIS && m<index)
-        strcpy(text,"(null)");
-    else
-    {
-        get_midi_info((MIDI*)tunes[i].data,zmi);
-        get_midi_text((MIDI*)tunes[i].data,zmi,text);
-    }
-    
-    midi_dlg[0].dp2=lfont;
-    midi_dlg[3].dp = text;
-    midi_dlg[3].d1 = midi_dlg[3].d2 = 0;
-    midi_dlg[5].flags = (tunes[i].flags&tfDISABLESAVE) ? D_DISABLED : D_EXIT;
-    
-    if(dialog_running)
-    {
-        scare_mouse();
-        jwin_textbox_proc(MSG_DRAW,midi_dlg+3,0);
-        d_savemidi_proc(MSG_DRAW,midi_dlg+5,0);
-        unscare_mouse();
-    }
-}
-
-int onMIDICredits()
-{
-    text = (char*)zc_malloc(4096);
-    zmi = (midi_info*)zc_malloc(sizeof(midi_info));
-    
-    if(!text || !zmi)
-    {
-        jwin_alert(NULL,"Not enough memory",NULL,NULL,"OK",NULL,13,27,lfont);
-        return D_O_K;
-    }
-    
-    midi_dlg[0].dp2=lfont;
-    midi_dlg[2].d1 = 0;
-    midi_dlg[2].d2 = 0;
-    midi_dlg[4].flags = (midi_pos >= 0) ? D_DISABLED : D_EXIT;
-    midi_dlg[5].flags = (tunes[midi_dlg[2].d1].flags&tfDISABLESAVE) ? D_DISABLED : D_EXIT;
-    
-    listening = false;
-    dialog_running=false;
-    get_info(0);
-    
-    dialog_running=true;
-    
-    if(is_large)
-        large_dialog(midi_dlg);
-        
-    zc_popup_dialog(midi_dlg,0);
-    dialog_running=false;
-    
-    if(listening)
-        music_stop();
-        
-    zc_free(text);
-    zc_free(zmi);
-    return D_O_K;
-}
 
 int onAbout()
 {
@@ -6562,7 +6379,6 @@ static MENU misc_menu[] =
     { (char *)"&Video Mode...",             onVidMode,               NULL,                      0, NULL },
     { (char *)"",                           NULL,                    NULL,                      0, NULL },
     { (char *)"&Quest Info...",             onQuest,                 NULL,                      0, NULL },
-    { (char *)"Quest &MIDI Info...",        onMIDICredits,           NULL,                      0, NULL },
     { (char *)"Quest &Directory...",        onQstPath,               NULL,                      0, NULL },
     { (char *)"",                           NULL,                    NULL,                      0, NULL },
     { (char *)"Take &Snapshot\tF12",        onSnapshot,              NULL,                      0, NULL },

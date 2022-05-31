@@ -29,7 +29,6 @@
 #include "zc_custom.h"
 #include "title.h"
 #include "ffscript.h"
-#include "mem_debug.h"
 #include "zscriptversion.h"
 
 using std::set;

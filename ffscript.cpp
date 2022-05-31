@@ -21,15 +21,12 @@
 #include "zc_init.h"
 #include "zsys.h"
 #include "title.h"
-#include "mem_debug.h"
 #include "zscriptversion.h"
 #include "rendertarget.h"
 
 #ifdef _FFDEBUG
 #include "ffdebug.h"
 #endif
-
-#include "debug.h"
 
 #define zc_max(a,b)  ((a)>(b)?(a):(b))
 /*template <typename T>
@@ -6107,9 +6104,6 @@ void do_trace(bool v)
     string s2(tmp);
     s2 = s2.substr(0, s2.size() - 4) + "." + s2.substr(s2.size() - 4, 4);
     al_trace("%s\n", s2.c_str());
-    
-    if(zconsole)
-        printf("%s\n", s2.c_str());
 }
 
 void do_tracebool(const bool v)
@@ -6117,9 +6111,6 @@ void do_tracebool(const bool v)
     long32 temp = SH::get_arg(sarg1, v);
     
     al_trace("%s\n", temp ? "true": "false");
-    
-    if(zconsole)
-        printf("%s\n", temp ? "true": "false");
 }
 
 void do_tracestring()
@@ -6128,17 +6119,11 @@ void do_tracestring()
     string str;
     ArrayH::getString(arrayptr, str, 512);
     al_trace("%s", str.c_str());
-    
-    if(zconsole)
-        printf("%s", str.c_str());
 }
 
 void do_tracenl()
 {
     al_trace("\n");
-    
-    if(zconsole)
-        printf("\n");
 }
 
 void do_cleartrace()
@@ -6201,9 +6186,6 @@ void do_tracetobase()
     }
     
     al_trace("%s\n", s2.c_str());
-    
-    if(zconsole)
-        printf("%s\n", s2.c_str());
 }
 
 ///----------------------------------------------------------------------------------------------------//

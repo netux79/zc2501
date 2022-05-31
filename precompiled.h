@@ -27,11 +27,5 @@
 #include <vector>
 #include <set>
 
-
-//zc
-#include "zc_malloc.h"
-
-
-
 #endif
 

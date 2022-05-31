@@ -28,7 +28,6 @@
 #include "gui.h"
 #include "init.h"
 #include "zelda.h"
-#include "mem_debug.h"
 
 #ifdef _MSC_VER
 #define stricmp _stricmp

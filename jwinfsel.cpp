@@ -50,7 +50,6 @@
 #include "jwin.h"
 #include "jwinfsel.h"
 #include "zsys.h"
-#include "zc_malloc.h"
 
 extern FONT *lfont_l;
 
@@ -491,7 +490,7 @@ Next:
     if((flist->size < FLIST_SIZE) && ((ugetc(s) != '.') || (ugetat(s, 1))))
     {
         int size = ustrsizez(s) + ((attrib & FA_DIREC) ? ucwidth(OTHER_PATH_SEPARATOR) : 0);
-        name = (char *) zc_malloc(size);
+        name = (char *) malloc(size);
         
         if(!name)
             return -1;
@@ -582,7 +581,7 @@ static int fs_flist_proc(int msg, DIALOG *d, int c)
     {
         if(!flist)
         {
-            flist = (FLIST *) zc_malloc(sizeof(FLIST));
+            flist = (FLIST *) malloc(sizeof(FLIST));
             
             if(!flist)
             {
@@ -594,7 +593,7 @@ static int fs_flist_proc(int msg, DIALOG *d, int c)
         {
             for(i=0; i<flist->size; i++)
                 if(flist->name[i])
-                    zc_free(flist->name[i]);
+                    free(flist->name[i]);
         }
         
         flist->size = 0;
@@ -626,9 +625,9 @@ static int fs_flist_proc(int msg, DIALOG *d, int c)
         {
             for(i=0; i<flist->size; i++)
                 if(flist->name[i])
-                    zc_free(flist->name[i]);
+                    free(flist->name[i]);
                     
-            zc_free(flist);
+            free(flist);
             flist = NULL;
         }
     }
@@ -1009,7 +1008,7 @@ int jwin_file_select_ex(AL_CONST char *message, char *path, AL_CONST char *ext, 
     
     if(fext)
     {
-        zc_free(fext);
+        free(fext);
         fext = NULL;
     }
     
@@ -1214,7 +1213,7 @@ int jwin_dfile_select_ex(AL_CONST char *message, char *path, AL_CONST char *ext,
     
     if(fext)
     {
-        zc_free(fext);
+        free(fext);
         fext = NULL;
     }
     
@@ -1333,7 +1332,7 @@ int jwin_file_browse_ex(AL_CONST char *message, char *path, EXT_LIST *list, int 
     
     if(fext)
     {
-        zc_free(fext);
+        free(fext);
         fext = NULL;
     }
     

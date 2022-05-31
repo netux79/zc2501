@@ -86,10 +86,6 @@ enum
 
 /*
 
-  // aglogo.cc
-  int  aglogo(BITMAP* frame);
-
-
   // title.cc
   void update_game_icons();
 

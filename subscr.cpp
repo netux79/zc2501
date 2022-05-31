@@ -20,7 +20,6 @@
 #include "items.h"
 #include <stdio.h>
 #include <string.h>
-#include "gc.h"
 
 bool show_subscreen_dmap_dots=true;
 bool show_subscreen_numbers=true;

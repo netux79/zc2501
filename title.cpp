@@ -31,7 +31,6 @@
 #include "title.h"
 #include "gamedata.h"
 #include "link.h"
-#include "mem_debug.h"
 
 #ifdef _MSC_VER
 #define strupr _strupr
@@ -1386,7 +1385,7 @@ void set_up_standalone_save()
     char *fn=get_filename(standalone_quest);
     saves[0].set_name(fn);
     
-    qstpath=(char*)zc_malloc(2048);
+    qstpath=(char*)malloc(2048);
     strncpy(qstpath, standalone_quest, 2047);
     qstpath[2047]='\0';
     chosecustomquest=true;
@@ -1406,7 +1405,7 @@ void set_up_standalone_save()
 int load_savedgames()
 {
     char *fname = SAVE_FILE;
-    char *iname = (char *)zc_malloc(2048);
+    char *iname = (char *)malloc(2048);
     int ret;
     PACKFILE *f=NULL;
     FILE *f2=NULL;
@@ -1520,7 +1519,7 @@ int load_savedgames()
     
     pack_fclose(f);
     delete_file(tmpfilename);
-    zc_free(iname);
+    free(iname);
     return 0;
     
 newdata:
@@ -1585,7 +1584,7 @@ init:
     if(standalone_mode)
         set_up_standalone_save();
         
-    zc_free(iname);
+    free(iname);
     return 0;
     
 }
@@ -1856,7 +1855,7 @@ int save_savedgames()
     delete_file(tmpfilename);
     
     FILE *f2=NULL;
-    char *iname = (char *)zc_malloc(2048);
+    char *iname = (char *)malloc(2048);
     strcpy(iname, SAVE_FILE);
     
     for(int i=0; iname[i]!='\0'; iname[i]=='.'?iname[i]='\0':i++)
@@ -1873,7 +1872,7 @@ int save_savedgames()
         fputc(*(di2++),f2);
         
     fclose(f2);
-    zc_free(iname);
+    free(iname);
     return ret;
 }
 
