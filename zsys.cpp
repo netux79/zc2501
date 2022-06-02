@@ -927,32 +927,6 @@ static bool box_log=true;
 static char box_log_msg[480];
 static int box_msg_pos=0;
 static int box_store_pos=0;
-/*
-  static int jwin_pal[jcMAX] =
-  {
-  vc(11),vc(15),vc(4),vc(7),vc(6),vc(0),
-  192,223,vc(14),vc(15),vc(0),vc(1),vc(14)
-  };
-  */
-int onSnapshot2()
-{
-    char buf[20];
-    int num=0;
-    
-    do
-    {
-        sprintf(buf, "zelda%03d.bmp", ++num);
-    }
-    while(num<999 && exists(buf));
-    
-    PALETTE temppal;
-    get_palette(temppal);
-    BITMAP *tempbmp=create_bitmap_ex(8,screen->w, screen->h);
-    blit(screen,tempbmp,0,0,0,0,screen->w,screen->h);
-    save_bitmap(buf,screen,temppal);
-    destroy_bitmap(tempbmp);
-    return D_O_K;
-}
 
 void set_default_box_size()
 {

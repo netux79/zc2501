@@ -79,7 +79,6 @@ extern int d_dropdmaplist_proc(int msg,DIALOG *d,int c);
 extern const char *dmaplist(int index, int *list_size);
 extern int onHelp();
 extern int startdmapxy[6];
-extern void onInitOK();
 
 std::map<int, int> listidx2biic;
 //sorted by family id
@@ -1557,6 +1556,8 @@ const char *item_class_list(int index, int *list_size)
     return biic[index].s;
 }
 
+const char *familylist(int index, int *list_size);
+
 
 int doInit(zinitdata *local_zinit)
 {
@@ -1821,7 +1822,6 @@ int doInit(zinitdata *local_zinit)
         local_zinit->gravity = vbound(int(strtod(gravitystring, NULL)*100),1,255);
         local_zinit->terminalv = vbound(int(strtod(terminalvstring, NULL)*100), 1, 9999);
         local_zinit->jump_link_layer_threshold = vbound(atoi(thresholdstring),0,255);
-        onInitOK();
     }
     
     //for(map<int, char *>::iterator it = famnames.begin(); it != famnames.end(); it++)

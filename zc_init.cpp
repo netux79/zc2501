@@ -23,7 +23,6 @@
 #include "zc_alleg.h"
 #include "zdefs.h"
 #include "jwin.h"
-#include "zq_init.h"
 #include "zsys.h"
 #include "zquest.h"
 #include "gamedata.h"
@@ -65,10 +64,6 @@ int onCheatConsole()
 void center_zc_init_dialog()
 {
     jwin_center_dialog(init_dlg);
-}
-
-void onInitOK()
-{
 }
 
 // copyIntoZinit: worst kludge in all of ZC history? I've seen worse. ;) -Gleeok

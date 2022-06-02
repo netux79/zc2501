@@ -979,7 +979,6 @@ int InitPage_5();
 int InitPage_6();
 int InitPage_7();
 int InitPage_8();
-int onInit();
 int onItemProps();
 int onSubscreen();
 

@@ -23,7 +23,6 @@
 #include "pal.h"
 #include "zsys.h"
 #include "qst.h"
-#include "matrix.h"
 #include "jwin.h"
 #include "jwinfsel.h"
 #include "weapons.h"

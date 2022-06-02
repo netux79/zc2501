@@ -94,7 +94,6 @@ enum
   void go();
   void comeback();
   void waitvsync(bool fast);
-  int  input_idle(bool checkmouse);
   int  after_time();
   void hit_close_button();
   */

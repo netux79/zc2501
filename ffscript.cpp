@@ -11,7 +11,6 @@
 #include <math.h>
 #include <cstdio>
 
-#include "zc_math.h"
 #include "zc_array.h"
 #include "ffscript.h"
 #include "zelda.h"
@@ -23,10 +22,6 @@
 #include "title.h"
 #include "zscriptversion.h"
 #include "rendertarget.h"
-
-#ifdef _FFDEBUG
-#include "ffdebug.h"
-#endif
 
 #define zc_max(a,b)  ((a)>(b)?(a):(b))
 /*template <typename T>
@@ -6532,13 +6527,8 @@ int run_script(const byte type, const word script, const byte i)
     {
         check_quit();
         
-#ifdef _FFDEBUG
-#ifdef _FFDISSASSEMBLY
-        ffdebug::print_dissassembly(scommand);
-#endif
 #ifdef _SCRIPT_COUNTER
         start_time = script_counter;
-#endif
 #endif
         
         switch(scommand)

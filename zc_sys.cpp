@@ -65,16 +65,7 @@ bool midi_paused=false;
 //extern int db;
 
 static const char *ZC_str = "Zelda Classic";
-#ifdef ALLEGRO_DOS
-static  const char *qst_dir_name = "dos_qst_dir";
-#elif defined(ALLEGRO_WINDOWS)
-static  const char *qst_dir_name = "win_qst_dir";
-#elif defined(ALLEGRO_LINUX)
 static  const char *qst_dir_name = "linux_qst_dir";
-#elif defined(ALLEGRO_MACOSX)
-static  const char *qst_dir_name = "macosx_qst_dir";
-#endif
-
 #ifdef _MSC_VER
 #define getcwd _getcwd
 #endif
@@ -3480,79 +3471,6 @@ void updatescr(bool allowwavy)
 
 PALETTE sys_pal;
 
-int onGUISnapshot()
-{
-    char buf[20];
-    int num=0;
-    
-    do
-    {
-#ifdef ALLEGRO_MACOSX
-        sprintf(buf, "../../../zelda%03d.%s", ++num, snapshotformat_str[SnapshotFormat][1]);
-#else
-        sprintf(buf, "zelda%03d.%s", ++num, snapshotformat_str[SnapshotFormat][1]);
-#endif
-    }
-    while(num<999 && exists(buf));
-    
-    BITMAP *b = create_bitmap_ex(8,resx,resy);
-    
-    if(b)
-    {
-        blit(screen,b,0,0,0,0,resx,resy);
-        save_bmp(buf,b,sys_pal);
-        destroy_bitmap(b);
-    }
-    
-    return D_O_K;
-}
-
-int onNonGUISnapshot()
-{
-    PALETTE temppal;
-    get_palette(temppal);
-    bool realpal=(key[KEY_ZC_LCONTROL] || key[KEY_ZC_RCONTROL]);
-    
-    char buf[20];
-    int num=0;
-    
-    do
-    {
-        sprintf(buf, "zelda%03d.%s", ++num, snapshotformat_str[SnapshotFormat][1]);
-    }
-    while(num<999 && exists(buf));
-    
-    BITMAP *panorama = create_bitmap_ex(8,256,168);
-    
-    if(tmpscr->flags3&fNOSUBSCR)
-    {
-        clear_to_color(panorama,0);
-        blit(framebuf,panorama,0,playing_field_offset,0,0,256,168);
-        save_bitmap(buf,panorama,realpal?temppal:RAMpal);
-    }
-    else
-    {
-        save_bitmap(buf,framebuf,realpal?temppal:RAMpal);
-    }
-    
-    destroy_bitmap(panorama);
-    return D_O_K;
-}
-
-int onSnapshot()
-{
-    if(key[KEY_LSHIFT]||key[KEY_RSHIFT])
-    {
-        onGUISnapshot();
-    }
-    else
-    {
-        onNonGUISnapshot();
-    }
-    
-    return D_O_K;
-}
-
 int onSaveMapPic()
 {
     BITMAP* mappic = NULL;
@@ -3742,34 +3660,6 @@ int onNoWalls()
     return D_O_K;
 }
 
-int input_idle(bool checkmouse)
-{
-    static int mx, my, mz, mb;
-    
-    if(keypressed() || zc_key_pressed() ||
-       (checkmouse && (mx != gui_mouse_x() || my != gui_mouse_y() || mz != gui_mouse_z() || mb != gui_mouse_b())))
-    {
-        idle_count = 0;
-        
-        if(active_count < MAX_ACTIVE)
-        {
-            ++active_count;
-        }
-    }
-    else if(idle_count < MAX_IDLE)
-    {
-        ++idle_count;
-        active_count = 0;
-    }
-    
-    mx = gui_mouse_x();
-    my = gui_mouse_y();
-    mz = gui_mouse_z();
-    mb = gui_mouse_b();
-    
-    return idle_count;
-}
-
 int onGoFast()
 {
     gofast=gofast?false:true;
@@ -3933,11 +3823,6 @@ void syskeys()
 #endif
     if(rF5()&&(Playing && currscr<128 && DMaps[currdmap].flags&dmfVIEWMAP))    onSaveMapPic();
     
-    if(rF12())
-    {
-        onSnapshot();
-    }
-    
     if(debug_enabled && ReadKey(KEY_TAB))
         set_debug(!get_debug());
         
@@ -4064,25 +3949,8 @@ void syskeys()
     }
     
     if(ReadKey(KEY_G))   db=(db==999)?0:999;
-#ifndef ALLEGRO_MACOSX
     if(ReadKey(KEY_F8))  Showpal=!Showpal;
-    
-    if(ReadKey(KEY_F7))
-    {
-        Matrix(ss_speed, ss_density, 0);
-        game_pal();
-    }
-#else
-    // The reason these are different on Mac in the first place is that
-    // the OS doesn't let us use F9 and F10...
-    if(ReadKey(KEY_F10))  Showpal=!Showpal;
-    
-    if(ReadKey(KEY_F9))
-    {
-        Matrix(ss_speed, ss_density, 0);
-        game_pal();
-    }
-#endif
+
     if(ReadKey(KEY_PLUS_PAD) || ReadKey(KEY_EQUALS))
     {
         //change containers
@@ -4158,12 +4026,6 @@ void syskeys()
     
 bottom:
 
-    if(input_idle(true) > after_time())
-    {
-        Matrix(ss_speed, ss_density, 0);
-        game_pal();
-    }
-    
     //while(Playing && keypressed())
     //readkey();
     // What's the Playing check for?
@@ -5292,98 +5154,6 @@ int onGoToComplete()
     return D_O_K;
 }
 
-int onCredits()
-{
-    go();
-    
-    BITMAP *win = create_bitmap_ex(8,222,110);
-    
-    if(!win)
-        return D_O_K;
-        
-    int c=0;
-    int l=0;
-    int ol=-1;
-    RLE_SPRITE *rle = (RLE_SPRITE*)(data[RLE_CREDITS].dat);
-    RGB *pal = (RGB*)(data[PAL_CREDITS].dat);
-    PALETTE tmppal;
-    
-    clear_bitmap(win);
-    draw_rle_sprite(win,rle,0,0);
-    credits_dlg[0].dp2=lfont;
-    credits_dlg[1].fg = gui_mg_color;
-    credits_dlg[2].dp = win;
-    set_palette_range(black_palette,0,127,false);
-    
-    DIALOG_PLAYER *p = init_dialog(credits_dlg,3);
-    
-    while(update_dialog(p))
-    {
-        throttleFPS();
-        ++c;
-        l = zc_max((c>>1)-30,0);
-        
-        if(l > rle->h)
-            l = c = 0;
-            
-        if(l > rle->h - 112)
-            l = rle->h - 112;
-            
-        clear_bitmap(win);
-        draw_rle_sprite(win,rle,0,0-l);
-        
-        if(c<=64)
-            fade_interpolate(black_palette,pal,tmppal,c,0,127);
-            
-        set_palette_range(tmppal,0,127,false);
-        
-        if(l!=ol)
-        {
-            scare_mouse();
-            d_bitmap_proc(MSG_DRAW,credits_dlg+2,0);
-            unscare_mouse();
-            SCRFIX();
-            ol=l;
-        }
-    }
-    
-    shutdown_dialog(p);
-    destroy_bitmap(win);
-    comeback();
-    return D_O_K;
-}
-
-const char *midilist(int index, int *list_size)
-{
-    if(index<0)
-    {
-        *list_size=0;
-        
-        for(int i=0; i<MAXMIDIS; i++)
-            if(tunes[i].data)
-                ++(*list_size);
-                
-        return NULL;
-    }
-    
-    int i=0,m=0;
-    
-    while(m<=index && i<=MAXMIDIS)
-    {
-        if(tunes[i].data)
-            ++m;
-            
-        ++i;
-    }
-    
-    --i;
-    
-    if(i==MAXMIDIS && m<index)
-        return "(null)";
-        
-    return tunes[i].title;
-}
-
 /*  ------- MIDI info stuff -------- */
 
 char *text;
@@ -6265,38 +6035,6 @@ static DIALOG scrsaver_dlg[] =
     { NULL,                 0,    0,    0,    0,   0,       0,       0,       0,          0,             0,       NULL,                           NULL,  NULL }
 };
 
-int onScreenSaver()
-{
-    scrsaver_dlg[0].dp2=lfont;
-    scrsaver_dlg[5].d1 = scrsaver_dlg[5].d2 = ss_after;
-    scrsaver_dlg[6].d2 = ss_speed;
-    scrsaver_dlg[7].d2 = ss_density;
-    
-    if(is_large)
-        large_dialog(scrsaver_dlg);
-        
-    int ret = zc_popup_dialog(scrsaver_dlg,-1);
-    
-    if(ret == 8 || ret == 9)
-    {
-        ss_after   = scrsaver_dlg[5].d1;
-        ss_speed   = scrsaver_dlg[6].d2;
-        ss_density = scrsaver_dlg[7].d2;
-    }
-    
-    if(ret == 9)
-        // preview Screen Saver
-    {
-        clear_keybuf();
-        scare_mouse();
-        Matrix(ss_speed, ss_density, 30);
-        system_pal();
-        unscare_mouse();
-    }
-    
-    return D_O_K;
-}
-
 /*****  Menus  *****/
 
 static MENU game_menu[] =
@@ -6374,15 +6112,12 @@ static MENU settings_menu[] =
 static MENU misc_menu[] =
 {
     { (char *)"&About...",                  onAbout,                 NULL,                      0, NULL },
-    { (char *)"&Credits...",                onCredits,               NULL,                      0, NULL },
     { (char *)"&Fullscreen",                onFullscreenMenu,        NULL,                      0, NULL },
     { (char *)"&Video Mode...",             onVidMode,               NULL,                      0, NULL },
     { (char *)"",                           NULL,                    NULL,                      0, NULL },
     { (char *)"&Quest Info...",             onQuest,                 NULL,                      0, NULL },
     { (char *)"Quest &Directory...",        onQstPath,               NULL,                      0, NULL },
     { (char *)"",                           NULL,                    NULL,                      0, NULL },
-    { (char *)"Take &Snapshot\tF12",        onSnapshot,              NULL,                      0, NULL },
-    { (char *)"Sc&reen Saver...",           onScreenSaver,           NULL,                      0, NULL },
     { NULL,                                 NULL,                    NULL,                      0, NULL }
 };
 
@@ -6501,7 +6236,6 @@ static DIALOG system_dlg[] =
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F7,   0, (void *) onReset, NULL,  NULL },
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F8,   0, (void *) onExit, NULL,  NULL },
 #endif
-    { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F12,  0, (void *) onSnapshot, NULL,  NULL },
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_TAB,  0, (void *) onDebug, NULL,  NULL },
     { d_timer_proc,      0,    0,    0,    0,    0,    0,    0,       0,       0,        0,       NULL,             NULL, NULL },
     { NULL,              0,    0,    0,    0,    0,    0,    0,       0,       0,        0,       NULL,                           NULL,  NULL }
@@ -6521,7 +6255,6 @@ static DIALOG system_dlg2[] =
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F7,   0, (void *) onReset, NULL,  NULL },
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F8,   0, (void *) onExit, NULL,  NULL },
 #endif
-    { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F12,  0, (void *) onSnapshot, NULL,  NULL },
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_TAB,  0, (void *) onDebug, NULL,  NULL },
     { d_timer_proc,      0,    0,    0,    0,    0,    0,    0,       0,       0,        0,       NULL,             NULL, NULL },
     { NULL,                 0,    0,    0,    0,   0,       0,       0,       0,          0,             0,       NULL,                           NULL,  NULL }
@@ -7355,21 +7088,6 @@ void System()
         // press menu to drop the menu
         if(rMbtn())
             simulate_keypress(KEY_G << 8);
-            
-        {
-            if(input_idle(true) > after_time())
-                // run Screeen Saver
-            {
-				// Screen saver enabled for now.
-				clear_keybuf();
-                scare_mouse();
-                Matrix(ss_speed, ss_density, 0);
-                system_pal();
-                unscare_mouse();
-                broadcast_dialog_message(MSG_DRAW, 0);
-            }
-        }
-        
     }
     while(update_dialog(p));
     

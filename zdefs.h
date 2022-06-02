@@ -14,10 +14,7 @@
 
 //Conditional Debugging Compilation
 //Script related
-#define _FFDEBUG
 //#define _SCRIPT_COUNTER
-//#define _FFDISSASSEMBLY
-//#define _FFONESCRIPTDISSASSEMBLY
 
 //Other
 //#define _SKIPPASSWORDCHECK
