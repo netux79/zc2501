@@ -111,19 +111,7 @@
 
 enum {ENC_METHOD_192B104=0, ENC_METHOD_192B105, ENC_METHOD_192B185, ENC_METHOD_211B9, ENC_METHOD_211B18, ENC_METHOD_MAX};
 
-#ifdef ALLEGRO_DOS
-//already defined in DOS
-/*
-#elif defined(ALLEGRO_WINDOWS)
 #define PI 3.14159265358979323846
-#elif defined(ALLEGRO_MACOSX)
-#define PI 3.14159265358979323846
-#elif defined(ALLEGRO_LINUX)
-*/
-#else
-#define PI 3.14159265358979323846
-#endif
-
 #define HP_PER_HEART          16
 #define DAMAGE_MULTIPLIER     2
 
@@ -2845,21 +2833,10 @@ INLINE bool p_igetf(void *p,PACKFILE *f,bool keepdata)
     if(keepdata)
     {
         memset(p, 0,sizeof(float));
-#ifdef ALLEGRO_MACOSX
-        
-        for(int i=0; i<(int)sizeof(float); i++)
-        {
-            ((byte *)p)[i] = tempfloat[i];
-        }
-        
-#else
-        
         for(int i=0; i<(int)sizeof(float); i++)
         {
             ((byte *)p)[sizeof(float)-i-1] = tempfloat[i];
         }
-        
-#endif
     }
     
     readsize += sizeof(float);

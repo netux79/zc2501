@@ -13463,12 +13463,6 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
     mapsread=false;
     fixffcs=false;
     
-    if(get_debug()&&(key[KEY_LSHIFT]||key[KEY_RSHIFT]))
-    {
-        keepall=false;
-        jwin_alert("Load Quest","Data retention disabled.",NULL,NULL,"OK",NULL,13,27,lfont);
-    }
-    
     //  show_progress=true;
     char tmpfilename[32];
     temp_name(tmpfilename);

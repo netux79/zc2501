@@ -33,9 +33,6 @@
 //#define ed15 253
 //#define FLASH 243
 
-#ifdef ALLEGRO_MACOSX
-extern int midi_strict; //L
-#endif
 extern bool cancelgetnum;
 
 extern bool is_large;
@@ -157,7 +154,6 @@ extern int AutoSaveRetention;                               //how many autosaves
 extern int ImportMapBias;                                   //tells what has precedence on map importing
 extern int BrushWidth, BrushHeight;
 extern bool quit,saved;
-extern bool __debug;
 extern byte LayerMask[2];                                   //determines which layers are on or off.  0-15
 extern int LayerMaskInt[7];
 extern int CurrentLayer;
@@ -194,9 +190,6 @@ extern bool init_done, save_init;
 extern bool doorcombos_done, save_doorcombos;
 
 void loadlvlpal(int level);
-
-bool get_debug();
-void set_debug(bool d);
 
 // quest data
 extern zquestheader        header;
@@ -725,8 +718,6 @@ int onCatchall();
 int onScreenPalette();
 int onDecScrPal();
 int onIncScrPal();
-int onFullScreen();
-int isFullScreen();
 int onToggleGrid();
 int onToggleShowScripts();
 int onToggleShowSquares();
@@ -1083,7 +1074,6 @@ int d_nbmenu_proc(int msg,DIALOG *d,int c);
 void center_zquest_dialogs();
 void animate_coords();
 void do_animations();
-int onZQVidMode();
 bool is_zquest();
 int save_config_file();
 int d_timer_proc(int msg, DIALOG *d, int c);

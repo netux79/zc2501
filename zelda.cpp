@@ -272,14 +272,13 @@ bool show_layer_0=true, show_layer_1=true, show_layer_2=true, show_layer_3=true,
      show_layer_over=true, show_layer_push=true, show_sprites=true, show_ffcs=true, show_hitboxes=false, show_walkflags=false, show_ff_scripts=false;
 
 
-bool Throttlefps, ClickToFreeze=false, Paused=false, Advance=false, ShowFPS, Showpal=false, disableClickToFreeze=false;
+bool Throttlefps, Paused=false, Advance=false, ShowFPS, Showpal=false;
 bool Playing, FrameSkip=false, TransLayers;
-bool __debug=false,debug_enabled;
 bool refreshpal,blockpath,loaded_guys,freeze_guys,
      loaded_enemies,drawguys,details=false,watch;
 bool darkroom=false,naturaldark=false,BSZ;                         //,NEWSUBSCR;
 bool Udown,Ddown,Ldown,Rdown,Adown,Bdown,Sdown,Mdown,LBdown,RBdown,Pdown,Ex1down,Ex2down,Ex3down,Ex4down,AUdown,ADdown,ALdown,ARdown,F12,F11, F5,keyI, keyQ,
-     SystemKeys=true,NESquit,volkeys,useCD=false,boughtsomething=false,
+     SystemKeys=true,NESquit,boughtsomething=false,
      fixed_door=false, hookshot_used=false, hookshot_frozen=false,
      pull_link=false, add_chainlink=false, del_chainlink=false, hs_fix=false,
      cheat_superman=false, gofast=false, checklink=true, didpit=false, heart_beep=true,
@@ -289,7 +288,7 @@ bool Udown,Ddown,Ldown,Rdown,Adown,Bdown,Sdown,Mdown,LBdown,RBdown,Pdown,Ex1down
 byte COOLSCROLL;
 
 int  add_asparkle=0, add_bsparkle=0;
-int SnapshotFormat, NameEntryMode=0;
+int SnapshotFormat;
 
 char   zeldadat_sig[52];
 char   sfxdat_sig[52];
@@ -653,18 +652,6 @@ extern char *guy_string[];
 /******* Other Source Files *******/
 /**********************************/
 
-bool get_debug()
-{
-    //return false; //remove later
-    return __debug;
-}
-
-void set_debug(bool d)
-{
-    __debug=d;
-    return;
-}
-
 void hit_close_button()
 {
     close_button_quit=true;
@@ -967,9 +954,7 @@ int load_quest(gamedata *g, bool report)
 {
     chop_path(qstpath);
     char *tempdir=(char *)"";
-#ifndef ALLEGRO_MACOSX
     tempdir=qstdir;
-#endif
     
     if(g->get_quest()<255)
     {
@@ -2433,11 +2418,6 @@ bool is_zquest()
     return false;
 }
 
-int isFullScreen()
-{
-    return !is_windowed_mode();
-}
-
 class TB_Handler //Dear Santa: please kill Easter bunny. I've been a good boy.
 {
 public:
@@ -2508,69 +2488,6 @@ public:
 }
 static Triplebuffer;
 
-
-
-
-
-int onFullscreen()
-{
-#ifdef ALLEGRO_DOS
-    return D_O_K;
-#endif
-    PALETTE oldpal;
-    get_palette(oldpal);
-    
-    show_mouse(NULL);
-    bool windowed=is_windowed_mode()!=0;
-    
-    // these will become ultra corrupted no matter what.
-    Triplebuffer.Destroy();
-    
-    fullscreen=!fullscreen;
-    int ret=set_gfx_mode(windowed?GFX_AUTODETECT_FULLSCREEN:GFX_AUTODETECT_WINDOWED,resx,resy,0,0);
-    
-    if(ret!=0)
-    {
-        if(!windowed)
-        {
-            ret=set_gfx_mode(windowed?GFX_AUTODETECT_FULLSCREEN:GFX_AUTODETECT_WINDOWED,resx,resy,0,0);
-            
-            if(ret!=0)
-            {
-                Z_message("Can't set video mode (%d).\n", ret);
-                Z_message(allegro_error);
-                exit(1);
-            }
-        }
-        else
-        {
-            Z_message("Can't set video mode (%d).\n", ret);
-            Z_message(allegro_error);
-            exit(1);
-        }
-    }
-    
-    /* ZC will crash going from fullscreen to windowed mode if triple buffer is left unchecked. -Gleeok  */
-    if(Triplebuffer.GFX_can_triple_buffer())
-    {
-        Triplebuffer.Create();
-        Z_message("Triplebuffer enabled \n");
-    }
-    else Z_message("Triplebuffer disabled \n");
-    
-    //Everything set?
-    Z_message("gfx mode set at -%d %dbpp %d x %d \n", is_windowed_mode(), get_color_depth(), resx, resy);
-    
-    set_palette(oldpal);
-    gui_mouse_focus=0;
-    show_mouse(screen);
-    set_display_switch_mode(fullscreen?SWITCH_BACKAMNESIA:SWITCH_BACKGROUND);
-//	set_display_switch_callback(SWITCH_OUT, switch_out_callback);/
-//	set_display_switch_callback(SWITCH_IN,switch_in_callback);
-
-    return D_REDRAW;
-}
-
 int main(int argc, char* argv[])
 {
     switch(IS_BETA)
@@ -2603,15 +2520,6 @@ int main(int argc, char* argv[])
         }
         
         standalone_quest=argv[arg+1];
-        
-        if(stricmp(standalone_quest, "1st.qst")==0 ||
-                stricmp(standalone_quest, "2nd.qst")==0 ||
-                stricmp(standalone_quest, "3rd.qst")==0 ||
-                stricmp(standalone_quest, "4th.qst")==0)
-        {
-            Z_error("Standalone mode can only be used with custom quests.");
-            exit(1);
-        }
         
         int len=strlen(standalone_quest);
         
@@ -2652,11 +2560,6 @@ int main(int argc, char* argv[])
     
     qstdir[0] = 0;
     qstpath[0] = 0;
-    
-#ifdef ALLEGRO_MACOSX
-    sprintf(qstdir, "../../../");
-    sprintf(qstpath, "../../../");
-#endif
     
     Z_message("OK\n");
 
@@ -2866,8 +2769,6 @@ int main(int argc, char* argv[])
     
     
     resolve_password(zeldapwd);
-    debug_enabled = used_switch(argc,argv,"-d") && !strcmp(get_config_string("zeldadx","debug",""),zeldapwd);
-    set_debug(debug_enabled);
     
     skipicon = standalone_mode || used_switch(argc,argv,"-quickload");
     
@@ -2898,7 +2799,7 @@ int main(int argc, char* argv[])
         slot_arg2=1;
     }
     
-    int fast_start = debug_enabled || used_switch(argc,argv,"-fast") || (!standalone_mode && (load_save || (slot_arg && (argc>(slot_arg+1)))));
+    int fast_start = used_switch(argc,argv,"-fast") || (!standalone_mode && (load_save || (slot_arg && (argc>(slot_arg+1)))));
     skip_title = used_switch(argc, argv, "-notitle") > 0;
     int save_arg = used_switch(argc,argv,"-savefile");
     
@@ -3134,20 +3035,6 @@ int main(int argc, char* argv[])
     
     Z_init_sound();
     
-    
-    // CD player
-    
-    /*
-      if(used_switch(argc,argv,"-cd"))
-      {
-      printf("Initializing CD player... ");
-      if(cd_init())
-      Z_error("Error");
-      printf("OK\n");
-      useCD = true;
-      }
-      */
-    
     //use only page flipping
     if(used_switch(argc,argv,"-doublebuffer"))
     {
@@ -3281,7 +3168,6 @@ int main(int argc, char* argv[])
     set_close_button_callback((void (*)()) hit_close_button);
     set_window_title("Zelda Classic");
     
-    fix_dialogs();
     gui_mouse_focus = FALSE;
     position_mouse(resx-16,resy-16);
     
@@ -3296,14 +3182,7 @@ int main(int argc, char* argv[])
     
     Z_message("OK\n");
     
-#ifdef _WIN32
-    // Nothing for them to do on other platforms
-    set_display_switch_callback(SWITCH_IN,switch_in_callback);
-    set_display_switch_callback(SWITCH_OUT,switch_out_callback);
-#endif
-    
     // play the game
-    fix_menu();
     reset_items(true, &QHeader);
     
     clear_to_color(screen,BLACK);
@@ -3412,8 +3291,6 @@ quick_quit:
     Triplebuffer.Destroy();
     set_gfx_mode(GFX_TEXT,80,25,0,0);
     //rest(250); // ???
-    //  if(useCD)
-    //    cd_exit();
     quit_game();
     Z_message("Armageddon Games web site: http://www.armageddongames.com\n");
     Z_message("Zelda Classic web site: http://www.zeldaclassic.com\n");

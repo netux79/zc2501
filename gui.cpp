@@ -15,14 +15,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-//#include <dir.h>
 #include <ctype.h>
 #include "zc_alleg.h"
-
-#ifdef ALLEGRO_DOS
-#include <unistd.h>
-#endif
-
 #include "zdefs.h"
 #include "zelda.h"
 #include "zquest.h"

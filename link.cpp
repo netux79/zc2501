@@ -3905,18 +3905,7 @@ bool LinkClass::animate(int)
         selectNextBWpn(SEL_RIGHT);
         
     if(rPbtn())
-    
-        // #define PBUTTONDEBUG
-        
-#ifndef PBUTTONDEBUG
         onViewMap();
-        
-#else
-        /* This is here to allow me to output something to allegro.log on demand. */
-    {
-        al_trace("**********\n");
-    }
-#endif
         
     for(int i=0; i<Lwpns.Count(); i++)
     {
@@ -4703,7 +4692,7 @@ bool LinkClass::startwpn(int itemid)
             
         paymagiccost(itemid);
         
-        if(!get_debug() && !current_item_power(itype_bombbag))
+        if(!current_item_power(itype_bombbag))
             game->change_bombs(-1);
             
         if(itemsbuf[itemid].misc1>0) // If not remote bombs
@@ -4753,7 +4742,7 @@ bool LinkClass::startwpn(int itemid)
             
         paymagiccost(itemid);
         
-        if(!get_debug() && !magicbag)
+        if(!magicbag)
             game->change_sbombs(-1);
             
         if(itemsbuf[itemid].misc1>0) // If not remote bombs
@@ -14521,11 +14510,7 @@ void LinkClass::gameover()
     
     action=none;
     Playing=false;
-    
-    if(!debug_enabled)
-    {
-        Paused=false;
-    }
+    Paused=false;
     
     game->set_deaths(zc_min(game->get_deaths()+1,999));
     dir=down;

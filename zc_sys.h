@@ -28,13 +28,10 @@ void save_game_configs();
 
 void draw_lens_under(BITMAP *dest, bool layer);
 void draw_lens_over();
-void fix_menu();
-int onFullscreenMenu();
 void f_Quit(int type);
 void advanceframe(bool allowwavy, bool sfxcleaup = true);
 void updatescr(bool allowwavy);
 void syskeys();
-void System();
 void system_pal();
 void switch_out_callback();
 void switch_in_callback();
@@ -43,7 +40,6 @@ int  onSave();
 int  onQuit();
 int  onReset();
 int  onExit();
-void fix_dialogs();
 
 int onCheatBombs();
 int onCheatArrows();
@@ -193,11 +189,5 @@ int onKeyboardEntry();
 int onLetterGridEntry();
 int onExtLetterGridEntry();
 
-#ifdef ALLEGRO_LINUX_GP2X
-extern int midi_strict;
-#endif
-#ifdef ALLEGRO_MACOSX
-extern int midi_strict; //L
-#endif
 #endif                                                      // _ZC_SYS_H_
 

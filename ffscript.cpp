@@ -2447,7 +2447,7 @@ long32 get_register(const long32 arg)
         break;
         
     case GAMECLICKFREEZE:
-        ret=disableClickToFreeze?0:10000;
+        ret=10000;
         break;
         
         
@@ -4401,7 +4401,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
         break;
         
     case GAMECLICKFREEZE:
-        disableClickToFreeze=value==0;
+        value==0;
         break;
         
 ///----------------------------------------------------------------------------------------------------//

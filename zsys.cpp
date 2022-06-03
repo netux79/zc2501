@@ -19,10 +19,6 @@
 
 using std::string;
 
-#ifdef ALLEGRO_DOS
-#include <conio.h>
-#endif
-
 #include "zdefs.h"
 #include "zsys.h"
 #include "zc_sys.h"
@@ -183,8 +179,6 @@ char *zc_make_relative_filename(char *dest, const char *path, const char *filena
 {
 #ifdef ALLEGRO_LINUX
     return make_relative_filename(dest, path, filename, size);
-#elif defined(ALLEGRO_MACOSX)
-    return make_relative_filename(dest, path, filename, size);
 #else
     char *tpath = new char[size+1];
     make_relative_filename(dest, path, filename, size);
@@ -304,9 +298,6 @@ void Z_error(const char *format,...)
     vsprintf(buf, format, ap);
     va_end(ap);
     
-#if defined(ALLEGRO_DOS ) || defined(ALLEGRO_MAXOSX)
-    printf("%s\n",buf);
-#endif
     al_trace("%s\n",buf);
     exit(1);
 }
@@ -320,9 +311,6 @@ void Z_message(const char *format,...)
     vsprintf(buf, format, ap);
     va_end(ap);
     
-#if defined(ALLEGRO_DOS ) || defined(ALLEGRO_MAXOSX)
-    printf("%s",buf);
-#endif
     al_trace("%s",buf);
 }
 
@@ -334,39 +322,7 @@ void Z_title(const char *format,...)
     vsprintf(buf, format, ap);
     va_end(ap);
     
-#ifdef ALLEGRO_DOS
-    text_info ti;
-    gettextinfo(&ti);
-    int w = ti.screenwidth;
-    
-    int len = strlen(buf);
-    
-    if(len>w)
-        printf("%s\n",buf);
-    else
-    {
-        char title[81];
-        
-        for(int i=0; i<w; i++)
-            title[i]=' ';
-            
-        title[w]=0;
-        
-        int center = (w - len) >> 1;
-        memcpy(title+center,buf,len);
-        
-        printf("\n");
-        textattr(0x4E);
-        cprintf("%s",title);
-        textattr(0x07);
-        
-        for(int i=0; i<w; i++)
-            cprintf(" ");
-    }
-    
-#else
     al_trace("%s\n",buf);
-#endif
 }
 
 int anim_3_4(int clk, int speed)

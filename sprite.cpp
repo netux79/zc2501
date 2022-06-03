@@ -22,7 +22,6 @@
 #include "sprite.h"
 #include "tiles.h"
 
-extern bool get_debug();
 extern bool halt;
 extern bool show_sprites;
 extern bool show_hitboxes;
@@ -669,9 +668,6 @@ void sprite::drawcloaked(BITMAP* dest)
         
         overtile16(dest,t,x,sy,cs2,0);
     }
-    
-    if(get_debug() && key[KEY_O])
-        rectfill(dest,x+hxofs,sy+hyofs,x+hxofs+hxsz-1,sy+hyofs+hysz-1,vc(id));
 }
 
 void sprite::drawshadow(BITMAP* dest,bool translucent)

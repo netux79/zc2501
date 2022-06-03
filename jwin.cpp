@@ -2767,9 +2767,6 @@ static int menu_key_shortcut(int c, AL_CONST char *s)
   *  up a menu.
   */
 
-//#ifdef ALLEGRO_DOS
-//int menu_alt_key(int k, MENU *m);
-//#elif defined ALLEGRO_WINDOWS
 
 int menu_alt_key(int k, MENU *m)
 {
@@ -2828,12 +2825,6 @@ int menu_alt_key(int k, MENU *m)
     return 0;
 }
 
-
-//#elif defined ALLEGRO_LINUX
-//int menu_alt_key(int k, MENU *m);
-//#elif defined ALLEGRO_MACOSX
-//int menu_alt_key(int k, MENU *m);
-//#endif
 
 /* _jwin_do_menu:
   *  The core menu control function, called by jwin_do_menu() and jwin_menu_proc().

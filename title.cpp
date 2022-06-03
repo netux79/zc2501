@@ -2126,8 +2126,6 @@ static bool register_name()
 {
     if(savecnt>=MAXSAVES)
         return false;
-        
-    int NameEntryMode2=NameEntryMode;
     
     saves[savecnt].set_maxlife(3*HP_PER_HEART);
     saves[savecnt].set_maxbombs(8);
@@ -2143,7 +2141,7 @@ static bool register_name()
     blit(framebuf,scrollbuf,0,0,0,0,256,224);
     
     int pos=s%3;
-    int y=((NameEntryMode2>0)?0:(pos*24))+72;
+    int y=72;
     int x=0;
     int spos=0;
     char name[9];
@@ -2151,80 +2149,66 @@ static bool register_name()
     memset(name,0,9);
     register_mode();
     clear_keybuf();
-    SystemKeys=(NameEntryMode2>0);
+    SystemKeys=true;
     refreshpal=true;
     bool done=false;
     bool cancel=false;
     
-    int letter_grid_x=(NameEntryMode2==2)?34:44;
+    int letter_grid_x=34;
     int letter_grid_y=120;
-    int letter_grid_offset=(NameEntryMode2==2)?10:8;
-    int letter_grid_width=(NameEntryMode2==2)?16:11;
-    int letter_grid_height=(NameEntryMode2==2)?6:4;
-    int letter_grid_spacing=(NameEntryMode2==2)?12:16;
+    int letter_grid_offset=10;
+    int letter_grid_width=16;
+    int letter_grid_height=6;
+    int letter_grid_spacing=12;
     
     const char *simple_grid="ABCDEFGHIJKLMNOPQRSTUVWXYZ-.,!'&.0123456789 ";
     const char *complete_grid=" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
     
-    if(NameEntryMode2>0)
+    //int pos=file%3;
+    BITMAP *info = create_bitmap_ex(8,168,32);
+    clear_bitmap(info);
+    blit(framebuf,info,40,pos*24+70,0,0,168,26);
+    rectfill(info,40,0,168,1,0);
+    rectfill(info,0,24,39,25,0);
+    rectfill(info,0,0,7,15,0);
+    rectfill(framebuf,40,64,216,192,0);
+    rectfill(framebuf,96,60,183,67,0);
+    
+    int i=pos*24+70;
+    
+    do
     {
-        //int pos=file%3;
-        BITMAP *info = create_bitmap_ex(8,168,32);
-        clear_bitmap(info);
-        blit(framebuf,info,40,pos*24+70,0,0,168,26);
-        rectfill(info,40,0,168,1,0);
-        rectfill(info,0,24,39,25,0);
-        rectfill(info,0,0,7,15,0);
-        rectfill(framebuf,40,64,216,192,0);
-        rectfill(framebuf,96,60,183,67,0);
-        
-        int i=pos*24+70;
-        
-        do
-        {
-            blit(info,framebuf,0,0,40,i,168,32);
-            advanceframe(true);
-            i-=pos+pos;
-        }
-        while(pos && i>=70);
-        
-        clear_bitmap(framebuf);
-        frame2x2(framebuf,&QMisc,24,48,QMisc.colors.blueframe_tile,QMisc.colors.blueframe_cset,26,8,0,1,0);
-        textout_ex(framebuf,zfont," NAME ",80,48,1,0);
-        textout_ex(framebuf,zfont," LIFE ",152,48,1,0);
-        
-        blit(info,framebuf,0,0,40,70,168,32);
-        destroy_bitmap(info);
-        
-        frame2x2(framebuf,&QMisc,letter_grid_x-letter_grid_offset,letter_grid_y-letter_grid_offset,QMisc.colors.blueframe_tile,QMisc.colors.blueframe_cset,(NameEntryMode2==2)?26:23,(NameEntryMode2==2)?11:9,0,1,0);
-        
-        if(NameEntryMode2==1)
-        {
-            textout_ex(framebuf,zfont,"A B C D E F G H I J K",letter_grid_x,letter_grid_y,1,-1);
-            textout_ex(framebuf,zfont,"L M N O P Q R S T U V",letter_grid_x,letter_grid_y+16,1,-1);
-            textout_ex(framebuf,zfont,"W X Y Z - . , ! ' & .",letter_grid_x,letter_grid_y+32,1,-1);
-            textout_ex(framebuf,zfont,"0 1 2 3 4 5 6 7 8 9  ",letter_grid_x,letter_grid_y+48,1,-1);
-        }
-        else
-        {
-            textout_ex(framebuf,zfont,"   \"  $  &  (  *  ,  .",letter_grid_x,   letter_grid_y,   1,-1);
-            textout_ex(framebuf,zfont, "!  #  %  '  )  +  -  /",letter_grid_x+12,letter_grid_y,   1,-1);
-            textout_ex(framebuf,zfont,"0  2  4  6  8  :  <  >", letter_grid_x,   letter_grid_y+12,1,-1);
-            textout_ex(framebuf,zfont, "1  3  5  7  9  ;  =  ?",letter_grid_x+12,letter_grid_y+12,1,-1);
-            textout_ex(framebuf,zfont,"@  B  D  F  H  J  L  N", letter_grid_x,   letter_grid_y+24,1,-1);
-            textout_ex(framebuf,zfont, "A  C  E  G  I  K  M  O",letter_grid_x+12,letter_grid_y+24,1,-1);
-            textout_ex(framebuf,zfont,"P  R  T  V  X  Z  \\  ^",letter_grid_x,   letter_grid_y+36,1,-1);
-            textout_ex(framebuf,zfont, "Q  S  U  W  Y  [  ]  _",letter_grid_x+12,letter_grid_y+36,1,-1);
-            textout_ex(framebuf,zfont,"`  b  d  f  h  j  l  n", letter_grid_x,   letter_grid_y+48,1,-1);
-            textout_ex(framebuf,zfont, "a  c  e  g  i  k  m  o",letter_grid_x+12,letter_grid_y+48,1,-1);
-            textout_ex(framebuf,zfont,"p  r  t  v  x  z  |  ~", letter_grid_x,   letter_grid_y+60,1,-1);
-            textout_ex(framebuf,zfont, "q  s  u  w  y  {  }",   letter_grid_x+12,letter_grid_y+60,1,-1);
-        }
-        
+        blit(info,framebuf,0,0,40,i,168,32);
         advanceframe(true);
-        blit(framebuf,scrollbuf,0,0,0,0,256,224);
-        
+        i-=pos+pos;
     }
+    while(pos && i>=70);
+    
+    clear_bitmap(framebuf);
+    frame2x2(framebuf,&QMisc,24,48,QMisc.colors.blueframe_tile,QMisc.colors.blueframe_cset,26,8,0,1,0);
+    textout_ex(framebuf,zfont," NAME ",80,48,1,0);
+    textout_ex(framebuf,zfont," LIFE ",152,48,1,0);
+    
+    blit(info,framebuf,0,0,40,70,168,32);
+    destroy_bitmap(info);
+    
+    frame2x2(framebuf,&QMisc,letter_grid_x-letter_grid_offset,letter_grid_y-letter_grid_offset,QMisc.colors.blueframe_tile,QMisc.colors.blueframe_cset,26,11,0,1,0);
+    
+    textout_ex(framebuf,zfont,"   \"  $  &  (  *  ,  .",letter_grid_x,   letter_grid_y,   1,-1);
+    textout_ex(framebuf,zfont, "!  #  %  '  )  +  -  /",letter_grid_x+12,letter_grid_y,   1,-1);
+    textout_ex(framebuf,zfont,"0  2  4  6  8  :  <  >", letter_grid_x,   letter_grid_y+12,1,-1);
+    textout_ex(framebuf,zfont, "1  3  5  7  9  ;  =  ?",letter_grid_x+12,letter_grid_y+12,1,-1);
+    textout_ex(framebuf,zfont,"@  B  D  F  H  J  L  N", letter_grid_x,   letter_grid_y+24,1,-1);
+    textout_ex(framebuf,zfont, "A  C  E  G  I  K  M  O",letter_grid_x+12,letter_grid_y+24,1,-1);
+    textout_ex(framebuf,zfont,"P  R  T  V  X  Z  \\  ^",letter_grid_x,   letter_grid_y+36,1,-1);
+    textout_ex(framebuf,zfont, "Q  S  U  W  Y  [  ]  _",letter_grid_x+12,letter_grid_y+36,1,-1);
+    textout_ex(framebuf,zfont,"`  b  d  f  h  j  l  n", letter_grid_x,   letter_grid_y+48,1,-1);
+    textout_ex(framebuf,zfont, "a  c  e  g  i  k  m  o",letter_grid_x+12,letter_grid_y+48,1,-1);
+    textout_ex(framebuf,zfont,"p  r  t  v  x  z  |  ~", letter_grid_x,   letter_grid_y+60,1,-1);
+    textout_ex(framebuf,zfont, "q  s  u  w  y  {  }",   letter_grid_x+12,letter_grid_y+60,1,-1);
+    
+    advanceframe(true);
+    blit(framebuf,scrollbuf,0,0,0,0,256,224);
     
     int grid_x=0;
     int grid_y=0;
@@ -2232,219 +2216,109 @@ static bool register_name()
     
     do
     {
-        if(NameEntryMode2>0)
+        spos = grid_y*letter_grid_width+grid_x;
+        load_control_state();
+        
+        if(rLeft())
         {
-            spos = grid_y*letter_grid_width+grid_x;
-            load_control_state();
+            --grid_x;
             
-            if(rLeft())
+            if(grid_x<0)
             {
-                --grid_x;
-                
-                if(grid_x<0)
-                {
-                    grid_x=letter_grid_width-1;
-                    --grid_y;
-                    
-                    if(grid_y<0)
-                    {
-                        grid_y=letter_grid_height-1;
-                    }
-                }
-                
-                sfx(WAV_CHIME);
-            }
-            else if(rRight())
-            {
-                ++grid_x;
-                
-                if(grid_x>=letter_grid_width)
-                {
-                    grid_x=0;
-                    ++grid_y;
-                    
-                    if(grid_y>=letter_grid_height)
-                    {
-                        grid_y=0;
-                    }
-                }
-                
-                sfx(WAV_CHIME);
-            }
-            else if(rUp())
-            {
+                grid_x=letter_grid_width-1;
                 --grid_y;
                 
                 if(grid_y<0)
                 {
                     grid_y=letter_grid_height-1;
                 }
-                
-                sfx(WAV_CHIME);
             }
-            else if(rDown())
+            
+            sfx(WAV_CHIME);
+        }
+        else if(rRight())
+        {
+            ++grid_x;
+            
+            if(grid_x>=letter_grid_width)
             {
+                grid_x=0;
                 ++grid_y;
                 
                 if(grid_y>=letter_grid_height)
                 {
                     grid_y=0;
                 }
-                
-                sfx(WAV_CHIME);
             }
-            else if(rBbtn())
+            
+            sfx(WAV_CHIME);
+        }
+        else if(rUp())
+        {
+            --grid_y;
+            
+            if(grid_y<0)
             {
-                ++x;
-                
-                if(x>=8)
-                {
-                    x=0;
-                }
+                grid_y=letter_grid_height-1;
             }
-            else if(rAbtn())
+            
+            sfx(WAV_CHIME);
+        }
+        else if(rDown())
+        {
+            ++grid_y;
+            
+            if(grid_y>=letter_grid_height)
             {
-                name[zc_min(x,7)]=(NameEntryMode2==2)?complete_grid[spos]:simple_grid[spos];
-                ++x;
-                
-                if(x>=8)
-                {
-                    x=0;
-                }
-                
-                sfx(WAV_PLACE);
+                grid_y=0;
             }
-            else if(rSbtn())
+            
+            sfx(WAV_CHIME);
+        }
+        else if(rBbtn())
+        {
+            ++x;
+            
+            if(x>=8)
             {
-                done=true;
-                int ltrs=0;
-                
-                for(int i=0; i<8; i++)
+                x=0;
+            }
+        }
+        else if(rAbtn())
+        {
+            name[zc_min(x,7)]=complete_grid[spos];
+            ++x;
+            
+            if(x>=8)
+            {
+                x=0;
+            }
+            
+            sfx(WAV_PLACE);
+        }
+        else if(rSbtn())
+        {
+            done=true;
+            int ltrs=0;
+            
+            for(int i=0; i<8; i++)
+            {
+                if(name[i]!=' ' && name[i]!=0)
                 {
-                    if(name[i]!=' ' && name[i]!=0)
-                    {
-                        ++ltrs;
-                    }
-                }
-                
-                if(!ltrs)
-                {
-                    cancel=true;
+                    ++ltrs;
                 }
             }
             
-        }
-        else
-        {
-            if(keypressed())
+            if(!ltrs)
             {
-                int k=readkey();
-                
-                if(isprint(k&255))
-                {
-                    name[zc_min(x,7)]=k&0xFF;
-                    
-                    if(x<8)
-                    {
-                        ++x;
-                    }
-                    
-                    sfx(WAV_PLACE);
-                }
-                else
-                {
-                    switch(k>>8)
-                    {
-                    case KEY_LEFT:
-                        if(x>0)
-                        {
-                            if(x==8)
-                            {
-                                x=6;
-                            }
-                            else
-                            {
-                                --x;
-                            }
-                            
-                            sfx(WAV_CHIME);
-                        }
-                        
-                        break;
-                        
-                    case KEY_RIGHT:
-                        if(x<8 && name[zc_min(x,7)])
-                        {
-                            ++x;
-                            sfx(WAV_CHIME);
-                        }
-                        
-                        break;
-                        
-                    case KEY_ENTER:
-                    case KEY_ENTER_PAD:
-                    {
-                        done=true;
-                        int ltrs=0;
-                        
-                        for(int i=0; i<8; i++)
-                        {
-                            if(name[i]!=' ' && name[i]!=0)
-                            {
-                                ++ltrs;
-                            }
-                        }
-                        
-                        if(!ltrs)
-                        {
-                            cancel=true;
-                        }
-                    }
-                    break;
-                    
-                    case KEY_BACKSPACE:
-                        if(x>0)
-                        {
-                            --x;
-                            
-                            for(int i=zc_min(x,7); i<8; i++)
-                            {
-                                name[i]=name[i+1];
-                            }
-                            
-                            sfx(WAV_OUCH);
-                        }
-                        
-                        break;
-                        
-                    case KEY_DEL:
-                        for(int i=zc_min(x,7); i<8; i++)
-                        {
-                            name[i]=name[i+1];
-                        }
-                        
-                        sfx(WAV_OUCH);
-                        break;
-                        
-                    case KEY_ESC:
-                        x=-1;
-                        done=true;
-                        
-                        while(key[KEY_ESC])
-                        {
-                            /* do nothing */
-                        }
-                        
-                        break;
-                    }
-                }
+                cancel=true;
             }
         }
         
         saves[s].set_name(name);
         blit(scrollbuf,framebuf,0,0,0,0,256,224);
 //    list_saves();
-        list_save(s,56+((NameEntryMode2>0)?0:(pos*24)));
+        list_save(s,56);
         
         int x2=letter_grid_x + grid_x*letter_grid_spacing;
         int y2=letter_grid_y + grid_y*letter_grid_spacing;
@@ -2462,18 +2336,15 @@ static bool register_name()
                         framebuf->line[y+dy][tx+dx]=CSET(9)+1;
                     }
                     
-                    if(NameEntryMode2>0)
+                    if(framebuf->line[y2+dy][x2+dx]==0)
                     {
-                        if(framebuf->line[y2+dy][x2+dx]==0)
-                        {
-                            framebuf->line[y2+dy][x2+dx]=CSET(9)+1;
-                        }
+                        framebuf->line[y2+dy][x2+dx]=CSET(9)+1;
                     }
                 }
             }
         }
         
-        draw_cursor((NameEntryMode2>0)?0:pos,0);
+        draw_cursor(0,0);
         advanceframe(true);
         /*
           if(rBbtn())
@@ -2735,16 +2606,6 @@ static int get_quest_info(zquestheader *header,char *str)
         strcpy(str,"Error: Obsolete version");
         return 0;
         break;
-    }
-    
-    if(header->quest_number > 0)
-    {
-        strcpy(str,
-               (header->quest_number == 4) ? "Error: Not a custom quest! Clear the Second Quest with all 16 Heart Containers to play this." :
-               (header->quest_number == 3) ? "Error: Not a custom quest! Clear the Second Quest to play this." :
-               (header->quest_number > 1) ? "Error: Not a custom quest! Clear the First Quest to play this." :
-               "Error: Not a custom quest! Create a new save file and press Start to play the First Quest.");
-        return 0;
     }
     
     strcpy(str,"Title:\n");

@@ -27,9 +27,6 @@
 #include "zsys.h"
 #include "script_drawing.h"
 
-int isFullScreen();
-int onFullscreen();
-
 #define  MAXMIDIS     ZC_MIDI_COUNT+MAXCUSTOMTUNES
 
 #define MAX_IDLE      72000                                 // 20 minutes
@@ -98,8 +95,6 @@ enum
   void hit_close_button();
   */
 
-bool get_debug();
-void set_debug(bool d);
 
 void Z_eventlog(const char *format, ...);
 void Z_scripterrlog(const char * const format, ...);
@@ -288,11 +283,11 @@ extern float avgfps;
 
 extern bool do_cheat_goto, do_cheat_light;
 extern bool blockmoving;
-extern bool Throttlefps, ClickToFreeze, Paused, Advance, ShowFPS, Showpal, Playing, FrameSkip, TransLayers, disableClickToFreeze;
-extern bool refreshpal,blockpath,__debug,loaded_guys,freeze_guys;
-extern bool loaded_enemies,drawguys,details,debug_enabled,watch;
+extern bool Throttlefps, Paused, Advance, ShowFPS, Showpal, Playing, FrameSkip, TransLayers;
+extern bool refreshpal,blockpath,loaded_guys,freeze_guys;
+extern bool loaded_enemies,drawguys,details,watch;
 extern bool Udown,Ddown,Ldown,Rdown,Adown,Bdown,Sdown,Mdown,LBdown,RBdown,Pdown,Ex1down,Ex2down,Ex3down,Ex4down,AUdown,ADdown,ALdown,ARdown,F12,F11,F5,keyI, keyQ;
-extern bool SystemKeys,NESquit,volkeys,useCD,boughtsomething;
+extern bool SystemKeys,NESquit,boughtsomething;
 extern bool fixed_door, darkroom,naturaldark,BSZ;            //,NEWSUBSCR;
 extern bool hookshot_used, hookshot_frozen, pull_link, add_chainlink;
 extern bool del_chainlink, hs_fix, cheat_superman, gofast, checklink;
@@ -302,7 +297,7 @@ extern bool is_on_conveyor, activated_timed_warp;
 
 extern byte COOLSCROLL;
 
-extern int SnapshotFormat, NameEntryMode;
+extern int SnapshotFormat;
 
 extern int add_asparkle, add_bsparkle;
 

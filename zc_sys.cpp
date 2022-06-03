@@ -25,11 +25,6 @@
 #include "zc_init.h"
 #include "zquest.h"
 #include "init.h"
-
-#ifdef ALLEGRO_DOS
-#include <unistd.h>
-#endif
-
 #include "zdefs.h"
 #include "zelda.h"
 #include "tiles.h"
@@ -256,15 +251,12 @@ void load_game_configs()
     pan_style = get_config_int(cfg_sect,"pan",1);
     // 1 <= zcmusic_bufsz <= 128
     zcmusic_bufsz = vbound(get_config_int(cfg_sect,"zcmusic_bufsz",64),1,128);
-    volkeys = get_config_int(cfg_sect,"volkeys",0)!=0;
     zc_vsync = get_config_int(cfg_sect,"vsync",0);
     Throttlefps = get_config_int(cfg_sect,"throttlefps",1)!=0;
     TransLayers = get_config_int(cfg_sect,"translayers",1)!=0;
     SnapshotFormat = get_config_int(cfg_sect,"snapshot_format",3);
-    NameEntryMode = get_config_int(cfg_sect,"name_entry_mode",0);
     ShowFPS = get_config_int(cfg_sect,"showfps",0)!=0;
     NESquit = get_config_int(cfg_sect,"fastquit",0)!=0;
-    ClickToFreeze = get_config_int(cfg_sect,"clicktofreeze",1)!=0;
     title_version = get_config_int(cfg_sect,"title",2);
     
     //default - scale x2, 640 x 480
@@ -280,12 +272,7 @@ void load_game_configs()
     
     zc_color_depth = (byte) get_config_int(cfg_sect,"color_depth",8);
     
-    //workaround for the 100% CPU bug. -Gleeok
-#ifdef ALLEGRO_MACOSX //IIRC rest(0) was a mac issue fix.
-    frame_rest_suggest = (byte) get_config_int(cfg_sect,"frame_rest_suggest",0);
-#else
     frame_rest_suggest = (byte) get_config_int(cfg_sect,"frame_rest_suggest",1);
-#endif
     frame_rest_suggest = zc_min(2, frame_rest_suggest);
     
     forceExit = (byte) get_config_int(cfg_sect,"force_exit",0);
@@ -305,11 +292,7 @@ void load_game_configs()
 	midi_patch_fix = (byte) get_config_int("zeldadx","midi_patch_fix",0);
 #endif
     
-#ifdef ALLEGRO_MACOSX
-    const char *default_path="../../../";
-#else
     const char *default_path="";
-#endif
     strcpy(qstdir,get_config_string(cfg_sect,qst_dir_name,default_path));
     
     if(strlen(qstdir)==0)
@@ -375,15 +358,12 @@ void save_game_configs()
     set_config_int(cfg_sect,"emusic",emusic_volume);
     set_config_int(cfg_sect,"pan",pan_style);
     set_config_int(cfg_sect,"zcmusic_bufsz",zcmusic_bufsz);
-    set_config_int(cfg_sect,"volkeys",(int)volkeys);
     set_config_int(cfg_sect,"vsync",zc_vsync);
     set_config_int(cfg_sect,"throttlefps", (int)Throttlefps);
     set_config_int(cfg_sect,"translayers",(int)TransLayers);
     set_config_int(cfg_sect,"snapshot_format",SnapshotFormat);
-    set_config_int(cfg_sect,"name_entry_mode",NameEntryMode);
     set_config_int(cfg_sect,"showfps",(int)ShowFPS);
     set_config_int(cfg_sect,"fastquit",(int)NESquit);
-    set_config_int(cfg_sect,"clicktofreeze", (int)ClickToFreeze);
     set_config_int(cfg_sect,"title",title_version);
     
     set_config_int(cfg_sect,"resx",resx);
@@ -2347,14 +2327,14 @@ void draw_lens_under(BITMAP *dest, bool layer)
                 case mfPUSHDINS:
                 case mfPUSHLINS:
                 case mfPUSHRINS:
-                    if(!hints && ((!(get_debug() && key[KEY_N]) && (lensclk&16))
-                                  || ((get_debug() && key[KEY_N]) && (frame&16))))
+                    if(!hints && ((!key[KEY_N] && (lensclk&16))
+                                  || (key[KEY_N] && (frame&16))))
                     {
                         putcombo(dest,x,y,tmpscr->undercombo,tmpscr->undercset);
                     }
                     
-                    if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                            || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                    if((!key[KEY_N] && (lensclk&blink_rate))
+                            || (key[KEY_N] && (frame&blink_rate)))
                     {
                         if(hints)
                         {
@@ -2392,8 +2372,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2414,8 +2394,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem < 0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2435,8 +2415,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2456,8 +2436,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2479,8 +2459,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         tempweapon=wFire;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2506,8 +2486,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2527,8 +2507,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2548,8 +2528,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2569,8 +2549,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2590,8 +2570,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         tempweapon = wLitBomb;
                         
                         //if (tempitem<0) break;
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempweaponx=x;
                             tempweapony=y;
@@ -2611,8 +2591,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         //if (tempitem<0) break;
                         tempweapon = wLitSBomb;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempweaponx=x;
                             tempweapony=y;
@@ -2638,8 +2618,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2659,8 +2639,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2680,8 +2660,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2703,8 +2683,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         tempweapon=itemsbuf[tempitem].wpn3;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2738,8 +2718,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         tempweapon=ewMagic;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2786,8 +2766,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         tempweapon=ewFireball;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2826,8 +2806,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2847,8 +2827,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2868,8 +2848,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2889,8 +2869,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2910,8 +2890,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2931,8 +2911,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || key[KEY_N] && (frame&blink_rate))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2952,8 +2932,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2973,8 +2953,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || key[KEY_N] && (frame&blink_rate))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2994,8 +2974,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -3015,8 +2995,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -3036,8 +3016,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         
                         if(tempitem<0) break;
                         
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&blink_rate))
-                                || ((get_debug() && key[KEY_N]) && (frame&blink_rate)))
+                        if((!key[KEY_N] && (lensclk&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -3081,7 +3061,7 @@ void draw_lens_under(BITMAP *dest, bool layer)
                 default:
                     if(layer && ((checkflag!=mfRAFT && checkflag!=mfRAFT_BRANCH&& checkflag!=mfRAFT_BOUNCE) || get_bit(quest_rules,qr_RAFTLENS)))
                     {
-                        if((!(get_debug() && key[KEY_N]) && (lensclk&1)) || ((get_debug() && key[KEY_N]) && (frame&1)))
+                        if((!key[KEY_N] && (lensclk&1)) || (key[KEY_N] && (frame&1)))
                         {
                             rectfill(dest,x,y,x+15,y+15,WHITE);
                         }
@@ -3139,8 +3119,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
                     int tempitemx=-16;
                     int tempitemy=-16;
                     
-                    if((!(get_debug() && key[KEY_N]) && (lensclk&(blink_rate/4)))
-                            || ((get_debug() && key[KEY_N]) && (frame&(blink_rate/4))))
+                    if((!key[KEY_N] && (lensclk&(blink_rate/4)))
+                            || (key[KEY_N] && (frame&(blink_rate/4))))
                     {
                         tempitemx=tmpscr->stairx;
                         tempitemy=tmpscr->stairy+playing_field_offset;
@@ -3471,133 +3451,6 @@ void updatescr(bool allowwavy)
 
 PALETTE sys_pal;
 
-int onSaveMapPic()
-{
-    BITMAP* mappic = NULL;
-    int mapres2 = 0;
-    char buf[20];
-    int num=0;
-    set_clip_state(temp_buf,1);
-    set_clip_rect(temp_buf,0,0,temp_buf->w, temp_buf->h);
-    
-    do
-    {
-#ifdef ALLEGRO_MACOSX
-        sprintf(buf, "../../../zelda%03d.bmp", ++num);
-#else
-        sprintf(buf, "zelda%03d.bmp", ++num);
-#endif
-    }
-    while(num<999 && exists(buf));
-    
-    //  if(!mappic) {
-    mappic = create_bitmap_ex(8,(256*16)>>mapres2,(176*8)>>mapres2);
-    
-    if(!mappic)
-    {
-        system_pal();
-        jwin_alert("Save Map Picture","Not enough memory.",NULL,NULL,"OK",NULL,13,27,lfont);
-        game_pal();
-        return D_O_K;
-    }
-    
-    //  }
-    
-    int layermap, layerscreen;
-    int x2=0;
-    
-    // draw the map
-    for(int y=0; y<8; y++)
-    {
-        for(int x=0; x<16; x++)
-        {
-            int s = (y<<4) + x;
-            
-            if(!displayOnMap(x, y))
-            {
-                rectfill(temp_buf, 0, 0, 255, 223, WHITE);
-            }
-            else
-            {
-                loadscr(1,currdmap,s,-1,false);
-                putscr(temp_buf, 0, 0, tmpscr+1);
-                
-                for(int k=0; k<4; k++)
-                {
-                    if(k==2)
-                    {
-                        putscrdoors(temp_buf, 0, 0, tmpscr+1);
-                    }
-                    
-                    layermap=TheMaps[currmap*MAPSCRS+s].layermap[k]-1;
-                    
-                    if(layermap>-1)
-                    {
-                        layerscreen=layermap*MAPSCRS+TheMaps[currmap*MAPSCRS+s].layerscreen[k];
-                        
-                        if(TheMaps[currmap*MAPSCRS+s].layeropacity[k]==255)
-                        {
-                            for(int i=0; i<176; i++)
-                            {
-                                overcombo(temp_buf,((i&15)<<4)+x2,(i&0xF0),TheMaps[layerscreen].data[i],TheMaps[layerscreen].cset[i]);
-                            }
-                        }
-                        else
-                        {
-                            for(int i=0; i<176; i++)
-                            {
-                                overcombotranslucent(temp_buf,((i&15)<<4)+x2,(i&0xF0),TheMaps[layerscreen].data[i],TheMaps[layerscreen].cset[i],TheMaps[currmap*MAPSCRS+s].layeropacity[k]);
-                            }
-                        }
-                    }
-                }
-                
-                for(int i=0; i<176; i++)
-                {
-//          if (COMBOTYPE((i&15)<<4,i&0xF0)==cOLD_OVERHEAD)
-                    if(combo_class_buf[COMBOTYPE((i&15)<<4,i&0xF0)].overhead)
-                    {
-                        overcombo(temp_buf,((i&15)<<4)+x2,(i&0xF0),MAPCOMBO((i&15)<<4,i&0xF0),MAPCSET((i&15)<<4,i&0xF0));
-                    }
-                }
-                
-                for(int k=4; k<6; k++)
-                {
-                    layermap=TheMaps[currmap*MAPSCRS+s].layermap[k]-1;
-                    
-                    if(layermap>-1)
-                    {
-                        layerscreen=layermap*MAPSCRS+TheMaps[currmap*MAPSCRS+s].layerscreen[k];
-                        
-                        if(TheMaps[currmap*MAPSCRS+s].layeropacity[k]==255)
-                        {
-                            for(int i=0; i<176; i++)
-                            {
-                                overcombo(temp_buf,((i&15)<<4)+x2,(i&0xF0),TheMaps[layerscreen].data[i],TheMaps[layerscreen].cset[i]);
-                            }
-                        }
-                        else
-                        {
-                            for(int i=0; i<176; i++)
-                            {
-                                overcombotranslucent(temp_buf,((i&15)<<4)+x2,(i&0xF0),TheMaps[layerscreen].data[i],TheMaps[layerscreen].cset[i],TheMaps[currmap*MAPSCRS+s].layeropacity[k]);
-                            }
-                        }
-                    }
-                }
-            }
-            
-            stretch_blit(temp_buf, mappic, 0, 0, 256, 176,
-                         x<<(8-mapres2), (y*176)>>mapres2, 256>>mapres2, 176>>mapres2);
-        }
-        
-    }
-    
-    save_bitmap(buf,mappic,RAMpal);
-    destroy_bitmap(mappic);
-    return D_O_K;
-}
-
 void f_Quit(int type)
 {
     if(type==qQUIT && !Playing)
@@ -3768,12 +3621,6 @@ void syskeys()
     
     poll_joystick();
     
-    if(rMbtn() || (gui_mouse_b() && !mouse_down && ClickToFreeze &&!disableClickToFreeze))
-    {
-        oldtitle_version=title_version;
-        System();
-    }
-    
     mouse_down=gui_mouse_b();
     
     if(ReadKey(KEY_F1))
@@ -3812,21 +3659,11 @@ void syskeys()
     
     if(ReadKey(KEY_F6))    if(!get_bit(quest_rules, qr_NOCONTINUE)) f_Quit(qQUIT);
     
-#ifndef ALLEGRO_MACOSX
     if(ReadKey(KEY_F9))    f_Quit(qRESET);
     
     if(ReadKey(KEY_F10))   f_Quit(qEXIT);
-#else
-    if(ReadKey(KEY_F7))    f_Quit(qRESET);
     
-    if(ReadKey(KEY_F8))   f_Quit(qEXIT);
-#endif
-    if(rF5()&&(Playing && currscr<128 && DMaps[currdmap].flags&dmfVIEWMAP))    onSaveMapPic();
-    
-    if(debug_enabled && ReadKey(KEY_TAB))
-        set_debug(!get_debug());
-        
-    if(get_debug() || cheat>=1)
+    if(cheat>=1)
     {
         if(ReadKey(KEY_ASTERISK) || ReadKey(KEY_H))   game->set_life(game->get_maxlife());
         
@@ -3845,7 +3682,7 @@ void syskeys()
         }
     }
     
-    if(get_debug() || cheat>=2)
+    if(cheat>=2)
     {
         if(rI())
         {
@@ -3854,7 +3691,7 @@ void syskeys()
         }
     }
     
-    if(get_debug() || cheat>=4)
+    if(cheat>=4)
     {
         if(rF11())
         {
@@ -3904,18 +3741,7 @@ void syskeys()
         if(ReadKey(KEY_L))   onLightSwitch();
     }
     
-    if(volkeys)
-    {
-        if(ReadKey(KEY_PGUP)) master_volume(-1,midi_volume+8);
-        
-        if(ReadKey(KEY_PGDN)) master_volume(-1,midi_volume==255?248:midi_volume-8);
-        
-        if(ReadKey(KEY_HOME)) master_volume(digi_volume+8,-1);
-        
-        if(ReadKey(KEY_END))  master_volume(digi_volume==255?248:digi_volume-8,-1);
-    }
-    
-    if(!get_debug() || !SystemKeys)
+    if(!SystemKeys)
         goto bottom;
         
     if(ReadKey(KEY_D))
@@ -4391,12 +4217,6 @@ int onVsync()
     return D_O_K;
 }
 
-int onClickToFreeze()
-{
-    ClickToFreeze = !ClickToFreeze;
-    return D_O_K;
-}
-
 int onFrameSkip()
 {
     FrameSkip = !FrameSkip;
@@ -4412,12 +4232,6 @@ int onTransLayers()
 int onNESquit()
 {
     NESquit = !NESquit;
-    return D_O_K;
-}
-
-int onVolKeys()
-{
-    volkeys = !volkeys;
     return D_O_K;
 }
 
@@ -5173,160 +4987,6 @@ static DIALOG midi_dlg[] =
     { NULL,                 0,    0,    0,    0,   0,       0,       0,       0,          0,             0,       NULL,                           NULL,  NULL }
 };
 
-int onAbout()
-{
-    switch(IS_BETA)
-    {
-    case 1:
-        sprintf(str_s,"%s Beta Build %d",VerStr(ZELDA_VERSION), VERSION_BUILD);
-        break;
-        
-    case -1:
-        sprintf(str_s,"%s Alpha Build %d",VerStr(ZELDA_VERSION), VERSION_BUILD);
-        break;
-        
-    case 0:
-    default:
-        sprintf(str_s,"%s Build %d",VerStr(ZELDA_VERSION), VERSION_BUILD);
-        break;
-    }
-    
-    //  sprintf(str_s,"%s",VerStr(ZELDA_VERSION));
-    about_dlg[0].dp2=lfont;
-    
-    if(is_large)
-        large_dialog(about_dlg);
-        
-    zc_popup_dialog(about_dlg,1);
-    return D_O_K;
-}
-
-int onQuest()
-{
-    char fname[100];
-    strcpy(fname, get_filename(qstpath));
-    quest_dlg[0].dp2=lfont;
-    quest_dlg[1].dp = fname;
-    
-    if(QHeader.quest_number==0)
-        sprintf(str_a,"Custom");
-    else
-        sprintf(str_a,"%d",QHeader.quest_number);
-        
-    sprintf(str_s,"%s",VerStr(QHeader.zelda_version));
-    
-    quest_dlg[11].d1 = quest_dlg[9].d1 = 0;
-    quest_dlg[11].d2 = quest_dlg[9].d2 = 0;
-    
-    if(is_large)
-        large_dialog(quest_dlg);
-        
-    zc_popup_dialog(quest_dlg, 0);
-    return D_O_K;
-}
-
-int onVidMode()
-{
-    int VidMode=gfx_driver->id;
-#ifdef ALLEGRO_DOS
-    
-    switch(VidMode)
-    {
-    case GFX_MODEX:
-        sprintf(str_a,"VGA Mode X");
-        break;
-        
-    case GFX_VESA1:
-        sprintf(str_a,"VESA 1.x");
-        break;
-        
-    case GFX_VESA2B:
-        sprintf(str_a,"VESA2 Banked");
-        break;
-        
-    case GFX_VESA2L:
-        sprintf(str_a,"VESA2 Linear");
-        break;
-        
-    case GFX_VESA3:
-        sprintf(str_a,"VESA3");
-        break;
-        
-    default:
-        sprintf(str_a,"Unknown... ?");
-        break;
-    }
-    
-#elif defined(ALLEGRO_WINDOWS)
-    
-    switch(VidMode)
-    {
-    case GFX_DIRECTX:
-        sprintf(str_a,"DirectX Hardware Accelerated");
-        break;
-    
-    case GFX_DIRECTX_SOFT:
-        sprintf(str_a,"DirectX Software Accelerated");
-        break;
-    
-    case GFX_DIRECTX_SAFE:
-        sprintf(str_a,"DirectX Safe");
-        break;
-    
-    case GFX_DIRECTX_WIN:
-        sprintf(str_a,"DirectX Windowed");
-        break;
-    
-    case GFX_GDI:
-        sprintf(str_a,"GDI");
-        break;
-    
-    default:
-        sprintf(str_a,"Unknown... ?");
-        break;
-    }
-    
-#elif defined(ALLEGRO_MACOSX)
-    
-    switch(VidMode)
-    {
-    case GFX_SAFE:
-        sprintf(str_a,"MacOS X Safe");
-        break;
-    
-    case GFX_QUARTZ_FULLSCREEN:
-        sprintf(str_a,"MacOS X Fullscreen Quartz");
-        break;
-    
-    case GFX_QUARTZ_WINDOW:
-        sprintf(str_a,"MacOS X Windowed Quartz");
-        break;
-    
-    default:
-        sprintf(str_a,"Unknown... ?");
-        break;
-    }
-    
-#elif defined(ALLEGRO_LINUX)
-    
-    switch(VidMode)
-    {
-    case GFX_AUTODETECT_WINDOWED:
-        sprintf(str_a,"Autodetect Windowed");
-        break;
-    
-    default:
-        sprintf(str_a,"Unknown... ?");
-        break;
-    }
-    
-#endif
-    
-    sprintf(str_b,"%dx%d 8-bit",resx,resy);
-    jwin_alert("Video Mode",str_a,str_b,NULL,"OK",NULL,13,27,lfont);
-    return D_O_K;
-}
-
 #define addToHash(c,b,h) if(h->find(c ## key) == h->end()) \
 {(*h)[c ## key]=true;} else {b = false;}
 
@@ -5648,11 +5308,6 @@ int onSound()
     return D_O_K;
 }
 
-int queding(const char *s1,const char *s2,const char *s3)
-{
-    return jwin_alert(ZC_str,s1,s2,s3,"&Yes","&No",'y','n',lfont);
-}
-
 int onQuit()
 {
     if(Playing)
@@ -5661,36 +5316,17 @@ int onQuit()
         
         if(get_bit(quest_rules, qr_NOCONTINUE))
         {
-            if(standalone_mode)
-            {
-                ret=queding("End current game?",
-                            "The continue screen is disabled; the game",
-                            "will be reloaded from the last save.");
-            }
-            else
-            {
-                ret=queding("End current game?",
-                            "The continue screen is disabled. You will",
-                            "be returned to the file select screen.");
-            }
         }
-        else
-            ret=queding("End current game?",NULL,NULL);
-            
-        if(ret==1)
+        
+        Quit=qQUIT;
+        
+        // Trying to evade a door repair charge?
+        if(repaircharge)
         {
-            disableClickToFreeze=false;
-            Quit=qQUIT;
-            
-            // Trying to evade a door repair charge?
-            if(repaircharge)
-            {
-                game->change_drupy(-repaircharge);
-                repaircharge=0;
-            }
-            
-            return D_CLOSE;
+            game->change_drupy(-repaircharge);
+            repaircharge=0;
         }
+
     }
     
     return D_O_K;
@@ -5698,24 +5334,13 @@ int onQuit()
 
 int onReset()
 {
-    if(queding("  Reset system?  ",NULL,NULL)==1)
-    {
-        disableClickToFreeze=false;
-        Quit=qRESET;
-        return D_CLOSE;
-    }
-    
+    Quit=qRESET;
     return D_O_K;
 }
 
 int onExit()
 {
-    if(queding(" Quit Zelda Classic? ",NULL,NULL)==1)
-    {
-        Quit=qEXIT;
-        return D_CLOSE;
-    }
-    
+    Quit=qEXIT;
     return D_O_K;
 }
 
@@ -5732,14 +5357,6 @@ int onTitle_DX()
 int onTitle_25()
 {
     title_version=2;
-    return D_O_K;
-}
-
-int onDebug()
-{
-    if(debug_enabled)
-        set_debug(!get_debug());
-        
     return D_O_K;
 }
 
@@ -5882,28 +5499,6 @@ int onClock()
     return D_O_K;
 }
 
-int onQstPath()
-{
-    char path[2048];
-    
-    chop_path(qstdir);
-    strcpy(path,qstdir);
-    
-    go();
-    
-    if(jwin_dfile_select_ex("Quest File Directory", path, "qst", 2048, -1, -1, lfont))
-    {
-        chop_path(path);
-        fix_filename_case(path);
-        fix_filename_slashes(path);
-        strcpy(qstdir,path);
-        strcpy(qstpath,qstdir);
-    }
-    
-    comeback();
-    return D_O_K;
-}
-
 static DIALOG cheat_dlg[] =
 {
     /* (dialog proc)       (x)   (y)   (w)   (h)   (fg)     (bg)     (key)    (flags)    (d1)      (d2)     (dp) */
@@ -5916,7 +5511,7 @@ static DIALOG cheat_dlg[] =
 
 int onCheat()
 {
-    if(!zcheats.flags && !get_debug())
+    if(!zcheats.flags)
         return D_O_K;
         
     str_a[0]=0;
@@ -6044,13 +5639,8 @@ static MENU game_menu[] =
     { (char *)"L&oad Quest...",            onCustomGame,             NULL,                      0, NULL },
     { (char *)"&End Game\tF6",             onQuit,                   NULL,                      0, NULL },
     { (char *)"",                          NULL,                     NULL,                      0, NULL },
-#ifndef ALLEGRO_MACOSX
     { (char *)"&Reset\tF9",                onReset,                  NULL,                      0, NULL },
     { (char *)"&Quit\tF10",                onExit,                   NULL,                      0, NULL },
-#else
-    { (char *)"&Reset\tF7",                onReset,                  NULL,                      0, NULL },
-    { (char *)"&Quit\tF8",                onExit,                   NULL,                      0, NULL },
-#endif
     { NULL,                                NULL,                     NULL,                      0, NULL }
 };
 
@@ -6079,44 +5669,27 @@ static MENU controls_menu[] =
     { NULL,                                 NULL,                    NULL,                      0, NULL }
 };
 
-static MENU name_entry_mode_menu[] =
-{
-    { (char *)"&Keyboard",                  onKeyboardEntry,         NULL,                      0, NULL },
-    { (char *)"&Letter Grid",               onLetterGridEntry,       NULL,                      0, NULL },
-    { (char *)"&Extended Letter Grid",      onExtLetterGridEntry,    NULL,                      0, NULL },
-    { NULL,                                 NULL,                    NULL,                      0, NULL }
-};
-
 static MENU settings_menu[] =
 {
     { (char *)"C&ontrols",                  NULL,                    controls_menu,             0, NULL },
     { (char *)"&Sound...",                  onSound,                 NULL,                      0, NULL },
     { (char *)"&Title Screen",              NULL,                    title_menu,                0, NULL },
-    { (char *)"Name &Entry Mode",           NULL,                    name_entry_mode_menu,      0, NULL },
     { (char *)"",                           NULL,                    NULL,                      0, NULL },
     { (char *)"&Cap FPS\tF1",               onVsync,                 NULL,                      0, NULL },
     { (char *)"Show &FPS\tF2",              onShowFPS,               NULL,                      0, NULL },
     { (char *)"Show Trans. &Layers",        onTransLayers,           NULL,                      0, NULL },
     { (char *)"Up+A+B To &Quit",            onNESquit,               NULL,                      0, NULL },
-    { (char *)"Click to Freeze",            onClickToFreeze,         NULL,                      0, NULL },
-    { (char *)"Volume &Keys",               onVolKeys,               NULL,                      0, NULL },
     { (char *)"Cont. &Heart Beep",          onHeartBeep,             NULL,                      0, NULL },
     { (char *)"Sa&ve Indicator",            onSaveIndicator,         NULL,                      0, NULL },
     { (char *)"",                           NULL,                    NULL,                      0, NULL },
     { (char *)"S&napshot Format",           NULL,                    snapshot_format_menu,      0, NULL },
     { (char *)"",                           NULL,                    NULL,                      0, NULL },
-    { (char *)"Debu&g",                     onDebug,                 NULL,                      0, NULL },
     { NULL,                                 NULL,                    NULL,                      0, NULL }
 };
 
 static MENU misc_menu[] =
 {
-    { (char *)"&About...",                  onAbout,                 NULL,                      0, NULL },
-    { (char *)"&Fullscreen",                onFullscreenMenu,        NULL,                      0, NULL },
-    { (char *)"&Video Mode...",             onVidMode,               NULL,                      0, NULL },
     { (char *)"",                           NULL,                    NULL,                      0, NULL },
-    { (char *)"&Quest Info...",             onQuest,                 NULL,                      0, NULL },
-    { (char *)"Quest &Directory...",        onQstPath,               NULL,                      0, NULL },
     { (char *)"",                           NULL,                    NULL,                      0, NULL },
     { NULL,                                 NULL,                    NULL,                      0, NULL }
 };
@@ -6191,37 +5764,6 @@ MENU the_menu2[] =
     { NULL,                                 NULL,                    NULL,                      0, NULL }
 };
 
-int onKeyboardEntry()
-{
-    NameEntryMode=0;
-    return D_O_K;
-}
-
-int onLetterGridEntry()
-{
-    NameEntryMode=1;
-    return D_O_K;
-}
-
-int onExtLetterGridEntry()
-{
-    NameEntryMode=2;
-    return D_O_K;
-}
-
-int onFullscreenMenu()
-{
-    onFullscreen();
-    misc_menu[2].flags =(isFullScreen()==1)?D_SELECTED:0;
-    return D_O_K;
-}
-
-void fix_menu()
-{
-    if(!debug_enabled)
-        settings_menu[15].text = NULL;
-}
-
 static DIALOG system_dlg[] =
 {
     /* (dialog proc)     (x)   (y)   (w)   (h)   (fg)  (bg)  (key)    (flags)  (d1)      (d2)     (dp) */
@@ -6229,14 +5771,8 @@ static DIALOG system_dlg[] =
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F1,   0, (void *) onVsync, NULL,  NULL },
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F2,   0, (void *) onShowFPS, NULL,  NULL },
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F6,   0, (void *) onQuit, NULL,  NULL },
-#ifndef ALLEGRO_MACOSX
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F9,   0, (void *) onReset, NULL,  NULL },
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F10,  0, (void *) onExit, NULL,  NULL },
-#else
-    { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F7,   0, (void *) onReset, NULL,  NULL },
-    { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F8,   0, (void *) onExit, NULL,  NULL },
-#endif
-    { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_TAB,  0, (void *) onDebug, NULL,  NULL },
     { d_timer_proc,      0,    0,    0,    0,    0,    0,    0,       0,       0,        0,       NULL,             NULL, NULL },
     { NULL,              0,    0,    0,    0,    0,    0,    0,       0,       0,        0,       NULL,                           NULL,  NULL }
 };
@@ -6248,14 +5784,8 @@ static DIALOG system_dlg2[] =
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F1,   0, (void *) onVsync, NULL,  NULL },
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F2,   0, (void *) onShowFPS, NULL,  NULL },
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F6,   0, (void *) onQuit, NULL,  NULL },
-#ifndef ALLEGRO_MACOSX
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F9,   0, (void *) onReset, NULL,  NULL },
     { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F10,  0, (void *) onExit, NULL,  NULL },
-#else
-    { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F7,   0, (void *) onReset, NULL,  NULL },
-    { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_F8,   0, (void *) onExit, NULL,  NULL },
-#endif
-    { d_keyboard_proc,   0,    0,    0,    0,    0,    0,    0,       0,       KEY_TAB,  0, (void *) onDebug, NULL,  NULL },
     { d_timer_proc,      0,    0,    0,    0,    0,    0,    0,       0,       0,        0,       NULL,             NULL, NULL },
     { NULL,                 0,    0,    0,    0,   0,       0,       0,       0,          0,             0,       NULL,                           NULL,  NULL }
 };
@@ -6979,200 +6509,6 @@ void music_stop()
     stop_midi();
     midi_paused=false;
     currmidi=0;
-}
-
-void System()
-{
-    mouse_down=gui_mouse_b();
-    music_pause();
-    pause_all_sfx();
-    
-    system_pal();
-    //  FONT *oldfont=font;
-    //  font=tfont;
-    
-    misc_menu[2].flags =(isFullScreen()==1)?D_SELECTED:0;
-    
-    game_menu[2].flags = getsaveslot() > -1 ? 0 : D_DISABLED;
-    game_menu[3].flags =
-        misc_menu[5].flags = Playing ? 0 : D_DISABLED;
-    misc_menu[7].flags = !Playing ? 0 : D_DISABLED;
-    
-    clear_keybuf();
-    show_mouse(screen);
-    
-    DIALOG_PLAYER *p;
-    
-    if(!Playing || (!zcheats.flags && !get_debug()))
-    {
-        p = init_dialog(system_dlg2,-1);
-    }
-    else
-    {
-        p = init_dialog(system_dlg,-1);
-    }
-    
-    // drop the menu on startup if menu button pressed
-    if(joybtn(Mbtn)||key[KEY_ESC])
-        simulate_keypress(KEY_G << 8);
-        
-    do
-    {
-        rest(17);
-        
-        if(mouse_down && !gui_mouse_b())
-            mouse_down=0;
-            
-        title_menu[0].flags = (title_version==0) ? D_SELECTED : 0;
-        title_menu[1].flags = (title_version==1) ? D_SELECTED : 0;
-        title_menu[2].flags = (title_version==2) ? D_SELECTED : 0;
-        
-        settings_menu[5].flags = Throttlefps?D_SELECTED:0;
-        settings_menu[6].flags = ShowFPS?D_SELECTED:0;
-        settings_menu[7].flags = TransLayers?D_SELECTED:0;
-        settings_menu[8].flags = NESquit?D_SELECTED:0;
-        settings_menu[9].flags = ClickToFreeze?D_SELECTED:0;
-        settings_menu[10].flags = volkeys?D_SELECTED:0;
-        
-        name_entry_mode_menu[0].flags = (NameEntryMode==0)?D_SELECTED:0;
-        name_entry_mode_menu[1].flags = (NameEntryMode==1)?D_SELECTED:0;
-        name_entry_mode_menu[2].flags = (NameEntryMode==2)?D_SELECTED:0;
-        
-        /*
-          if(!Playing || (!zcheats.flags && !debug))
-          {
-          cheat_menu[0].flags = D_DISABLED;
-          cheat_menu[1].text  = NULL;
-          }
-          else */
-        {
-            cheat_menu[0].flags = 0;
-            refill_menu[4].flags = get_bit(quest_rules, qr_TRUEARROWS) ? 0 : D_DISABLED;
-            cheat_menu[1].text  = (cheat >= 1) || get_debug() ? bar_str : NULL;
-            cheat_menu[3].text  = (cheat >= 2) || get_debug() ? bar_str : NULL;
-            cheat_menu[8].text  = (cheat >= 3) || get_debug() ? bar_str : NULL;
-            cheat_menu[10].text = (cheat >= 4) || get_debug() ? bar_str : NULL;
-            cheat_menu[4].flags = getClock() ? D_SELECTED : 0;
-            cheat_menu[11].flags = toogam ? D_SELECTED : 0;
-            cheat_menu[12].flags = gofast ? D_SELECTED : 0;
-            
-            show_menu[0].flags = show_layer_0 ? D_SELECTED : 0;
-            show_menu[1].flags = show_layer_1 ? D_SELECTED : 0;
-            show_menu[2].flags = show_layer_2 ? D_SELECTED : 0;
-            show_menu[3].flags = show_layer_3 ? D_SELECTED : 0;
-            show_menu[4].flags = show_layer_4 ? D_SELECTED : 0;
-            show_menu[5].flags = show_layer_5 ? D_SELECTED : 0;
-            show_menu[6].flags = show_layer_6 ? D_SELECTED : 0;
-            show_menu[7].flags = show_layer_over ? D_SELECTED : 0;
-            show_menu[8].flags = show_layer_push ? D_SELECTED : 0;
-            show_menu[9].flags = show_sprites ? D_SELECTED : 0;
-            show_menu[10].flags = show_ffcs ? D_SELECTED : 0;
-            show_menu[12].flags = show_walkflags ? D_SELECTED : 0;
-            show_menu[13].flags = show_ff_scripts ? D_SELECTED : 0;
-            show_menu[14].flags = show_hitboxes ? D_SELECTED : 0;
-        }
-        
-        settings_menu[11].flags = heart_beep ? D_SELECTED : 0;
-        settings_menu[12].flags = use_save_indicator ? D_SELECTED : 0;
-        reset_snapshot_format_menu();
-        snapshot_format_menu[SnapshotFormat].flags = D_SELECTED;
-        
-        if(debug_enabled)
-        {
-            settings_menu[16].flags = get_debug() ? D_SELECTED : 0;
-        }
-        
-        if(gui_mouse_b() && !mouse_down)
-            break;
-            
-        // press menu to drop the menu
-        if(rMbtn())
-            simulate_keypress(KEY_G << 8);
-    }
-    while(update_dialog(p));
-    
-    //  font=oldfont;
-    mouse_down=gui_mouse_b();
-    shutdown_dialog(p);
-    show_mouse(NULL);
-    
-    if(Quit)
-    {
-        kill_sfx();
-        music_stop();
-        clear_to_color(screen,BLACK);
-    }
-    else
-    {
-        game_pal();
-        music_resume();
-        resume_all_sfx();
-        
-        if(rc)
-            ringcolor(false);
-    }
-    
-    eat_buttons();
-    
-    rc=false;
-    clear_keybuf();
-    //  text_mode(0);
-}
-
-void fix_dialog(DIALOG *d)
-{
-    for(; d->proc != NULL; d++)
-    {
-        d->x += scrx;
-        d->y += scry;
-    }
-}
-
-void fix_dialogs()
-{
-    /*
-      int x = scrx-(sbig?160:0);
-      int y = scry-(sbig?120:0);
-      if(x>0) x+=3;
-      if(y>0) y+=3;
-      if(x<0) x=0;
-      if(y<0) y=0;
-    
-      system_dlg[0].x = x;
-      system_dlg[0].y = y;
-      system_dlg2[0].x = x;
-      system_dlg2[0].y = y;
-    */
-    
-    jwin_center_dialog(about_dlg);
-    jwin_center_dialog(btn_dlg);
-    jwin_center_dialog(exbtn_dlg);
-    jwin_center_dialog(cheat_dlg);
-    jwin_center_dialog(credits_dlg);
-    jwin_center_dialog(gamemode_dlg);
-    jwin_center_dialog(getnum_dlg);
-    jwin_center_dialog(goto_dlg);
-    center_zc_init_dialog();
-    jwin_center_dialog(key_dlg);
-    jwin_center_dialog(keydir_dlg);
-    jwin_center_dialog(midi_dlg);
-    jwin_center_dialog(quest_dlg);
-    jwin_center_dialog(scrsaver_dlg);
-    jwin_center_dialog(sound_dlg);
-    jwin_center_dialog(triforce_dlg);
-    
-    digi_dp[1] += scrx;
-    digi_dp[2] += scry;
-    midi_dp[1] += scrx;
-    midi_dp[2] += scry;
-    pan_dp[1]  += scrx;
-    pan_dp[2]  += scry;
-    emus_dp[1]  += scrx;
-    emus_dp[2]  += scry;
-    buf_dp[1]  += scrx;
-    buf_dp[2]  += scry;
-    sfx_dp[1]  += scrx;
-    sfx_dp[2]  += scry;
 }
 
 /*****************************/
