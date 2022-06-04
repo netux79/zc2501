@@ -13,10 +13,6 @@
 #define _ZC_SYS_H_
 
 #include "zdefs.h"
-extern MENU the_menu[];
-
-void large_dialog(DIALOG *d);
-void large_dialog(DIALOG *d, float RESIZE_AMT);
 
 bool game_vid_mode(int mode,int wait);
 int Z_init_timers();
@@ -40,9 +36,6 @@ int  onSave();
 int  onQuit();
 int  onReset();
 int  onExit();
-
-int onCheatBombs();
-int onCheatArrows();
 
 int  next_press_key();
 int  next_press_btn();
@@ -119,8 +112,6 @@ bool DrunkrLbtn();
 bool DrunkrRbtn();
 bool DrunkrPbtn();
 
-int after_time();
-
 enum {bosCIRCLE=0, bosOVAL, bosTRIANGLE, bosSMAS, bosMAX};
 
 void go();
@@ -183,7 +174,6 @@ void stop_sfx(int index);
 void stop_item_sfx(int family);
 void kill_sfx();
 int  pan(int x);
-int  onSetSnapshotFormat();
 void zc_putpixel(int layer, int x, int y, int cset, int color, int timer);
 int onKeyboardEntry();
 int onLetterGridEntry();

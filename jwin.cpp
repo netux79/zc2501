@@ -3439,7 +3439,6 @@ int jwin_alert3(const char *title, const char *s1, const char *s2, const char *s
     
     if(is_large)
     {
-        large_dialog(alert_dialog);
         alert_dialog[0].d1 = 0;
     }
     
@@ -3542,7 +3541,6 @@ static int droplist(DIALOG *d)
     
     /*if (is_large)
     {
-      large_dialog(droplist_dlg);
     alert_dialog[0].d1 = 0;
     }*/
     if(popup_zqdialog(droplist_dlg,1)==1)

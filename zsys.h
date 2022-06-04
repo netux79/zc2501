@@ -25,7 +25,6 @@
 extern int jwin_pal[jcMAX];
 
 extern bool is_large;
-extern void large_dialog(DIALOG *d);
 
 extern volatile int dclick_status, dclick_time;
 
@@ -164,9 +163,6 @@ void textprintf_shadowed_right_plus_ex(BITMAP *bmp, const FONT *f, int x, int y,
 void textprintf_shadowed_x_ex(BITMAP *bmp, const FONT *f, int x, int y, int color, int shadow, int bg, const char *format, ...);
 void textprintf_shadowed_centre_x_ex(BITMAP *bmp, const FONT *f, int x, int y, int color, int shadow, int bg, const char *format, ...);
 void textprintf_shadowed_right_x_ex(BITMAP *bmp, const FONT *f, int x, int y, int color, int shadow, int bg, const char *format, ...);
-
-void copy_dialog(DIALOG **to, DIALOG *from);
-void free_dialog(DIALOG **dlg);
 
 void safe_rect(BITMAP *bmp, int x1, int y1, int x2, int y2, int color);
 

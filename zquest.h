@@ -232,8 +232,6 @@ bool bad_version(int ver);
 fix LinkModifiedX();
 fix LinkModifiedY();
 
-extern MENU colors_menu[];
-
 void rebuild_trans_table();
 void rebuild_string_list();
 
@@ -764,13 +762,11 @@ int onTriPieces();
 int d_maptile_proc(int msg,DIALOG *d,int c);
 int editdmapmaps(int index);
 int d_hexedit_proc(int msg,DIALOG *d,int c);
-int xtoi(char *hexstr);
 void drawgrid(BITMAP *dest,int x,int y,int grid,int fg,int bg,int div);
 void drawgrid(BITMAP *dest,int x,int y,int w, int h, int tw, int th, int *grid,int fg,int bg,int div);
 void drawgrid_s(BITMAP *dest,int x,int y,int grid,int fg,int bg,int div);
 void drawdmap(int dmap);
 int d_dmaplist_proc(int msg,DIALOG *d,int c);
-int d_dropdmaplist_proc(int msg,DIALOG *d,int c);
 int d_dropdmaptypelist_proc(int msg,DIALOG *d,int c);
 int d_grid_proc(int msg,DIALOG *d,int c);
 void drawxmap(int map,int xoff,bool large);
@@ -996,8 +992,6 @@ void edit_cycles(int level);
 void draw_cset_proc(DIALOG *d);
 int d_cset_proc(int msg,DIALOG *d,int c);
 
-int d_dummy_proc(int msg,DIALOG *d,int c);
-
 //byte mainpal_csets[30]    = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14, 11,11,12,12,12,11, 10,10,10,12,10,10,10,10,9 };
 //byte levelpal_csets[26]   = { 2,3,4,9,2,3,4,2,3,4, 2, 3, 4,       15,15,15,15, 7,7,7, 8,8,8, 0,0,0 };
 //byte levelpal2_csets[26]  = { 2,3,4,9,2,0,1,2,3,4, 5, 6, 7,       15,15,15,15, 8,  9,9,9,9,9,9,9,9 };
@@ -1029,8 +1023,6 @@ void cycle_palette();
 /******  Help  ******/
 /********************/
 
-void doHelp(int bg,int fg);
-int onHelp();
 int edit_layers(mapscr* tempscr);
 void autolayer(mapscr* tempscr, int layer, int al[6][3]);
 int findblankcombo();

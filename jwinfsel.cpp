@@ -896,7 +896,6 @@ void enlarge_file_selector(int width, int height)
     
     if(is_large)
     {
-        large_dialog(file_selector);
         int bottom =
 #ifndef HAVE_DIR_LIST
             file_selector[FS_OK].y;

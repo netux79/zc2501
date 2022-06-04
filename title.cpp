@@ -2701,9 +2701,6 @@ int custom_game(int file)
     
     clear_keybuf();
     
-    if(is_large)
-        large_dialog(gamemode_dlg);
-        
     while((ret=zc_popup_dialog(gamemode_dlg,1))==1)
     {
         scare_mouse();

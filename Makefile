@@ -63,7 +63,7 @@ gui.o: gui.cpp colors.h gamedata.h gui.h items.h jwin.h jwinfsel.h pal.h qst.h s
 guys.o: guys.cpp colors.h defdata.h ffscript.h gamedata.h guys.h items.h jwin.h jwinfsel.h link.h maps.h pal.h qst.h sfx.h sprite.h subscr.h tab_ctl.h tiles.h weapons.h zc_alleg.h zc_custom.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c guys.cpp -o guys.o $(SFLAG)
 init.o: init.cpp gamedata.h gui.h init.h jwin.h sfx.h tab_ctl.h zc_alleg.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
-	$(CC) $(CFLAG) -c init.cpp -o init.o $(SFLAG)
+	$(CC) $(OPTS) $(CFLAG) -c init.cpp -o init.o $(SFLAG)
 items.o: items.cpp gamedata.h items.h jwin.h maps.h sfx.h sprite.h tab_ctl.h zc_alleg.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c items.cpp -o items.o $(SFLAG)
 jmenu.o: jmenu.cpp gamedata.h jwin.h sfx.h tab_ctl.h zc_alleg.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h

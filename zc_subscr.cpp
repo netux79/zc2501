@@ -28,8 +28,6 @@ extern int directItem;
 extern int directItemA;
 extern int directItemB;
 
-//DIALOG *sso_properties_dlg;
-
 void put_active_subscr(miscQdata *misc, int y, int pos)
 {
     //Don't call Sitems.animate() - that gets called somewhere else, somehow. -L

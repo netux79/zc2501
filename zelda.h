@@ -91,7 +91,6 @@ enum
   void go();
   void comeback();
   void waitvsync(bool fast);
-  int  after_time();
   void hit_close_button();
   */
 

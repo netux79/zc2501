@@ -132,17 +132,6 @@ void throttleFPS()
     logic_counter = 0;
 }
 
-int onHelp()
-{
-    //  restore_mouse();
-    //  doHelp(vc(15),vc(0));
-    return D_O_K;
-}
-int d_dropdmaplist_proc(int ,DIALOG *,int)
-{
-    return D_O_K;
-}
-
 static char dmap_str_buf[37];
 int dmap_list_size=MAXDMAPS;
 bool dmap_list_zero=true;
@@ -2411,8 +2400,6 @@ bool no_subscreen()
 /********** Main **********/
 /**************************/
 
-void PopulateInitDialog();
-
 bool is_zquest()
 {
     return false;
@@ -2544,8 +2531,6 @@ int main(int argc, char* argv[])
     }
     // Before anything else, let's register our custom trace handler:
     register_trace_handler(zc_trace_handler);
-    
-    PopulateInitDialog();
     
     memrequested += 4096;
     Z_message("Allocating quest path buffers (%s)...", byte_conversion2(4096,memrequested,-1,-1));
@@ -3194,20 +3179,6 @@ int main(int argc, char* argv[])
     game = new gamedata;
     game->Clear();
     
-#ifdef _WIN32
-    
-    if(use_win32_proc != FALSE)
-    {
-        al_trace("Config file warning: \"zc_win_proc_fix\" enabled switch found. This can cause crashes on some computers.\n");
-        
-        if(win32data.zcSetCustomCallbackProc(win_get_window()) != 0)
-        {
-            use_win32_proc = FALSE;
-        }
-    }
-    
-#endif
-    
     while(Quit!=qEXIT)
     {
         // this is here to continually fix the keyboard repeat
@@ -3221,14 +3192,6 @@ int main(int argc, char* argv[])
         
         while(!Quit)
         {
-#ifdef _WIN32
-        
-            if(use_win32_proc != FALSE)
-            {
-                win32data.Update(0);
-            }
-            
-#endif
             game_loop();
             advanceframe(true);
         }
