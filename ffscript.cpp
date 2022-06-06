@@ -2338,7 +2338,7 @@ long32 get_register(const long32 arg)
         break;
         
     case GAMESTANDALONE:
-        ret=standalone_mode?10000:0;
+        ret=0;
         break;
         
     case GAMEGUYCOUNT:

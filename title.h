@@ -12,11 +12,8 @@
 #ifndef _ZC_TITLE_H_
 #define _ZC_TITLE_H_
 
-extern DIALOG gamemode_dlg[];
-
 int  load_savedgames();
 int  save_savedgames();
-int custom_game(int file);
 int getsaveslot();
 void load_game_icon(gamedata *g, bool forceDefault, int index);
 void load_game_icon_to_buffer(bool forceDefault, int index);

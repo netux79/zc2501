@@ -50,7 +50,6 @@ int d_stringloader(int msg,DIALOG *d,int c);
 extern FONT *lfont;
 extern LinkClass Link;
 extern sprite_list  guys, items, Ewpns, Lwpns, Sitems, chainlinks, decorations, particles;
-extern int loadlast;
 byte disable_direct_updating;
 byte use_dwm_flush;
 byte use_save_indicator;
@@ -134,7 +133,6 @@ void load_game_configs()
     //screen_scale = get_config_int(cfg_sect,"screen_scale",2);
     
     scanlines = get_config_int(cfg_sect,"scanlines",0)!=0;
-    loadlast = get_config_int(cfg_sect,"load_last",0);
     fullscreen = get_config_int(cfg_sect,"fullscreen",1);
     disable_triplebuffer = (byte) get_config_int(cfg_sect,"doublebuffer",0);
     can_triplebuffer_in_windowed_mode = (byte) get_config_int(cfg_sect,"triplebuffer",0);
@@ -145,25 +143,6 @@ void load_game_configs()
     frame_rest_suggest = zc_min(2, frame_rest_suggest);
     
     forceExit = (byte) get_config_int(cfg_sect,"force_exit",0);
-    
-    const char *default_path="";
-    strcpy(qstdir,get_config_string(cfg_sect,qst_dir_name,default_path));
-    
-    if(strlen(qstdir)==0)
-    {
-        if(getcwd(qstdir,2048))
-        {
-            fix_filename_case(qstdir);
-            fix_filename_slashes(qstdir);
-            put_backslash(qstdir);
-        }
-    }
-    else
-    {
-        chop_path(qstdir);
-    }
-    
-    strcpy(qstpath,qstdir); //qstpath is the local (for this run of ZC) quest path, qstdir is the universal quest dir.
 	ss_enable = get_config_int(cfg_sect,"ss_enable",1) ? 1 : 0;
     ss_after = vbound(get_config_int(cfg_sect,"ss_after",14), 0, 14);
     ss_speed = vbound(get_config_int(cfg_sect,"ss_speed",2), 0, 6);
@@ -229,9 +208,6 @@ void save_game_configs()
     //set_config_int(cfg_sect,"sbig2",sbig2);
     
     set_config_int(cfg_sect,"scanlines",scanlines);
-    set_config_int(cfg_sect,"load_last",loadlast);
-    chop_path(qstdir);
-    set_config_string(cfg_sect,qst_dir_name,qstdir);
     set_config_int(cfg_sect,"ss_enable",ss_enable);
     set_config_int(cfg_sect,"ss_after",ss_after);
     set_config_int(cfg_sect,"ss_speed",ss_speed);
@@ -1715,9 +1691,7 @@ bool has_item(int item_type, int it)                        //does Link possess 
         //it=(1<<(it-1));
         /*if (item_type>=itype_max)
         {
-          system_pal();
-          jwin_alert("Error","has_item exception",NULL,NULL,"O&K",NULL,'k',0,lfont);
-          game_pal();
+          Z_error("Error","has_item exception",NULL,NULL,"O&K",NULL,'k',0,lfont);
         
           return false;
         }*/
@@ -5030,7 +5004,7 @@ bool try_zcmusic(char *filename, int track, int midi)
     if(newzcmusic==NULL)
     {
         char musicpath[2048];
-        replace_filename(musicpath, qstpath, filename, 2048);
+        replace_filename(musicpath, quest_path, filename, 2048);
         newzcmusic=(ZCMUSIC*)zcmusic_load_file(musicpath);
     }
     
@@ -5136,7 +5110,7 @@ void play_DmapMusic()
             if(zcmusic==NULL)
             {
                 char musicpath[2048];
-                replace_filename(musicpath, qstpath, DMaps[currdmap].tmusic, 2048);
+                replace_filename(musicpath, quest_path, DMaps[currdmap].tmusic, 2048);
                 zcmusic=(ZCMUSIC*)zcmusic_load_file(musicpath);
             }
             

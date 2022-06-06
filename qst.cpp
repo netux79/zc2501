@@ -814,7 +814,7 @@ PACKFILE *open_quest_template(zquestheader *Header, char *deletefilename, bool v
     {
         if(!valid_zqt(f))
         {
-            jwin_alert("Error","Invalid Quest Template",NULL,NULL,"O&K",NULL,'k',0,lfont);
+            Z_message("Error - Invalid Quest Template: %s", filename);
             pack_fclose(f);
             
             //setPackfilePassword(NULL);

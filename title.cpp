@@ -38,11 +38,7 @@
 #define snprintf _snprintf
 #endif
 
-extern int loadlast;
 extern int skipcont;
-extern int skipicon;
-
-bool load_custom_game(int file);
 
 struct savedicon
 {
@@ -53,8 +49,6 @@ struct savedicon
 };
 
 savedicon iconbuffer[15];
-
-static bool chosecustomquest = false;
 
 /********************************/
 /*****   NES title screen   *****/
@@ -796,7 +790,7 @@ static void v25_titlescreen()
 // first the game saving & loading system
 
 static const char *SAVE_HEADER = "Zelda Classic Save File";
-extern char *SAVE_FILE;
+static char SAVE_FILE[1048] = {'\0'};
 
 int readsaves(gamedata *savedata, PACKFILE *f)
 {
@@ -846,31 +840,6 @@ int readsaves(gamedata *savedata, PACKFILE *f)
     if(!p_igetw(&save_count,f,true))
     {
         return 5;
-    }
-    
-    // Excess saves would get deleted, so...
-    if(standalone_mode && save_count>1)
-    {
-        system_pal();
-        jwin_alert("Invalid save file",
-                   "This save file cannot be",
-                   "used in standalone mode.",
-                   "",
-                   "OK",NULL,'o',0,lfont);
-        exit(0);
-    }
-    else if(!standalone_mode && save_count==1)
-    {
-        system_pal();
-        
-        if(jwin_alert3("Standalone save file",
-                       "This save file was created in standalone mode.",
-                       "If you continue, you will no longer be able",
-                       "to use it in standalone mode. Continue anyway?",
-                       "No","Yes",NULL, 'n','y', 0, lfont)!=2)
-        {
-            exit(0);
-        }
     }
     
     for(int i=0; i<save_count; i++)
@@ -1172,35 +1141,13 @@ int readsaves(gamedata *savedata, PACKFILE *f)
             return 39;
         }
         
-        if(standalone_mode && strcmp(savedata[i].qstpath, standalone_quest)!=0)
-        {
-            system_pal();
-            jwin_alert("Invalid save file",
-                       "This save file is for",
-                       "a different quest.",
-                       "",
-                       "OK",NULL,'o',0,lfont);
-            exit(0);
-        }
-        
         // Convert path separators so save files work across platforms (hopefully)
         for(int j=0; j<qstpath_len; j++)
         {
-#ifdef _ALLEGRO_WINDOWS
-        
-            if(savedata[i].qstpath[j]=='/')
-            {
-                savedata[i].qstpath[j]='\\';
-            }
-            
-#else
-            
             if(savedata[i].qstpath[j]=='\\')
             {
                 savedata[i].qstpath[j]='/';
             }
-            
-#endif
         }
         
         savedata[i].qstpath[qstpath_len]=0;
@@ -1380,31 +1327,9 @@ int readsaves(gamedata *savedata, PACKFILE *f)
     return 0;
 }
 
-void set_up_standalone_save()
-{
-    char *fn=get_filename(standalone_quest);
-    saves[0].set_name(fn);
-    
-    qstpath=(char*)malloc(2048);
-    strncpy(qstpath, standalone_quest, 2047);
-    qstpath[2047]='\0';
-    chosecustomquest=true;
-    load_custom_game(0);
-    
-    // Why does the continue screen need set when
-    // everything else gets set automatically?
-    saves[0].set_continue_dmap(0);
-    saves[0].set_continue_scrn(0xFF);
-    saves[0].set_hasplayed(false);
-    
-    load_game_icon_to_buffer(false, 0);
-    load_game_icon(saves, true, 0);
-}
-
 // call once at startup
 int load_savedgames()
 {
-    char *fname = SAVE_FILE;
     char *iname = (char *)malloc(2048);
     int ret;
     PACKFILE *f=NULL;
@@ -1412,6 +1337,9 @@ int load_savedgames()
     char tmpfilename[32];
     temp_name(tmpfilename);
 //  const char *passwd = datapwd;
+
+    /* Calculate the savefile name based on the quest filename */
+    replace_extension(SAVE_FILE, quest_path, "sav", sizeof(SAVE_FILE));
 
     if(saves == NULL)
     {
@@ -1422,12 +1350,12 @@ int load_savedgames()
     }
     
     // see if it's there
-    if(!exists(fname))
+    if(!exists(SAVE_FILE))
     {
         goto newdata;
     }
     
-    if(file_size_ex_password(fname, "") == 0)
+    if(file_size_ex_password(SAVE_FILE, "") == 0)
     {
         if(errno==0) // No error, file's empty
         {
@@ -1440,17 +1368,15 @@ int load_savedgames()
     }
     
     // decode to temp file
-    ret = decode_file_007(fname, tmpfilename, SAVE_HEADER, ENC_METHOD_MAX-1, strstr(fname, ".dat#")!=NULL, "");
+    ret = decode_file_007(SAVE_FILE, tmpfilename, SAVE_HEADER, ENC_METHOD_MAX-1, strstr(SAVE_FILE, ".dat#")!=NULL, "");
     
     if(ret)
     {
         goto cantopen;
     }
     
-    fname = tmpfilename;
-    
     // load the games
-    f = pack_fopen_password(fname, F_READ_PACKED, "");
+    f = pack_fopen_password(tmpfilename, F_READ_PACKED, "");
     
     if(!f)
         goto cantopen;
@@ -1490,28 +1416,13 @@ int load_savedgames()
     {
         if(strlen(saves[i].qstpath))
         {
-            if(skipicon)
+            if(!iconbuffer[i].loaded)
             {
-                for(int j=0; j<128; j++)
-                {
-                    saves[i].icon[j]=0;
-                }
+                int ret2 = load_quest(saves+i);
                 
-                for(int j=0; j<48; j++)
+                if(ret2 == qe_OK)
                 {
-                    saves[i].pal[j]=0;
-                }
-            }
-            else
-            {
-                if(!iconbuffer[i].loaded)
-                {
-                    int ret2 = load_quest(saves+i, false);
-                    
-                    if(ret2 == qe_OK)
-                    {
-                        load_game_icon_to_buffer(false,i);
-                    }
+                    load_game_icon_to_buffer(false,i);
                 }
             }
         }
@@ -1523,56 +1434,19 @@ int load_savedgames()
     return 0;
     
 newdata:
-    system_pal();
-    
-    if(standalone_mode)
-        goto init;
-        
-    if(jwin_alert("Can't Find Saved Game File",
-                  "The save file could not be found.",
-                  "Create a new file from scratch?",
-                  "Warning: Doing so will erase any previous saved games!",
-                  "OK","Cancel",13,27,lfont)!=1)
-    {
-        exit(1);
-    }
-    
-    game_pal();
-    Z_message("Save file not found.  Creating new save file.");
+    Z_message("Save file not found: %s. Creating new save file.", SAVE_FILE);
     goto init;
     
 cantopen:
-    {
-        system_pal();
-        char buf[256];
-        snprintf(buf, 256, "still can't be opened, you'll need to delete %s.", SAVE_FILE);
-        jwin_alert("Can't Open Saved Game File",
-                   "The save file was found, but could not be opened. Wait a moment",
-                   "and try again. If this problem persists, reboot. If the file",
-                   buf,
-                   "OK",NULL,'o',0,lfont);
-    }
+    Z_message("Can't Open Saved Game File: %s, exiting...", SAVE_FILE);
     exit(1);
     
 reset:
-    system_pal();
-    
-    if(jwin_alert3("Can't Open Saved Game File",
-                   "Unable to read the save file.",
-                   "Create a new file from scratch?",
-                   "Warning: Doing so will erase any previous saved games!",
-                   "No","Yes",NULL,'n','y',0,lfont)!=2)
-    {
-        exit(1);
-    }
-    
-    game_pal();
-    
     if(f)
         pack_fclose(f);
         
     delete_file(tmpfilename);
-    Z_message("Format error.  Resetting game data... ");
+    Z_message("Format error: %s. Resetting game data... ", SAVE_FILE);
     
 init:
 
@@ -1581,12 +1455,8 @@ init:
         
     memset(iconbuffer, 0, sizeof(savedicon)*MAXSAVES);
     
-    if(standalone_mode)
-        set_up_standalone_save();
-        
     free(iname);
     return 0;
-    
 }
 
 
@@ -2161,7 +2031,6 @@ static bool register_name()
     int letter_grid_height=6;
     int letter_grid_spacing=12;
     
-    const char *simple_grid="ABCDEFGHIJKLMNOPQRSTUVWXYZ-.,!'&.0123456789 ";
     const char *complete_grid=" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
     
     //int pos=file%3;
@@ -2346,13 +2215,6 @@ static bool register_name()
         
         draw_cursor(0,0);
         advanceframe(true);
-        /*
-          if(rBbtn())
-          {
-          x=-1;
-          done=true;
-          }
-          */
     }
     while(!done && !Quit);
     
@@ -2363,22 +2225,9 @@ static bool register_name()
     
     if(done)
     {
-        int quest=1;
-        char buf[9];
-        strcpy(buf,name);
-        strupr(buf);
-        
-        if(!stricmp(buf,"ZELDA"))
-            quest=2;
-            
-        if(!stricmp(buf,"ALPHA"))
-            quest=3;
-            
-        if(!stricmp(buf,"GANON"))
-            quest=4;
-            
-        saves[s].set_quest(quest);
-        
+        saves[s].set_quest(0xFF); // Always a custom quest, no longer matters.
+        sprintf(saves[s].qstpath, "%s", quest_path);
+
 //	setPackfilePassword(datapwd);
         //0 is success
         int ret = load_quest(saves+s);
@@ -2391,18 +2240,18 @@ static bool register_name()
             game = saves+s;
             saves[s].set_maxlife(zinit.hc*HP_PER_HEART);
             //saves[s].items[itype_ring]=0;
-            removeItemsOfFamily(&saves[s], itemsbuf, itype_ring);
+            //removeItemsOfFamily(&saves[s], itemsbuf, itype_ring);
             int maxringid = getHighestLevelOfFamily(&zinit, itemsbuf, itype_ring);
             
             if(maxringid != -1)
                 getitem(maxringid, true);
                 
             //      game->set_maxbombs(&saves[s], zinit.max_bombs);
-            selectscreen();                                       // refresh palette
-            game = oldgame;
             ringcolor(false);
-            load_game_icon_to_buffer(false,s);
-            load_game_icon(saves+s, true, s);
+            load_game_icon_to_buffer(false, s);
+            load_game_icon(saves+s, false, s);
+            game = oldgame;
+            //selectscreen();                                       // refresh palette
         }
         else
         {
@@ -2474,280 +2323,6 @@ static bool delete_save(int file)
 }
 
 /** game mode stuff **/
-
-DIALOG gamemode_dlg[] =
-{
-    // (dialog proc)      (x)   (y)   (w)   (h)   (fg)     (bg)     (key)    (flags)     (d1)           (d2)     (dp)                            (dp2)  (dp3)
-    { jwin_win_proc,       40,   44,  240,  180,   0,       0,       0,       D_EXIT,     0,             0, (void *) "Select Custom Quest", NULL,  NULL },
-    // 1
-    { jwin_button_proc,   205,   76,   61,   21,   0,       0,       'b',     D_EXIT,     0,             0, (void *) "&Browse",             NULL,  NULL },
-    { jwin_textbox_proc,   55,   78,  140,   16,   0,       0,       0,       0,          0,             0,       NULL,                           NULL,  NULL },
-    { jwin_text_proc,      76,  106,   64,    8,   vc(0),   vc(11),  0,       0,          0,             0, (void *) "Info:",               NULL,  NULL },
-    { jwin_textbox_proc,   76,  118,  168,   60,   0,       0,       0,       0,          0,             0,       NULL,                           NULL,  NULL },
-    // 5
-    { jwin_button_proc,    90,  191,   61,   21,   0,       0,       'k',     D_EXIT,     0,             0, (void *) "O&K",                 NULL,  NULL },
-    { jwin_button_proc,   170,  191,   61,   21,   0,       0,       27,      D_EXIT,     0,             0, (void *) "Cancel",              NULL,  NULL },
-    { d_timer_proc,         0,    0,     0,    0,    0,       0,       0,       0,          0,          0,         NULL, NULL, NULL },
-    { NULL,                 0,    0,    0,    0,   0,       0,       0,       0,          0,             0,       NULL,                           NULL,  NULL }
-};
-
-
-static int get_quest_info(zquestheader *header,char *str)
-{
-    if(strlen(get_filename(qstpath)) == 0)
-    {
-        str[0]=0;
-        return 0;
-    }
-    
-    bool oldquest=false;
-    
-    // default error
-    strcpy(str,"Error: Invalid quest file");
-    
-    char tmpfilename[32];
-    temp_name(tmpfilename);
-    int ret;
-    PACKFILE *f;
-    
-    const char *passwd = datapwd;
-    ret = decode_file_007(qstpath, tmpfilename, ENC_STR, ENC_METHOD_MAX-1, strstr(qstpath, ".dat#")!=NULL, passwd);
-    
-    if(ret)
-    {
-        switch(ret)
-        {
-        case 1:
-            strcpy(str,"Error: Unable to open file");
-            break;
-            
-        case 2:
-            strcpy(str,"Internal error occurred");
-            break;
-            // be sure not to delete tmpfilename now...
-        }
-        
-        if(ret==5)                                              //old encryption?
-        {
-            ret = decode_file_007(qstpath, tmpfilename, ENC_STR, ENC_METHOD_211B9, strstr(qstpath, ".dat#")!=NULL,passwd);
-        }
-        
-        if(ret==5)                                              //old encryption?
-        {
-            ret = decode_file_007(qstpath, tmpfilename, ENC_STR, ENC_METHOD_192B185, strstr(qstpath, ".dat#")!=NULL,passwd);
-        }
-        
-        if(ret==5)                                              //old encryption?
-        {
-            ret = decode_file_007(qstpath, tmpfilename, ENC_STR, ENC_METHOD_192B105, strstr(qstpath, ".dat#")!=NULL,passwd);
-        }
-        
-        if(ret==5)                                              //old encryption?
-        {
-            ret = decode_file_007(qstpath, tmpfilename, ENC_STR, ENC_METHOD_192B104, strstr(qstpath, ".dat#")!=NULL,passwd);
-        }
-        
-        if(ret)
-        {
-            oldquest = true;
-            passwd = "";
-        }
-    }
-    
-    f = pack_fopen_password(oldquest ? qstpath : tmpfilename, F_READ_PACKED, passwd);
-    
-    if(!f)
-    {
-        if(!oldquest&&(errno==EDOM))
-        {
-            f = pack_fopen_password(oldquest ? qstpath : tmpfilename, F_READ, passwd);
-        }
-        
-        if(!f)
-        {
-            delete_file(tmpfilename);
-        }
-        
-        strcpy(str,"Error: Unable to open file");
-//	setPackfilePassword(NULL);
-        return 0;
-    }
-    
-    ret=readheader(f, header, true);
-    
-    if(f)
-    {
-        pack_fclose(f);
-    }
-    
-    if(!oldquest)
-    {
-        delete_file(tmpfilename);
-    }
-    
-//  setPackfilePassword(NULL);
-
-    switch(ret)
-    {
-    case 0:
-        break;
-        
-    case qe_invalid:
-        strcpy(str,"Error: Invalid quest file");
-        return 0;
-        break;
-        
-    case qe_version:
-        strcpy(str,"Error: Invalid version");
-        return 0;
-        break;
-        
-    case qe_obsolete:
-        strcpy(str,"Error: Obsolete version");
-        return 0;
-        break;
-    }
-    
-    strcpy(str,"Title:\n");
-    strcat(str,header->title);
-    strcat(str,"\n\nAuthor:\n");
-    strcat(str,header->author);
-//  setPackfilePassword(NULL);
-
-    return 1;
-}
-
-bool load_custom_game(int file)
-{
-    if(!saves[file].get_hasplayed())
-    {
-        if(chosecustomquest)
-        {
-            clear_to_color(screen,BLACK);
-            saves[file].set_quest(0xFF);
-            char temppath[2048];
-            memset(temppath, 0, 2048);
-            zc_make_relative_filename(temppath, qstdir, qstpath, 2047);
-            
-            if(temppath[0]==0)  //can't make relative, go absolute
-            {
-                sprintf(saves[file].qstpath, "%s", qstpath);
-            }
-            else
-            {
-                sprintf(saves[file].qstpath, "%s", temppath);
-            }
-            
-            load_quest(saves+file);
-            
-            saves[file].set_maxlife(zinit.hc*HP_PER_HEART);
-            flushItemCache();
-            
-            //messy hack to get this to work properly since game is not initialized -DD
-            gamedata *oldgame = game;
-            game = saves+file;
-            int maxringid = getHighestLevelOfFamily(&zinit, itemsbuf, itype_ring);
-            
-            if(maxringid != -1)
-                getitem(maxringid, true);
-                
-            rest(200); // Formerly 1000 -L
-            ringcolor(false);
-            load_game_icon_to_buffer(false,file);
-            load_game_icon(game,false,file);
-            game = oldgame;
-            chosecustomquest = false;
-            return true;
-        }
-    }
-    
-    return false;
-}
-
-int custom_game(int file)
-{
-    zquestheader h;
-    char infostr[200];
-    char path[2048];
-    int ret=0;
-    
-    if(is_relative_filename(saves[file].qstpath))
-    {
-        sprintf(qstpath,"%s%s",qstdir,saves[file].qstpath);
-    }
-    else
-    {
-        sprintf(qstpath,"%s", saves[file].qstpath);
-    }
-    
-    gamemode_dlg[0].dp2 = lfont;
-    gamemode_dlg[2].dp = get_filename(qstpath);
-    
-    if(get_quest_info(&h,infostr)==0)
-    {
-        gamemode_dlg[4].dp = infostr;
-        gamemode_dlg[5].flags = D_DISABLED;
-    }
-    else
-    {
-        gamemode_dlg[4].dp = infostr;
-        gamemode_dlg[5].flags = D_EXIT;
-    }
-    
-    gamemode_dlg[2].d1 = gamemode_dlg[4].d1 = 0;
-    gamemode_dlg[2].d2 = gamemode_dlg[4].d2 = 0;
-    system_pal();
-    show_mouse(screen);
-    
-    clear_keybuf();
-    
-    while((ret=zc_popup_dialog(gamemode_dlg,1))==1)
-    {
-        scare_mouse();
-        blit(screen,tmp_scr,scrx,scry,0,0,320,240);
-        unscare_mouse();
-        
-        int  sel=0;
-        static EXT_LIST list[] =
-        {
-            { (char *)"ZC Quests (*.qst)", (char *)"qst" },
-            { NULL,                        NULL }
-        };
-        
-        strcpy(path, qstpath);
-        
-        if(jwin_file_browse_ex("Load Quest", path, list, &sel, 2048, -1, -1, lfont))
-        {
-            //      strcpy(qstpath, path);
-            replace_extension(qstpath,path,"qst",2047);
-            gamemode_dlg[2].dp = get_filename(qstpath);
-            
-            if(get_quest_info(&h,infostr)==0)
-            {
-                gamemode_dlg[4].dp = infostr;
-                gamemode_dlg[5].flags = D_DISABLED;
-            }
-            else
-            {
-                gamemode_dlg[4].dp = infostr;
-                gamemode_dlg[5].flags = D_EXIT;
-            }
-            
-            gamemode_dlg[2].d1 = gamemode_dlg[4].d1 = 0;
-            gamemode_dlg[2].d2 = gamemode_dlg[4].d2 = 0;
-        }
-        
-        scare_mouse();
-        blit(tmp_scr,screen,0,0,scrx,scry,320,240);
-        unscare_mouse();
-    }
-    
-    show_mouse(NULL);
-    game_pal();
-    key[KEY_ESC]=0;
-    chosecustomquest = (ret==5);
-    return (int)chosecustomquest;
-}
 
 static int game_details(int file)
 {
@@ -2827,17 +2402,6 @@ static int game_details(int file)
             blit(framebuf,scrollbuf,0,0,0,0,256,224);
             return 1;
         }
-        
-        if(rAbtn() && !saves[file].get_hasplayed())
-        {
-            (void)custom_game(file);
-        }
-        
-        if(chosecustomquest && load_custom_game(file))
-        {
-            selectscreen();
-            return 0;
-        }
     }
     
     return 0;
@@ -2857,9 +2421,7 @@ int getsaveslot()
 
 static void select_game()
 {
-    if(standalone_mode)
-        return;
-        
+    
     int pos = zc_max(zc_min(currgame-listpos,3),0);
     int mode = 0;
     
@@ -2928,8 +2490,6 @@ static void select_game()
                 {
                 case 0:
                     currgame=saveslot;
-                    loadlast=currgame+1;
-                    
                     if(saves[currgame].get_quest())
                         done=true;
                         
@@ -3006,17 +2566,9 @@ static void select_game()
             if(game_details(saveslot))
             {
                 currgame=saveslot;
-                loadlast=currgame+1;
-                
                 if(saves[currgame].get_quest())
                     done=true;
             }
-        }
-        
-        if(chosecustomquest)
-        {
-            load_custom_game(saveslot);
-            selectscreen();
         }
     }
     while(!Quit && !done);
@@ -3041,7 +2593,7 @@ void titlescreen(int lsave)
         return;
     }
     
-    if(q==qRESET && !skip_title)
+    if(q==qRESET)
     {
         show_subscreen_dmap_dots=true;
         show_subscreen_numbers=true;
@@ -3069,29 +2621,7 @@ void titlescreen(int lsave)
     {
         if(lsave<1)
         {
-            if(slot_arg)
-            {
-                currgame = slot_arg2-1;
-                savecnt=0;
-                
-                while(savecnt < MAXSAVES && saves[savecnt].get_quest() > 0)
-                    ++savecnt;
-                    
-                if(currgame > savecnt-1)
-                {
-                    slot_arg = 0;
-                    currgame = 0;
-                    select_game();
-                }
-                
-                slot_arg = 0;
-                //game->get_quest(&saves[currgame]);
-                //select_game();
-            }
-            else
-            {
-                select_game();
-            }
+            select_game();
         }
         else
         {
@@ -3219,21 +2749,13 @@ void game_over(int type)
     {
         if(pos)
         {
-            if(standalone_mode && !skip_title)
-            {
-                Quit=qRESET;
-            }
-            else
-            {
-                Quit=qQUIT;
-            }
+            Quit=qQUIT;
         }
         else
         {
             Quit=qCONT;
         }
         
-        //Quit = pos ? ((standalone_mode && skip_title) ? qRESET : qQUIT) : qCONT;
         if(pos==1&&(!type))
         {
             game->set_cheat(game->get_cheat() | cheat);

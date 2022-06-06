@@ -33,7 +33,7 @@
 #define MAX_ACTIVE    72000                                 // 20 minutes
 
 // saved games
-#define MAXSAVES      (standalone_mode?1:15) // It's constant enough... :p
+#define MAXSAVES      6 // It's constant enough... :p
 
 // game.maps[] flags
 #define mSECRET             8192                                 // only overworld and caves use this
@@ -142,7 +142,7 @@ void init_dmap();
 int  init_game();
 int  cont_game();
 void restart_level();
-int  load_quest(gamedata *g, bool report=true);
+int  load_quest(gamedata *g);
 void show_details();
 void show_ffscript_names();
 //int  init_palnames();
@@ -208,10 +208,6 @@ extern char     palnames[MAXLEVELS][17];
 
 extern bool is_large;
 
-extern bool standalone_mode;
-extern char *standalone_quest;
-extern bool skip_title;
-
 /*
 extern tiledata *newtilebuf, *grabtilebuf;
 extern newcombo *combobuf;
@@ -263,9 +259,6 @@ void update_script_counter();
 
 extern PALETTE tempbombpal;
 extern bool usebombpal;
-
-extern int slot_arg, slot_arg2;
-extern char *SAVE_FILE;
 
 extern int homescr,currscr,frame,currmap,dlevel,warpscr,worldscr;
 extern int newscr_clk,opendoors,currdmap,fadeclk,currgame,listpos;
@@ -341,8 +334,7 @@ extern int cheat;                                           // 0 = none; 1,2,3,4
 
 extern int  mouse_down;                                     // used to hold the last reading of 'gui_mouse_b()' status
 extern int idle_count, active_count;
-extern char *qstpath;
-extern char *qstdir;
+extern char *quest_path;
 extern gamedata *saves;
 extern gamedata *game;
 

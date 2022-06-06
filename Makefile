@@ -4,8 +4,8 @@ IMAGE_LIBS =
 #LINKOPTS = -pg
 #OPTS = -pg -g
 #OPTS = -pg
-#OPTS = -O3
-OPTS = -DPTW32_STATIC_LIB -O3
+OPTS = -O3 -pedantic -Wall
+#OPTS = -DPTW32_STATIC_LIB -O3
 
 ALLEG_LIB = `allegro-config --libs --static`
 SFLAG = -s
@@ -75,7 +75,7 @@ jwinfsel.o: jwinfsel.cpp jwin.h jwinfsel.h tab_ctl.h zc_alleg.h
 link.o: link.cpp colors.h decorations.h ffscript.h gamedata.h guys.h items.h jwin.h jwinfsel.h link.h maps.h pal.h qst.h sfx.h sprite.h subscr.h tab_ctl.h tiles.h title.h weapons.h zc_alleg.h zc_custom.h zc_subscr.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c link.cpp -o link.o $(SFLAG)
 maps.o: maps.cpp colors.h ffscript.h gamedata.h guys.h items.h jwin.h jwinfsel.h link.h maps.h pal.h particles.h qst.h sfx.h sprite.h subscr.h tab_ctl.h tiles.h weapons.h zc_alleg.h zc_custom.h zc_subscr.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
-	$(CC) $(OPTS) -O3 $(CFLAG) -c maps.cpp -o maps.o $(SFLAG)
+	$(CC) $(OPTS) $(CFLAG) -c maps.cpp -o maps.o $(SFLAG)
 md5.o: md5.cpp md5.h
 	$(CC) $(OPTS) $(CFLAG) -c md5.cpp -o md5.o $(SFLAG)
 pal.o: pal.cpp colors.h gamedata.h items.h jwin.h jwinfsel.h link.h maps.h pal.h qst.h sfx.h sprite.h subscr.h tab_ctl.h tiles.h zc_alleg.h zc_custom.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
@@ -93,7 +93,7 @@ subscr.o: subscr.cpp colors.h gamedata.h guys.h items.h jwin.h jwinfsel.h link.h
 tab_ctl.o: tab_ctl.cpp tab_ctl.h zc_alleg.h
 	$(CC) $(OPTS) $(CFLAG) -c tab_ctl.cpp -o tab_ctl.o $(SFLAG)
 tiles.o: tiles.cpp gamedata.h jwin.h tab_ctl.h tiles.h zc_alleg.h zdefs.h zsys.h
-	$(CC) $(OPTS) -O3 $(CFLAG) -c tiles.cpp -o tiles.o $(SFLAG)
+	$(CC) $(OPTS) $(CFLAG) -c tiles.cpp -o tiles.o $(SFLAG)
 title.o: title.cpp colors.h gamedata.h gui.h items.h jwin.h jwinfsel.h link.h maps.h pal.h qst.h sfx.h sprite.h subscr.h tab_ctl.h tiles.h title.h zc_alleg.h zc_custom.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c title.cpp -o title.o $(SFLAG)
 weapons.o: weapons.cpp colors.h gamedata.h items.h jwin.h jwinfsel.h link.h maps.h pal.h qst.h sfx.h sprite.h subscr.h tab_ctl.h tiles.h weapons.h zc_alleg.h zc_custom.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h

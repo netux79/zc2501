@@ -61,8 +61,6 @@ int lens_hint_weapon[MAXWPNS][5];                           //aclk, aframe, dir,
 int strike_hint_counter=0;
 int strike_hint_timer=0;
 int strike_hint;
-int slot_arg, slot_arg2;
-char *SAVE_FILE = (char *)"zc.sav";
 
 CScriptDrawingCommands script_drawing_commands;
 
@@ -80,10 +78,6 @@ extern int directItemA;
 extern int directItemB;
 
 bool is_large=false;
-
-bool standalone_mode=false;
-char *standalone_quest=NULL;
-bool skip_title=false;
 
 int favorite_combos[MAXFAVORITECOMBOS];
 int favorite_comboaliases[MAXFAVORITECOMBOALIASES];
@@ -252,9 +246,7 @@ float avgfps=0;
 dword fps_secs=0;
 bool do_cheat_goto=false, do_cheat_light=false;
 int checkx, checky;
-int loadlast=0;
 int skipcont=0;
-int skipicon=0;
 
 bool show_layer_0=true, show_layer_1=true, show_layer_2=true, show_layer_3=true, show_layer_4=true, show_layer_5=true, show_layer_6=true,
 //oveheard combos     //pushblocks
@@ -416,8 +408,7 @@ zcmap               *ZCMaps;
 byte                *quest_file;
 dword               quest_map_pos[MAPSCRS*MAXMAPS2];
 
-char     *qstpath=NULL;
-char     *qstdir=NULL;
+char     *quest_path=NULL;
 gamedata *saves=NULL;
 
 volatile int lastfps=0;
@@ -939,34 +930,8 @@ void CatchBrang()
 /***** Main Game Code *****/
 /**************************/
 
-int load_quest(gamedata *g, bool report)
+int load_quest(gamedata *g)
 {
-    chop_path(qstpath);
-    char *tempdir=(char *)"";
-    tempdir=qstdir;
-    
-    if(g->get_quest()<255)
-    {
-        // Check the ZC directory first for 1st-4th quests; check qstdir if they're not there
-        sprintf(qstpath, "%s.qst", ordinal(g->get_quest()));
-        
-        if(!exists(qstpath))
-        {
-            sprintf(qstpath,"%s%s.qst",tempdir,ordinal(g->get_quest()));
-        }
-    }
-    else
-    {
-        if(is_relative_filename(g->qstpath))
-        {
-            sprintf(qstpath,"%s%s",qstdir,g->qstpath);
-        }
-        else
-        {
-            sprintf(qstpath,"%s", g->qstpath);
-        }
-    }
-    
     //setPackfilePassword(datapwd);
     byte skip_flags[4];
     
@@ -975,7 +940,7 @@ int load_quest(gamedata *g, bool report)
         skip_flags[i]=0;
     }
     
-    int ret = loadquest(qstpath,&QHeader,&QMisc,tunes+ZC_MIDI_COUNT,false,true,true,true,skip_flags);
+    int ret = loadquest(quest_path,&QHeader,&QMisc,tunes+ZC_MIDI_COUNT,false,true,true,true,skip_flags);
     //setPackfilePassword(NULL);
     
     if(!g->title[0] || g->get_hasplayed() == 0)
@@ -997,20 +962,10 @@ int load_quest(gamedata *g, bool report)
             ret = qe_minver;
     }
     
-    if(ret && report)
+    if(ret)
     {
-        system_pal();
-        char buf1[80],buf2[80];
-        sprintf(buf1,"Error loading %s:",get_filename(qstpath));
-        sprintf(buf2,"%s",qst_error[ret]);
-        jwin_alert("File error",buf1,buf2,qstpath,"OK",NULL,13,27,lfont);
-        
-        if(standalone_mode)
-        {
-            exit(1);
-        }
-        
-        game_pal();
+        char buf1[80];
+        Z_error(buf1,"Error loading %s:, %s",get_filename(quest_path), qst_error[ret]);
     }
     
     return ret;
@@ -1099,7 +1054,7 @@ int init_game()
     //setPackfilePassword(NULL);
     
     char keyfilename[2048];
-    replace_extension(keyfilename, qstpath, "key", 2047);
+    replace_extension(keyfilename, quest_path, "key", 2047);
     bool gotfromkey=false;
     
     if(exists(keyfilename))
@@ -2475,6 +2430,16 @@ public:
 }
 static Triplebuffer;
 
+// Returns the first no switch (-) argv param
+char *get_cmd_arg(int argc, char *argv[])
+{
+   // assumes a switch won't be in argv[0] since it is the exe name.
+   for (int i = 1; i < argc; i++)
+      if (argv[i][0] != '-')
+         return argv[i];
+   return NULL;
+}
+
 int main(int argc, char* argv[])
 {
     switch(IS_BETA)
@@ -2492,59 +2457,48 @@ int main(int argc, char* argv[])
         Z_title("Zelda Classic %s (Build %d)",VerStr(ZELDA_VERSION), VERSION_BUILD);
     }
     
-    if(used_switch(argc, argv, "-standalone"))
-    {
-        standalone_mode=true;
-        
-        int arg=used_switch(argc, argv, "-standalone");
-        
-        if(arg==argc-1)
-        {
-            Z_error("-standalone requires a quest file, e.g.\n" \
-                    "  -standalone MyQuest.qst\n" \
-                    "  -standalone \"Name with spaces.qst\"");
-            exit(1);
-        }
-        
-        standalone_quest=argv[arg+1];
-        
-        int len=strlen(standalone_quest);
-        
-        for(int i=0; i<len; i++)
-        {
-#ifdef _ALLEGRO_WINDOWS
-        
-            if(standalone_quest[i]=='/')
-            {
-                standalone_quest[i]='\\';
-            }
-            
-#else
-            
-            if(standalone_quest[i]=='\\')
-            {
-                standalone_quest[i]='/';
-            }
-            
-#endif
-        }
-    }
     // Before anything else, let's register our custom trace handler:
     register_trace_handler(zc_trace_handler);
-    
-    memrequested += 4096;
-    Z_message("Allocating quest path buffers (%s)...", byte_conversion2(4096,memrequested,-1,-1));
-    qstdir = (char*)malloc(2048);
-    qstpath = (char*)malloc(2048);
-    
-    if(!qstdir || !qstpath)
+
+    Z_message("Initializing Allegro...");
+    if(allegro_init() != 0)
     {
-        Z_error("Allocation error");
-        quit_game();
+        Z_error("Failed Init!");
+        exit(-1);
     }
     
-    qstdir[0] = 0;
-    qstpath[0] = 0;
+    three_finger_flag=false;
+
+    // Allocate quest path buffer
+    memrequested += 2048;
+    Z_message("Allocating quest path buffers (%s)...", byte_conversion2(2048,memrequested,-1,-1));
+    quest_path = (char*)malloc(2048);
+    memset(quest_path, 0, 2048);
+
+    if(!quest_path)
+    {
+        Z_error("Allocation error");
+        exit(-1);
+    }
+    
+       // Get the quest file to run.
+   char *temp = get_cmd_arg(argc, argv);
+
+   if (temp != NULL)
+      strcpy(quest_path, temp);
+
+   if (strlen(quest_path) == 0)
+   {
+      printf("Provide a quest name as the first command argument:\n\t%s quest.qst\n", argv[0]);
+      exit(-1);
+   }
+
+   // Validate that the quest file really exists.
+   if (!exists(quest_path))
+   {
+      printf("Quest file doesn't exist or it's invalid: %s\n", quest_path);
+      exit(-1);
+   }
     
     Z_message("OK\n");
 
@@ -2555,23 +2509,8 @@ int main(int argc, char* argv[])
         quit_game();
     }
     
-    // initialize Allegro
-    
-    Z_message("Initializing Allegro... ");
-    
-    if(allegro_init() != 0)
-    {
-        Z_error("Failed Init!");
-        quit_game();
-    }
-    
-    three_finger_flag=false;
-    //atexit(&dumb_exit);
-    //dumb_register_stdfiles();
-    
     // set and load game configurations
     set_config_file("ag.cfg");
-    
     if(exists("ag.cfg") != 0)
     {
         load_game_configs();
@@ -2626,93 +2565,41 @@ int main(int argc, char* argv[])
     
     Z_message("OK\n");
     
-    // check for the included quest files
-    if(!standalone_mode)
+    //command-line switches takes priority
+    switch(zc_color_depth)
     {
-        Z_message("Checking Files... ");
+    case 0:
+        set_color_depth(desktop_color_depth());
+        break;
         
-        char path[2048];
+    case 8:
+        set_color_depth(8);
+        break;
         
-        append_filename(path, qstdir, "1st.qst", 2048);
+    case 15:
+        set_color_depth(15);
+        break;
         
-        if(!exists("1st.qst") && !exists(path))
-        {
-            Z_error("\"1st.qst\" not found.");
-            quit_game();
-        }
+    case 16:
+        set_color_depth(16);
+        break;
         
-        append_filename(path, qstdir, "2nd.qst", 2048);
+    case 24:
+        set_color_depth(24);
+        break;
         
-        if(!exists("2nd.qst") && !exists(path))
-        {
-            Z_error("\"2nd.qst\" not found.");
-            quit_game();
-        }
+    case 32:
+        set_color_depth(32);
+        break;
         
-        append_filename(path, qstdir, "3rd.qst", 2048);
-        
-        if(!exists("3rd.qst") && !exists(path))
-        {
-            Z_error("\"3rd.qst\" not found.");
-            quit_game();
-        }
-        
-        append_filename(path, qstdir, "4th.qst", 2048);
-        
-        if(!exists("4th.qst") && !exists(path))
-        {
-            Z_error("\"4th.qst\" not found.");
-            quit_game();
-        }
-        
-        Z_message("OK\n");
+    default:
+        zc_color_depth = 8; //invalid configuration, set to default in config file.
+        set_color_depth(8);
+        break;
     }
     
     // allocate bitmap buffers
     Z_message("Allocating bitmap buffers... ");
-    
-    //Turns out color depth can be critical. -Gleeok
-    if(used_switch(argc,argv,"-0bit")) set_color_depth(desktop_color_depth());
-    else if(used_switch(argc,argv,"-15bit")) set_color_depth(15);
-    else if(used_switch(argc,argv,"-16bit")) set_color_depth(16);
-    else if(used_switch(argc,argv,"-24bit")) set_color_depth(24);
-    else if(used_switch(argc,argv,"-32bit")) set_color_depth(32);
-    else
-    {
-        //command-line switches takes priority
-        switch(zc_color_depth)
-        {
-        case 0:
-            set_color_depth(desktop_color_depth());
-            break;
-            
-        case 8:
-            set_color_depth(8);
-            break;
-            
-        case 15:
-            set_color_depth(15);
-            break;
-            
-        case 16:
-            set_color_depth(16);
-            break;
-            
-        case 24:
-            set_color_depth(24);
-            break;
-            
-        case 32:
-            set_color_depth(32);
-            break;
-            
-        default:
-            zc_color_depth = 8; //invalid configuration, set to default in config file.
-            set_color_depth(8);
-            break;
-        }
-    }
-    
     
     framebuf  = create_bitmap_ex(8,256,224);
     temp_buf  = create_bitmap_ex(8,256,224);
@@ -2746,82 +2633,13 @@ int main(int argc, char* argv[])
     
     //  int mode = VidMode;                                       // from config file
     int tempmode=GFX_AUTODETECT;
-    int res_arg = used_switch(argc,argv,"-res");
-    
-    if(used_switch(argc,argv,"-v0")) Throttlefps=false;
-    
-    if(used_switch(argc,argv,"-v1")) Throttlefps=true;
-    
     
     resolve_password(zeldapwd);
-    
-    skipicon = standalone_mode || used_switch(argc,argv,"-quickload");
-    
-    int load_save=0;
-    
-    load_save = used_switch(argc,argv,"-load");
-    load_save = load_save?(argc>load_save+1)?atoi(argv[load_save+1]):0:0;
-    
-    if(!(used_switch(argc,argv,"-load")))
-        if(used_switch(argc,argv,"-loadlast"))
-            load_save = loadlast;
-            
-    slot_arg = used_switch(argc,argv,"-slot");
-    
-    if(argc <= (slot_arg+1))
-    {
-        slot_arg = 0;
-    }
-    else
-    {
-        slot_arg2 = vbound(atoi(argv[slot_arg+1]), 1, MAXSAVES);
-    }
-    
-    if(standalone_mode)
-    {
-        load_save=1;
-        slot_arg=1;
-        slot_arg2=1;
-    }
-    
-    int fast_start = used_switch(argc,argv,"-fast") || (!standalone_mode && (load_save || (slot_arg && (argc>(slot_arg+1)))));
-    skip_title = used_switch(argc, argv, "-notitle") > 0;
-    int save_arg = used_switch(argc,argv,"-savefile");
-    
-    if(save_arg && (argc>(save_arg+1)))
-    {
-        SAVE_FILE = (char *)malloc(2048);
-        sprintf(SAVE_FILE, "%s", argv[save_arg+1]);
-        
-        int len=strlen(SAVE_FILE);
-        
-        for(int i=0; i<len; i++)
-        {
-#ifdef _ALLEGRO_WINDOWS
-        
-            if(SAVE_FILE[i]=='/')
-            {
-                SAVE_FILE[i]='\\';
-            }
-            
-#else
-            
-            if(SAVE_FILE[i]=='\\')
-            {
-                SAVE_FILE[i]='/';
-            }
-            
-#endif
-        }
-    }
-    
-    
-    
+
     // load the data files
     resolve_password(datapwd);
 //  setPackfilePassword(datapwd);
     packfile_password(datapwd);
-    
     
     Z_message("Loading data files:\n");
     set_color_conversion(COLORCONV_NONE);
@@ -3001,21 +2819,14 @@ int main(int argc, char* argv[])
     
     Z_message("Initializing sound driver... ");
     
-    if(used_switch(argc,argv,"-s") || used_switch(argc,argv,"-nosound"))
+    if(install_sound(DIGI_AUTODETECT,MIDI_AUTODETECT,NULL))
     {
-        Z_message("skipped\n");
+        //      Z_error(allegro_error);
+        Z_message("Sound driver not available.  Sound disabled.\n");
     }
     else
     {
-        if(install_sound(DIGI_AUTODETECT,MIDI_AUTODETECT,NULL))
-        {
-            //      Z_error(allegro_error);
-            Z_message("Sound driver not available.  Sound disabled.\n");
-        }
-        else
-        {
-            Z_message("OK\n");
-        }
+        Z_message("OK\n");
     }
     
     Z_init_sound();
@@ -3036,24 +2847,7 @@ int main(int argc, char* argv[])
     
     const int wait_ms_on_set_graphics = 20; //formerly 250. -Gleeok
     
-    // quick quit
-    if(used_switch(argc,argv,"-q"))
-    {
-        printf("-q switch used, quitting program.\n");
-        goto quick_quit;
-    }
-    
     // set video mode
-    
-    if(res_arg && (argc>(res_arg+2)))
-    {
-        resx = atoi(argv[res_arg+1]);
-        resy = atoi(argv[res_arg+2]);
-        bool old_sbig = (argc>(res_arg+3))? stricmp(argv[res_arg+3],"big")==0 : 0;
-        bool old_sbig2 = (argc>(res_arg+3))? stricmp(argv[res_arg+3],"big2")==0 : 0;
-        
-//    mode = GFX_AUTODETECT;
-    }
     
     if(resx>=640 && resy>=480)
     {
@@ -3171,7 +2965,7 @@ int main(int argc, char* argv[])
     reset_items(true, &QHeader);
     
     clear_to_color(screen,BLACK);
-    Quit = (fast_start||skip_title) ? qQUIT : qRESET;
+    Quit = qRESET;
     
     rgb_map = &rgb_table;
     
@@ -3184,9 +2978,8 @@ int main(int argc, char* argv[])
         // this is here to continually fix the keyboard repeat
         set_keyboard_rate(250,33);
         toogam = false;
-        titlescreen(load_save);
+        titlescreen(0);
         
-        load_save=0;
         setup_combo_animations();
         setup_combo_animations2();
         
@@ -3247,7 +3040,6 @@ int main(int argc, char* argv[])
     music_stop();
     kill_sfx();
     
-quick_quit:
     show_saving(screen);
     save_savedgames();
     save_game_configs();
@@ -3421,9 +3213,7 @@ void quit_game()
     al_trace("Deleting quest buffers... \n");
     del_qst_buffers();
     
-    if(qstdir) free(qstdir);
-    
-    if(qstpath) free(qstpath);
+    if(quest_path) free(quest_path);
     
     //if(TheMaps != NULL) free(TheMaps);
     //if(ZCMaps != NULL) free(ZCMaps);

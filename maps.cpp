@@ -4538,9 +4538,7 @@ void ViewMap()
     
     if(!mappic)
     {
-        system_pal();
-        jwin_alert("View Map","Not enough memory.",NULL,NULL,"OK",NULL,13,27,lfont);
-        game_pal();
+        Z_message("View Map Error - Not enough memory.");
         return;
     }
     
