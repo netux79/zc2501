@@ -18,11 +18,9 @@
 
 #include <stdio.h>
 
-#include "gui.h"
 #include "init.h"
 #include "zc_alleg.h"
 #include "zdefs.h"
-#include "jwin.h"
 #include "zsys.h"
 #include "zquest.h"
 #include "gamedata.h"

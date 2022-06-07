@@ -33,9 +33,6 @@
 #include "zsys.h"
 #include "qst.h"
 #include "zc_sys.h"
-#include "jwin.h"
-#include "jwinfsel.h"
-#include "gui.h"
 #include "subscr.h"
 #include "maps.h"
 #include "sprite.h"
@@ -45,7 +42,6 @@
 #include "particles.h"
 
 static int sfx_voice[WAV_COUNT];
-int d_stringloader(int msg,DIALOG *d,int c);
 
 extern FONT *lfont;
 extern LinkClass Link;
@@ -4047,94 +4043,6 @@ bool is_Fkey(int k)
     return false;
 }
 
-void kb_getkey(DIALOG *d)
-{
-    d->flags|=D_SELECTED;
-    
-    scare_mouse();
-    jwin_button_proc(MSG_DRAW,d,0);
-    jwin_draw_win(screen, (resx-160)/2, (resy-48)/2, 160, 48, FR_WIN);
-    //  text_mode(vc(11));
-    textout_centre_ex(screen, font, "Press a key", resx/2, resy/2 - 8, jwin_pal[jcBOXFG],jwin_pal[jcBOX]);
-    textout_centre_ex(screen, font, "ESC to cancel", resx/2, resy/2, jwin_pal[jcBOXFG],jwin_pal[jcBOX]);
-    unscare_mouse();
-    
-    clear_keybuf();
-    int k = next_press_key();
-    clear_keybuf();
-    
-    //shnarf
-    //47=f1
-    //59=esc
-    if(k>0 && k<123 && !((k>46)&&(k<60)))
-        *((int*)d->dp3) = k;
-        
-        
-    d->flags&=~D_SELECTED;
-}
-
-int d_kbutton_proc(int msg,DIALOG *d,int c)
-{
-    switch(msg)
-    {
-    case MSG_KEY:
-    case MSG_CLICK:
-    
-        kb_getkey(d);
-        
-        while(gui_mouse_b())
-            clear_keybuf();
-            
-        return D_REDRAW;
-    }
-    
-    return jwin_button_proc(msg,d,c);
-}
-
-void j_getbtn(DIALOG *d)
-{
-    d->flags|=D_SELECTED;
-    scare_mouse();
-    jwin_button_proc(MSG_DRAW,d,0);
-    jwin_draw_win(screen, (resx-160)/2, (resy-48)/2, 160, 48, FR_WIN);
-    //  text_mode(vc(11));
-    int y = resy/2 - 12;
-    textout_centre_ex(screen, font, "Press a button", resx/2, y, jwin_pal[jcBOXFG],jwin_pal[jcBOX]);
-    textout_centre_ex(screen, font, "ESC to cancel", resx/2, y+8, jwin_pal[jcBOXFG],jwin_pal[jcBOX]);
-    textout_centre_ex(screen, font, "SPACE to disable", resx/2, y+16, jwin_pal[jcBOXFG],jwin_pal[jcBOX]);
-    unscare_mouse();
-    
-    int b = next_press_btn();
-    
-    if(b>=0)
-        *((int*)d->dp3) = b;
-        
-    d->flags&=~D_SELECTED;
-    
-    if(!player) //safety first...
-        player = init_dialog(d,-1);
-        
-    player->joy_on = TRUE;
-}
-
-int d_jbutton_proc(int msg,DIALOG *d,int c)
-{
-    switch(msg)
-    {
-    case MSG_KEY:
-    case MSG_CLICK:
-    
-        j_getbtn(d);
-        
-        while(gui_mouse_b())
-            clear_keybuf();
-            
-        return D_REDRAW;
-    }
-    
-    return jwin_button_proc(msg,d,c);
-}
-
 //shnarf
 const char *key_str[] =
 {
@@ -4177,114 +4085,6 @@ const char *pan_str[4] = { "MONO", " 1/2", " 3/4", "FULL" };
 
 static char str_a[80],str_b[80],str_s[80],str_m[16],str_l[16],str_r[16],str_p[16],str_ex1[16],str_ex2[16],str_ex3[16],str_ex4[16];
 
-int d_stringloader(int msg,DIALOG *d,int c)
-{
-    //these are here to bypass compiler warnings about unused arguments
-    c=c;
-    
-    if(msg==MSG_DRAW)
-    {
-        switch(d->w)
-        {
-        case 0:
-            sprintf(str_a,"%d\n%s",Akey,key_str[Akey]);
-            sprintf(str_b,"%d\n%s",Bkey,key_str[Bkey]);
-            sprintf(str_s,"%d\n%s",Skey,key_str[Skey]);
-            sprintf(str_l,"%d\n%s",Lkey,key_str[Lkey]);
-            sprintf(str_r,"%d\n%s",Rkey,key_str[Rkey]);
-            sprintf(str_p,"%d\n%s",Pkey,key_str[Pkey]);
-            sprintf(str_ex1,"%d\n%s",Pkey,key_str[Exkey1]);
-            sprintf(str_ex2,"%d\n%s",Pkey,key_str[Exkey2]);
-            sprintf(str_ex3,"%d\n%s",Pkey,key_str[Exkey3]);
-            sprintf(str_ex4,"%d\n%s",Pkey,key_str[Exkey4]);
-            break;
-            
-        case 1:
-            sprintf(str_a,"%d\n%s",DUkey,key_str[DUkey]);
-            sprintf(str_b,"%d\n%s",DDkey,key_str[DDkey]);
-            sprintf(str_l,"%d\n%s",DLkey,key_str[DLkey]);
-            sprintf(str_r,"%d\n%s",DRkey,key_str[DRkey]);
-            break;
-            
-        case 2:
-            sprintf(str_a,"%d",Abtn);
-            sprintf(str_b,"%d",Bbtn);
-            sprintf(str_s,"%d",Sbtn);
-            sprintf(str_l,"%d",Lbtn);
-            sprintf(str_r,"%d",Rbtn);
-            sprintf(str_m,"%d",Mbtn);
-            sprintf(str_p,"%d",Pbtn);
-            break;
-            
-        case 3:
-            sprintf(str_a,"%3d",midi_volume);
-            sprintf(str_b,"%3d",digi_volume);
-            sprintf(str_l,"%3d",emusic_volume);
-            sprintf(str_m,"%3dKB",zcmusic_bufsz);
-            sprintf(str_r,"%3d",sfx_volume);
-            strcpy(str_s,pan_str[pan_style]);
-            break;
-            
-        case 4:
-            sprintf(str_ex1,"%d",Exbtn1);
-            sprintf(str_ex2,"%d",Exbtn2);
-            sprintf(str_ex3,"%d",Exbtn3);
-            sprintf(str_ex4,"%d",Exbtn4);
-        }
-    }
-    
-    return D_O_K;
-}
-
-int set_vol(void *dp3, int d2)
-{
-    switch(((int*)dp3)[0])
-    {
-    case 0:
-        midi_volume   = zc_min(d2<<3,255);
-        break;
-        
-    case 1:
-        digi_volume   = zc_min(d2<<3,255);
-        break;
-        
-    case 2:
-        emusic_volume = zc_min(d2<<3,255);
-        break;
-        
-    case 3:
-        sfx_volume    = zc_min(d2<<3,255);
-        break;
-    }
-    
-    scare_mouse();
-    // text_mode(vc(11));
-    textprintf_right_ex(screen,is_large ? lfont_l : font, ((int*)dp3)[1],((int*)dp3)[2],jwin_pal[jcBOXFG],jwin_pal[jcBOX],"%3d",zc_min(d2<<3,255));
-    unscare_mouse();
-    return D_O_K;
-}
-
-int set_pan(void *dp3, int d2)
-{
-    pan_style = vbound(d2,0,3);
-    scare_mouse();
-    // text_mode(vc(11));
-    textout_right_ex(screen,is_large ? lfont_l : font, pan_str[pan_style],((int*)dp3)[1],((int*)dp3)[2],jwin_pal[jcBOXFG],jwin_pal[jcBOX]);
-    unscare_mouse();
-    return D_O_K;
-}
-
-int set_buf(void *dp3, int d2)
-{
-    scare_mouse();
-    // text_mode(vc(11));
-    zcmusic_bufsz = d2 + 1;
-    textprintf_right_ex(screen,is_large ? lfont_l : font, ((int*)dp3)[1],((int*)dp3)[2],jwin_pal[jcBOXFG],jwin_pal[jcBOX],"%3dKB",zcmusic_bufsz);
-    unscare_mouse();
-    return D_O_K;
-}
-
-
 /*
 int midi_dp[3] = {0,147,104};
 int digi_dp[3] = {1,147,120};
@@ -4297,8 +4097,6 @@ int emus_dp[3] = {2,0,0};
 int buf_dp[3]  = {0,0,0};
 int sfx_dp[3]  = {3,0,0};
 int pan_dp[3]  = {0,0,0};
-
-static ListData dmap_list(dmaplist, &font);
 
 int onQuit()
 {
@@ -4397,20 +4195,6 @@ void system_pal()
             pal[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
             pal[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
         }
-        
-        jwin_pal[jcBOX]    =dvc(3);
-        jwin_pal[jcLIGHT]  =dvc(5);
-        jwin_pal[jcMEDLT]  =dvc(4);
-        jwin_pal[jcMEDDARK]=dvc(2);
-        jwin_pal[jcDARK]   =dvc(1);
-        jwin_pal[jcBOXFG]  =dvc(1);
-        jwin_pal[jcTITLEL] =dvc(9);
-        jwin_pal[jcTITLER] =dvc(15);
-        jwin_pal[jcTITLEFG]=dvc(7);
-        jwin_pal[jcTEXTBG] =dvc(5);
-        jwin_pal[jcTEXTFG] =dvc(1);
-        jwin_pal[jcSELBG]  =dvc(8);
-        jwin_pal[jcSELFG]  =dvc(6);
     }
     break;
     
@@ -4438,20 +4222,6 @@ void system_pal()
             pal[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
             pal[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
         }
-        
-        jwin_pal[jcBOX]    =dvc(4);
-        jwin_pal[jcLIGHT]  =dvc(6);
-        jwin_pal[jcMEDLT]  =dvc(5);
-        jwin_pal[jcMEDDARK]=dvc(3);
-        jwin_pal[jcDARK]   =dvc(2);
-        jwin_pal[jcBOXFG]  =dvc(1);
-        jwin_pal[jcTITLEL] =dvc(10);
-        jwin_pal[jcTITLER] =dvc(15);
-        jwin_pal[jcTITLEFG]=dvc(8);
-        jwin_pal[jcTEXTBG] =dvc(6);
-        jwin_pal[jcTEXTFG] =dvc(1);
-        jwin_pal[jcSELBG]  =dvc(9);
-        jwin_pal[jcSELFG]  =dvc(7);
     }
     break;
     
@@ -4477,20 +4247,6 @@ void system_pal()
             pal[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
             pal[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
         }
-        
-        jwin_pal[jcBOX]    =dvc(4);
-        jwin_pal[jcLIGHT]  =dvc(5);
-        jwin_pal[jcMEDLT]  =dvc(4);
-        jwin_pal[jcMEDDARK]=dvc(3);
-        jwin_pal[jcDARK]   =dvc(2);
-        jwin_pal[jcBOXFG]  =dvc(1);
-        jwin_pal[jcTITLEL] =dvc(9);
-        jwin_pal[jcTITLER] =dvc(15);
-        jwin_pal[jcTITLEFG]=dvc(7);
-        jwin_pal[jcTEXTBG] =dvc(5);
-        jwin_pal[jcTEXTFG] =dvc(1);
-        jwin_pal[jcSELBG]  =dvc(8);
-        jwin_pal[jcSELFG]  =dvc(6);
     }
     break;
     
@@ -4517,20 +4273,6 @@ void system_pal()
             pal[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
             pal[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
         }
-        
-        jwin_pal[jcBOX]    =dvc(4);
-        jwin_pal[jcLIGHT]  =dvc(6);
-        jwin_pal[jcMEDLT]  =dvc(5);
-        jwin_pal[jcMEDDARK]=dvc(3);
-        jwin_pal[jcDARK]   =dvc(2);
-        jwin_pal[jcBOXFG]  =dvc(1);
-        jwin_pal[jcTITLEL] =dvc(10);
-        jwin_pal[jcTITLER] =dvc(15);
-        jwin_pal[jcTITLEFG]=dvc(8);
-        jwin_pal[jcTEXTBG] =dvc(6);
-        jwin_pal[jcTEXTFG] =dvc(1);
-        jwin_pal[jcSELBG]  =dvc(9);
-        jwin_pal[jcSELFG]  =dvc(7);
     }
     break;
     
@@ -4556,20 +4298,6 @@ void system_pal()
             pal[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
             pal[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
         }
-        
-        jwin_pal[jcBOX]    =dvc(4);
-        jwin_pal[jcLIGHT]  =dvc(5);
-        jwin_pal[jcMEDLT]  =dvc(4);
-        jwin_pal[jcMEDDARK]=dvc(3);
-        jwin_pal[jcDARK]   =dvc(2);
-        jwin_pal[jcBOXFG]  =dvc(7);
-        jwin_pal[jcTITLEL] =dvc(9);
-        jwin_pal[jcTITLER] =dvc(15);
-        jwin_pal[jcTITLEFG]=dvc(7);
-        jwin_pal[jcTEXTBG] =dvc(5);
-        jwin_pal[jcTEXTFG] =dvc(7);
-        jwin_pal[jcSELBG]  =dvc(8);
-        jwin_pal[jcSELFG]  =dvc(6);
     }
     break;
     
@@ -4595,29 +4323,9 @@ void system_pal()
             pal[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
             pal[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
         }
-        
-        jwin_pal[jcBOX]    =dvc(4);
-        jwin_pal[jcLIGHT]  =dvc(5);
-        jwin_pal[jcMEDLT]  =dvc(4);
-        jwin_pal[jcMEDDARK]=dvc(3);
-        jwin_pal[jcDARK]   =dvc(2);
-        jwin_pal[jcBOXFG]  =dvc(1);
-        jwin_pal[jcTITLEL] =dvc(9);
-        jwin_pal[jcTITLER] =dvc(15);
-        jwin_pal[jcTITLEFG]=dvc(7);
-        jwin_pal[jcTEXTBG] =dvc(5);
-        jwin_pal[jcTEXTFG] =dvc(1);
-        jwin_pal[jcSELBG]  =dvc(8);
-        jwin_pal[jcSELFG]  =dvc(6);
     }
     break;
     }
-    
-    gui_bg_color=jwin_pal[jcBOX];
-    gui_fg_color=jwin_pal[jcBOXFG];
-    gui_mg_color=jwin_pal[jcMEDDARK];
-    
-    jwin_set_colors(jwin_pal);
     
     color_layer(pal, pal, 24,16,16, 28, 128,191);
     
@@ -4703,233 +4411,6 @@ void system_pal()
         
     //  sys_pal = pal;
     memcpy(sys_pal,pal,sizeof(pal));
-}
-
-
-void system_pal2()
-{
-    PALETTE RAMpal2;
-    copy_pal((RGB*)data[PAL_GUI].dat, RAMpal2);
-    
-    /* Windows 2000 colors
-      RAMpal2[dvc(1)] = _RGB(  0*63/255,   0*63/255,   0*63/255);
-      RAMpal2[dvc(2)] = _RGB( 66*63/255,  65*63/255,  66*63/255);
-      RAMpal2[dvc(3)] = _RGB(132*63/255, 130*63/255, 132*63/255);
-      RAMpal2[dvc(4)] = _RGB(212*63/255, 208*63/255, 200*63/255);
-      RAMpal2[dvc(5)] = _RGB(255*63/255, 255*63/255, 255*63/255);
-      RAMpal2[dvc(6)] = _RGB(255*63/255, 255*63/255, 225*63/255);
-      RAMpal2[dvc(7)] = _RGB(255*63/255, 225*63/255, 160*63/255);
-      RAMpal2[dvc(8)] = _RGB(  0*63/255,   0*63/255,  80*63/255);
-    
-      byte palrstart= 10*63/255, palrend=166*63/255,
-      palgstart= 36*63/255, palgend=202*63/255,
-      palbstart=106*63/255, palbend=240*63/255,
-      paldivs=7;
-      for(int i=0; i<paldivs; i++)
-      {
-      RAMpal2[dvc(15-paldivs+1)+i].r = palrstart+((palrend-palrstart)*i/(paldivs-1));
-      RAMpal2[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
-      RAMpal2[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
-      }
-      */
-    
-    /* Windows 98 colors
-      RAMpal2[dvc(1)] = _RGB(  0*63/255,   0*63/255,   0*63/255);
-      RAMpal2[dvc(2)] = _RGB(128*63/255, 128*63/255, 128*63/255);
-      RAMpal2[dvc(3)] = _RGB(192*63/255, 192*63/255, 192*63/255);
-      RAMpal2[dvc(4)] = _RGB(223*63/255, 223*63/255, 223*63/255);
-      RAMpal2[dvc(5)] = _RGB(255*63/255, 255*63/255, 255*63/255);
-      RAMpal2[dvc(6)] = _RGB(255*63/255, 255*63/255, 225*63/255);
-      RAMpal2[dvc(7)] = _RGB(255*63/255, 225*63/255, 160*63/255);
-      RAMpal2[dvc(8)] = _RGB(  0*63/255,   0*63/255,  80*63/255);
-    
-      byte palrstart=  0*63/255, palrend=166*63/255,
-      palgstart=  0*63/255, palgend=202*63/255,
-      palbstart=128*63/255, palbend=240*63/255,
-      paldivs=7;
-      for(int i=0; i<paldivs; i++)
-      {
-      RAMpal2[dvc(15-paldivs+1)+i].r = palrstart+((palrend-palrstart)*i/(paldivs-1));
-      RAMpal2[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
-      RAMpal2[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
-      }
-      */
-    
-    /* Windows 99 colors
-      RAMpal2[dvc(1)] = _RGB(  0*63/255,   0*63/255,   0*63/255);
-      RAMpal2[dvc(2)] = _RGB( 64*63/255,  64*63/255,  64*63/255);
-      RAMpal2[dvc(3)] = _RGB(128*63/255, 128*63/255, 128*63/255);
-      RAMpal2[dvc(4)] = _RGB(192*63/255, 192*63/255, 192*63/255);
-      RAMpal2[dvc(5)] = _RGB(223*63/255, 223*63/255, 223*63/255);
-      RAMpal2[dvc(6)] = _RGB(255*63/255, 255*63/255, 255*63/255);
-      RAMpal2[dvc(7)] = _RGB(255*63/255, 255*63/255, 225*63/255);
-      RAMpal2[dvc(8)] = _RGB(255*63/255, 225*63/255, 160*63/255);
-      RAMpal2[dvc(9)] = _RGB(  0*63/255,   0*63/255,  80*63/255);
-    
-      byte palrstart=  0*63/255, palrend=166*63/255,
-      palgstart=  0*63/255, palgend=202*63/255,
-    
-      palbstart=128*63/255, palbend=240*63/255,
-      paldivs=6;
-      for(int i=0; i<paldivs; i++)
-      {
-      RAMpal2[dvc(15-paldivs+1)+i].r = palrstart+((palrend-palrstart)*i/(paldivs-1));
-      RAMpal2[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
-      RAMpal2[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
-      }
-      */
-    
-    
-    
-    RAMpal2[dvc(1)] = _RGB(0*63/255,   0*63/255,   0*63/255);
-    RAMpal2[dvc(2)] = _RGB(64*63/255,  64*63/255,  64*63/255);
-    RAMpal2[dvc(3)] = _RGB(128*63/255, 128*63/255, 128*63/255);
-    RAMpal2[dvc(4)] = _RGB(192*63/255, 192*63/255, 192*63/255);
-    RAMpal2[dvc(5)] = _RGB(223*63/255, 223*63/255, 223*63/255);
-    RAMpal2[dvc(6)] = _RGB(255*63/255, 255*63/255, 255*63/255);
-    RAMpal2[dvc(7)] = _RGB(255*63/255, 255*63/255, 225*63/255);
-    RAMpal2[dvc(8)] = _RGB(255*63/255, 225*63/255, 160*63/255);
-    RAMpal2[dvc(9)] = _RGB(0*63/255,   0*63/255,  80*63/255);
-    
-    byte palrstart=  0*63/255, palrend=166*63/255,
-         palgstart=  0*63/255, palgend=202*63/255,
-         palbstart=128*63/255, palbend=240*63/255,
-         paldivs=6;
-         
-    for(int i=0; i<paldivs; i++)
-    {
-        RAMpal2[dvc(15-paldivs+1)+i].r = palrstart+((palrend-palrstart)*i/(paldivs-1));
-        RAMpal2[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
-        RAMpal2[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
-    }
-    
-    gui_bg_color=jwin_pal[jcBOX];
-    gui_fg_color=jwin_pal[jcBOXFG];
-    gui_mg_color=jwin_pal[jcMEDDARK];
-    
-    jwin_set_colors(jwin_pal);
-    
-    
-    // set up the new palette
-    for(int i=128; i<192; i++)
-    {
-        RAMpal2[i].r = i-128;
-        RAMpal2[i].g = i-128;
-        RAMpal2[i].b = i-128;
-    }
-    
-    /*
-      for(int i=0; i<64; i++)
-      {
-      RAMpal2[128+i] = _RGB(i,i,i)1));
-      }
-      */
-    
-    /*
-    
-      pal[vc(1)]  = _RGB(0x00,0x00,0x14);
-      pal[vc(4)]  = _RGB(0x36,0x36,0x36);
-      pal[vc(6)]  = _RGB(0x10,0x10,0x10);
-      pal[vc(7)]  = _RGB(0x20,0x20,0x20);
-      pal[vc(9)]  = _RGB(0x20,0x20,0x24);
-      pal[vc(11)] = _RGB(0x30,0x30,0x30);
-      pal[vc(14)] = _RGB(0x3F,0x38,0x28);
-    
-      gui_fg_color=vc(14);
-      gui_bg_color=vc(1);
-      gui_mg_color=vc(9);
-    
-      jwin_set_colors(jwin_pal);
-      */
-    
-    //  color_layer(RAMpal2, RAMpal2, 24,16,16, 28, 128,191);
-    
-    // set up the colors for the vertical screen gradient
-    for(int i=0; i<256; i+=2)
-    {
-        int v = (i>>3)+2;
-        int c = (i>>3)+192;
-        RAMpal2[c] = _RGB(v,v,v+(v>>1));
-        
-        /*
-          if(i<240)
-          {
-          _allegro_hline(tmp_scr,0,i,319,c);
-          _allegro_hline(tmp_scr,0,i+1,319,c);
-          }
-          */
-    }
-    
-    set_palette(RAMpal2);
-    
-    for(int i=0; i<240; ++i)
-    {
-        _allegro_hline(tmp_scr,0,i,319,192+(i*31/239));
-    }
-    
-    /*
-      byte palrstart= 10*63/255, palrend=166*63/255,
-      palgstart= 36*63/255, palgend=202*63/255,
-      palbstart=106*63/255, palbend=240*63/255,
-      paldivs=32;
-      for(int i=0; i<paldivs; i++)
-      {
-      pal[223-paldivs+1+i].r = palrstart+((palrend-palrstart)*i/(paldivs-1));
-      pal[223-paldivs+1+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
-      pal[223-paldivs+1+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
-      }
-      */
-    BITMAP *panorama = create_bitmap_ex(8,256,224);
-    int ts_height, ts_start;
-    
-    if(tmpscr->flags3&fNOSUBSCR && !(tmpscr->flags3&fNOSUBSCROFFSET))
-    {
-        clear_to_color(panorama,0);
-        blit(framebuf,panorama,0,playing_field_offset,0,28,256,224-passive_subscreen_height);
-        ts_height=224-passive_subscreen_height;
-        ts_start=28;
-    }
-    else
-    {
-        blit(framebuf,panorama,0,0,0,0,256,224);
-        ts_height=224;
-        ts_start=0;
-    }
-    
-    // gray scale the current frame
-    for(int y=0; y<ts_height; y++)
-    {
-        for(int x=0; x<256; x++)
-        {
-            int c = panorama->line[y+ts_start][x];
-            int gray = zc_min((RAMpal2[c].r*42 + RAMpal2[c].g*75 + RAMpal2[c].b*14) >> 7, 63);
-            tmp_scr->line[y+8+ts_start][x+32] = gray+128;
-        }
-    }
-    
-    destroy_bitmap(panorama);
-    
-    // save the fps_undo section
-    blit(tmp_scr,fps_undo,40,216,0,0,64,16);
-    
-    // display everything
-    vsync();
-    set_palette_range(RAMpal2,0,255,false);
-    
-    if(sbig)
-        //stretch_blit(tmp_scr,screen,0,0,320,240,scrx-160,scry-120,640,480);
-        stretch_blit(tmp_scr,screen,0,0,320,240,scrx-(160*(screen_scale-1)),scry-(120*(screen_scale-1)),screen_scale*320,screen_scale*240);
-    else
-        blit(tmp_scr,screen,0,0,scrx,scry,320,240);
-        
-    if(ShowFPS)
-        show_fps(screen);
-        
-    if(Paused)
-        show_paused(screen);
-        
-    //  sys_pal = pal;
-    memcpy(sys_pal,RAMpal2,sizeof(RAMpal2));
 }
 
 void switch_out_callback()
@@ -5926,112 +5407,6 @@ void zc_putpixel(int layer, int x, int y, int cset, int color, int timer)
 {
     timer=timer;
     particles.add(new particle(fix(x), fix(y), layer, cset, color));
-}
-
-// these are here so that copy_dialog won't choke when compiling zelda
-int d_alltriggerbutton_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_comboa_radio_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_comboabutton_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_ssdn_btn_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_ssdn_btn2_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_ssdn_btn3_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_ssdn_btn4_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_sslt_btn_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_sslt_btn2_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_sslt_btn3_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_sslt_btn4_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_ssrt_btn_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_ssrt_btn2_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_ssrt_btn3_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_ssrt_btn4_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_ssup_btn_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_ssup_btn2_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_ssup_btn3_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_ssup_btn4_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_tri_edit_proc(int, DIALOG*, int)
-{
-    return D_O_K;
-}
-
-int d_triggerbutton_proc(int, DIALOG*, int)
-{
-    return D_O_K;
 }
 
 /*** end of zc_sys.cc ***/

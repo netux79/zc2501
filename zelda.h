@@ -22,7 +22,6 @@
 #include "zeldadat.h"
 #include "sfx.h"
 #include "zcmusic.h"
-#include "jwin.h"
 #include "gamedata.h"
 #include "zsys.h"
 #include "script_drawing.h"
@@ -145,7 +144,6 @@ void restart_level();
 int  load_quest(gamedata *g);
 void show_details();
 void show_ffscript_names();
-//int  init_palnames();
 
 int get_currdmap();
 int get_dlevel();
@@ -154,8 +152,6 @@ int get_homescr();
 int get_bmaps(int si);
 bool no_subscreen();
 bool is_zquest();
-//void quit_game();
-int d_timer_proc(int msg, DIALOG *d, int c);
 
 INLINE void sfx(int index)
 {
@@ -206,8 +202,6 @@ extern byte     use_cheats;
 extern byte     use_tiles;
 extern char     palnames[MAXLEVELS][17];
 
-extern bool is_large;
-
 /*
 extern tiledata *newtilebuf, *grabtilebuf;
 extern newcombo *combobuf;
@@ -245,7 +239,6 @@ extern volatile int script_counter;
 extern bool halt;
 extern bool screenscrolling;
 extern bool close_button_quit;
-extern int jwin_pal[jcMAX];
 extern int gui_colorset;
 extern int fullscreen;
 extern byte disable_triplebuffer, can_triplebuffer_in_windowed_mode;

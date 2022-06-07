@@ -3,8 +3,6 @@
 
 #include <string>
 #include <vector>
-#include "jwin.h"
-#include "jwinfsel.h"
 #include "zcmusic.h"
 #include "sprite.h"
 #include "gamedata.h"
@@ -33,14 +31,6 @@
 //#define ed15 253
 //#define FLASH 243
 
-extern bool cancelgetnum;
-
-extern bool is_large;
-extern int RulesetDialog;
-
-extern bool disable_saving, OverwriteProtection;
-extern int zq_scale, TileProtection;
-
 void setZScriptVersion(int); //Intentionally does nothing >_<
 
 enum
@@ -48,10 +38,6 @@ enum
     m_block, m_coords, m_flags, m_guy, m_warp, m_misc, m_layers, m_coords2,
     m_menucount
 };
-
-enum {MOUSE_BMP_NORMAL=0, MOUSE_BMP_POINT_BOX, MOUSE_BMP_FLAG, MOUSE_BMP_BOX, MOUSE_BMP_SWORD, MOUSE_BMP_POTION, MOUSE_BMP_WAND, MOUSE_BMP_LENS, MOUSE_BMP_GLOVE, MOUSE_BMP_HOOKSHOT, MOUSE_BMP_WAND2, MOUSE_BMP_BLANK, MOUSE_BMP_MAX};
-enum {ICON_BMP_ITEM=0, ICON_BMP_WARP, ICON_BMP_WARPDEST, ICON_BMP_FLAG, ICON_BMP_RETURN_A, ICON_BMP_RETURN_B, ICON_BMP_RETURN_C, ICON_BMP_RETURN_D, ICON_BMP_MAX};
-
 
 extern int CSET_SIZE;
 extern int CSET_SHFT;
@@ -64,7 +50,6 @@ void fix_layers(mapscr *tempscr, bool showwarning);
 
 extern int coord_timer, coord_frame;
 extern int blackout_color, zq_screen_w, zq_screen_h;
-extern int jwin_pal[jcMAX];
 
 extern size_and_pos minimap;
 
@@ -114,7 +99,7 @@ extern DATAFILE *zcdata, *fontsdata;
 extern MIDI *song;
 extern FONT *nfont, *zfont, *z3font, *z3smallfont, *deffont, *lfont, *lfont_l, *pfont, *mfont, *ztfont, *sfont, *sfont2, *sfont3, *spfont, *ssfont1, *ssfont2, *ssfont3, *ssfont4, *gblafont,
        *goronfont, *zoranfont, *hylian1font, *hylian2font, *hylian3font, *hylian4font, *gboraclefont, *gboraclepfont, *dsphantomfont, *dsphantompfont;
-extern BITMAP *menu1,*menu3, *mapscreenbmp, *tmp_scr, *screen2, *mouse_bmp[MOUSE_BMP_MAX][4], *icon_bmp[ICON_BMP_MAX][4], *panel_button_icon_bmp[m_menucount][4], *select_bmp[2],*dmapbmp_small, *dmapbmp_large;
+extern BITMAP *menu1,*menu3, *mapscreenbmp, *tmp_scr, *screen2,*dmapbmp_small, *dmapbmp_large;
 extern BITMAP *arrow_bmp[MAXARROWS],*brushbmp, *brushscreen, *tooltipbmp; //, *brushshadowbmp;
 extern byte *colordata, *trashbuf;
 //extern byte *tilebuf;
@@ -123,13 +108,9 @@ extern itemdata *itemsbuf;
 extern wpndata  *wpnsbuf;
 extern guydata  *guysbuf;
 extern item_drop_object    item_drop_sets[MAXITEMDROPSETS];
-extern newcombo curr_combo;
 extern PALETTE RAMpal;
-extern bool zq_showpal;
-extern bool combo_cols;
 
 
-extern int alignment_arrow_timer;
 extern int  Flip,Combo,CSet,First[3];
 extern int  Flags,Flag,menutype;
 extern int MouseScroll, SavePaths, CycleOn, InvalidStatic;
@@ -140,11 +121,8 @@ extern int ComboBrushPause;                                 //temporarily disabl
 extern int BrushPosition;                                   //top left, middle, bottom right, etc.
 extern int FloatBrush;                                      //makes the combo brush float a few pixels up and left complete with shadow
 
-extern int OpenLastQuest;                                   //makes the program reopen the quest that was
 //open at the time you quit
-extern int ShowMisalignments;                               //makes the program display arrows over combos that are
 //not aligned with the next screen.
-extern int AnimationOn;                                     //animate the combos in zquest?
 extern int AutoBackupRetention;                             //use auto-backup feature?  if so, how many backups (1-10) to keep
 extern int AutoSaveInterval;                                //how often a timed autosave is made (not overwriting the current file)
 extern int UncompressedAutoSaves;                           //should timed saves be uncompressed/encrypted?
@@ -236,136 +214,11 @@ void rebuild_trans_table();
 void rebuild_string_list();
 
 int onResetTransparency();
-int d_vsync_proc(int msg,DIALOG *d,int c);
-int d_nbmenu_proc(int msg,DIALOG *d,int c);
 int getnumber(const char *prompt,int initialval);
 int gettilepagenumber(const char *prompt, int initialval);
 int gethexnumber(const char *prompt,int initialval);
 
 void update_combo_cycling();
-
-int onSelectSFX();
-int onOptions();
-void fix_drawing_mode_menu();
-int onDrawingMode();
-int onDrawingModeNormal();
-int onDrawingModeRelational();
-int onDrawingModeDungeon();
-int onDrawingModeAlias();
-int onReTemplate();
-int onUndo();
-int onCopy();
-int onFlipDMapHorizontal(int d);
-int onFlipDMapVertical(int d);
-int onFlipMapHorizontal();
-int onFlipMapVertical();
-int onFlipScreenHorizontal();
-int onFlipScreenVertical();
-int onH();
-int onPaste();
-int onPasteAll();
-int onPasteToAll();
-int onPasteAllToAll();
-int onPasteUnderCombo();
-int onPasteSecretCombos();
-int onPasteFFCombos();
-int onPasteWarps();
-int onPasteScreenData();
-int onPasteWarpLocations();
-int onPasteDoors();
-int onPasteLayers();
-int onPastePalette();
-int onPasteRoom();
-int onPasteGuy();
-int onPasteEnemies();
-int onDelete();
-int onDeleteMap();
-int onToggleDarkness();
-int onIncMap();
-int onDecMap();
-int onDefault_Pals();
-int onDefault_Combos();
-int onDefault_Items();
-int onDefault_Guys();
-int onDefault_Weapons();
-int onDefault_SFX();
-int onDefault_Tiles();
-int onDefault_MapStyles();
-int on0();
-int on1();
-int on2();
-int on3();
-int on4();
-int on5();
-int on6();
-int on7();
-int on8();
-int on9();
-int on10();
-int on11();
-int on12();
-int on13();
-int on14();
-int onLeft();
-int onRight();
-int onUp();
-int onDown();
-int onPgUp();
-int onPgDn();
-int onIncreaseCSet();
-int onDecreaseCSet();
-int onGotoPage();
-
-bool getname(const char *prompt,const char *ext,EXT_LIST *list,const char *def,bool usefilename);
-bool getname_nogo(const char *prompt,const char *ext,EXT_LIST *list,const char *def,bool usefilename);
-//bool getname_nogo(char *prompt,char *ext,char *def,bool usefilename);
-
-
-int playTune1();
-int playTune2();
-int playTune3();
-int playTune4();
-int playTune5();
-int playTune6();
-int playTune7();
-int playTune8();
-int playTune9();
-int playTune10();
-int playTune11();
-int playTune12();
-int playTune13();
-int playTune14();
-int playTune15();
-int playTune16();
-int playTune17();
-int playTune18();
-int playTune19();
-
-int changeTrack();
-int playMusic();
-int playTune(int pos);
-int stopMusic();
-
-int onTemplates();
-
-//  +----------+
-//  |          |
-//  | View Pic |
-//  |          |
-//  |          |
-//  |          |
-//  +----------+
-
-extern BITMAP *pic;
-extern PALETTE picpal;
-extern int  pblack,pwhite;
-extern double scale;
-extern bool vp_showpal, vp_showsize, vp_center;
-
-INLINE int pal_sum(RGB p)
-{
-    return p.r + p.g + p.b;
-}
 
 void get_bw(RGB *pal,int &black,int &white);
 void draw_bw_mouse(int white, int old_mouse, int new_mouse);
@@ -388,7 +241,6 @@ void replace(int c);
 void draw_block(int start,int w,int h);
 void fill(mapscr* fillscr, int targetcombo, int targetcset, int sx, int sy, int dir, int diagonal, bool only_cset);
 void fill2(mapscr* fillscr, int targetcombo, int targetcset, int sx, int sy, int dir, int diagonal, bool only_cset);
-int d_wflag_proc(int msg,DIALOG *d,int c);
 
 /**************************/
 /*****     Mouse      *****/
@@ -453,9 +305,6 @@ const char *flaglist(int index, int *list_size);
 int select_data(const char *prompt,int index,const char *(proc)(int,int*), FONT *title_font);
 int select_data(const char *prompt,int index,const char *(proc)(int,int*), const char *b1, const char *b2, FONT *title_font);
 int select_flag(int &f);
-int d_scombo_proc(int msg,DIALOG *d,int c);
-int d_ffcombolist_proc(int msg,DIALOG *d,int c);
-int d_comboalist_proc(int msg,DIALOG *d,int c);
 int onSecretF();
 int onSecretCombo();
 int onUnderCombo();
@@ -672,7 +521,6 @@ int select_room(const char *prompt,int room);
 //char *doors_string[8]={"wall","passage","locked","shutter","bombable","walk thru","1-way shutter","boss"};
 const char *doorslist(int index, int *list_size);
 void edit_door(int side);
-int d_combo_proc(int msg,DIALOG *d,int c);
 const char *doorcombosetlist(int index, int *list_size);
 int onDoors();
 int onScrData();
@@ -721,24 +569,6 @@ int onToggleShowScripts();
 int onToggleShowSquares();
 int onToggleShowInfo();
 
-//char msgbuf[MSGSTRS*3];
-
-int d_ndroplist_proc(int msg,DIALOG *d,int c);
-int d_idroplist_proc(int msg,DIALOG *d,int c);
-int d_nidroplist_proc(int msg,DIALOG *d,int c);
-int d_ilist_proc(int msg,DIALOG *d,int c);
-int d_wlist_proc(int msg,DIALOG *d,int c);
-int enelist_proc(int msg,DIALOG *d,int c,bool use_abc_list);
-INLINE int d_enelist_proc(int msg,DIALOG *d,int c)
-{
-    return enelist_proc(msg,d,c,true);
-}
-INLINE int d_enelistnoabc_proc(int msg,DIALOG *d,int c)
-{
-    return enelist_proc(msg,d,c,false);
-}
-
-
 /**********************************/
 //        Triforce Pieces         //
 /**********************************/
@@ -751,26 +581,19 @@ INLINE int d_enelistnoabc_proc(int msg,DIALOG *d,int c)
   };
   */
 
-int d_tri_frame_proc(int msg,DIALOG *d,int c);
-int d_tri_edit_proc(int msg,DIALOG *d,int c);
+
 int onTriPieces();
 
 /**********************************/
 /***********  onDMaps  ************/
 /**********************************/
 
-int d_maptile_proc(int msg,DIALOG *d,int c);
 int editdmapmaps(int index);
-int d_hexedit_proc(int msg,DIALOG *d,int c);
 void drawgrid(BITMAP *dest,int x,int y,int grid,int fg,int bg,int div);
 void drawgrid(BITMAP *dest,int x,int y,int w, int h, int tw, int th, int *grid,int fg,int bg,int div);
 void drawgrid_s(BITMAP *dest,int x,int y,int grid,int fg,int bg,int div);
 void drawdmap(int dmap);
-int d_dmaplist_proc(int msg,DIALOG *d,int c);
-int d_dropdmaptypelist_proc(int msg,DIALOG *d,int c);
-int d_grid_proc(int msg,DIALOG *d,int c);
 void drawxmap(int map,int xoff,bool large);
-int d_xmaplist_proc(int msg,DIALOG *d,int c);
 
 //int xmapspecs[4] = {0,0,84+58,118+32+5};
 
@@ -780,9 +603,7 @@ int onXslider(void *dp3,int d2);
 
 const char *typelist(int index, int *list_size);
 void put_title_str(char *s,int x,int y,int fg,int bg,int pos,int lines,int cpl);
-int d_title_edit_proc(int msg,DIALOG *d,int c);
 void put_intro_str(char *s,int x,int y,int fg,int bg,int pos);
-int d_intro_edit_proc(int msg,DIALOG *d,int c);
 
 //char dmap_title[21];
 //char dmap_name[33];
@@ -825,7 +646,6 @@ int onMidis();
 /*******************************/
 
 void edit_music(int i);
-int d_musiclist_proc(int msg,DIALOG *d,int c);
 int onEnhancedMusic();
 
 /*******************************/
@@ -841,9 +661,6 @@ int onTestOptions();
 
 const char *warptypelist(int index, int *list_size);
 
-//int warpdmapxy[6] = {188,126,188,100,188,112};
-
-int d_warpdestsel_proc(int msg,DIALOG *d,int c);
 int onTileWarpIndex(int index);
 int onTileWarp();
 int onTimedWarp();
@@ -889,8 +706,6 @@ int onItemDropSets();
 //int curr_ring;
 
 void EditWarpRingScr(int ring,int index);
-int d_warplist_proc(int msg,DIALOG *d,int c);
-int d_wclist_proc(int msg,DIALOG *d,int c);
 const char *wclist(int index, int *list_size);
 
 //int warpringdmapxy[8] = {160,106,160,80,160,92,160,144};
@@ -934,8 +749,6 @@ int onEnemies();
 /********** onHeader ***********/
 /*******************************/
 
-//char author[65],title[65],password[32];
-int d_showedit_proc(int msg,DIALOG *d,int c);
 int onHeader();
 
 //static ZCHEATS tmpcheats;
@@ -956,7 +769,6 @@ int onItemRules();
 int onEnemyRules();
 int onFixesRules();
 int onMiscRules();
-int d_line_proc(int msg, DIALOG *d, int c);
 const char *subscrtypelist(int index, int *list_size);
 int InitPage_1();
 int InitPage_2();
@@ -989,8 +801,6 @@ void grab_dataset(int dataset);
 void undo_pal();
 void calc_dark(int first);
 void edit_cycles(int level);
-void draw_cset_proc(DIALOG *d);
-int d_cset_proc(int msg,DIALOG *d,int c);
 
 //byte mainpal_csets[30]    = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14, 11,11,12,12,12,11, 10,10,10,12,10,10,10,10,9 };
 //byte levelpal_csets[26]   = { 2,3,4,9,2,3,4,2,3,4, 2, 3, 4,       15,15,15,15, 7,7,7, 8,8,8, 0,0,0 };
@@ -1002,14 +812,9 @@ int EditColors(const char *caption,int first,int count,byte *label);
 //int onColors_Main();
 //int onColors_Levels();
 //int onColors_Sprites();
-int d_maptile_proc(int msg,DIALOG *d,int c);
 int onMapStyles();
-int d_misccolors_proc(int msg,DIALOG *d,int c);
 int onMiscColors();
 int onTestBox();
-
-
-int d_ticsedit_proc(int msg,DIALOG *d,int c);
 
 // ****  Palette cycling  ****
 
@@ -1062,13 +867,11 @@ extern int Awpn, Bwpn, Bpos;
 extern sprite_list Sitems;
 
 int main(int argc,char **argv);
-int d_nbmenu_proc(int msg,DIALOG *d,int c);
 void center_zquest_dialogs();
 void animate_coords();
 void do_animations();
 bool is_zquest();
 int save_config_file();
-int d_timer_proc(int msg, DIALOG *d, int c);
 void check_autosave();
 
 void update_tooltip(int x, int y, int trigger_x, int trigger_y, int trigger_w, int trigger_h, char *tipmsg);

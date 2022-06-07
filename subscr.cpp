@@ -3793,8 +3793,6 @@ void show_custom_subscreen(BITMAP *dest, miscQdata *misc, subscreen_group *css, 
             }
             break;
             }
-            
-            //sso_bounding_box(dest, css, i, vc(15));
         }
     }
 }
@@ -5255,91 +5253,6 @@ int sso_w(subscreen_object *tempsso)
     
     return w;
 }
-
-void sso_bounding_box(BITMAP *bmp, subscreen_group *tempss, int index, int color)
-{
-    if(index<0)
-    {
-        return;
-    }
-    
-    int x=sso_x(&tempss->objects[index]);
-    int y=sso_y(&tempss->objects[index]);
-    int w=sso_w(&tempss->objects[index]);
-    int h=sso_h(&tempss->objects[index]);
-    
-    switch(get_alignment(&tempss->objects[index]))
-    {
-    case sstaCENTER:
-        x-=(w/2);
-        break;
-        
-    case sstaRIGHT:
-        x-=w;
-        break;
-        
-    case sstaLEFT:
-    default:
-        break;
-    }
-    
-    int c=x+w/2;
-    int m=y+h/2;
-    bool normalrect=true;
-    
-    if(color==-1)
-    {
-        color=jwin_pal[jcTITLER];
-    }
-    else if(color==-2)
-    {
-        color=jwin_pal[jcTITLEL];
-    }
-    
-    //draw a bounding box around the current object
-    if(normalrect)
-    {
-        rect(bmp, x, y, x+w-1, y+h-1, color);
-    }
-    else
-    {
-        rect(bmp, x-1,   y-1,   x+1, y+1, color);
-        rect(bmp, x-1,   y+h-2, x+1, y+h, color);
-        rect(bmp, x+w-2, y-1,   x+w, y+1, color);
-        rect(bmp, x+w-2, y+h-2, x+w, y+h, color);
-        
-        if(w>=9)
-        {
-            rect(bmp, c-1, y-1,   c+1, y+1, color);
-            rect(bmp, c-1, y+h-2, c+1, y+h, color);
-            _allegro_hline(bmp, x+2,  y,     c-2,  color);
-            _allegro_hline(bmp, c+2, y,     x+w-3, color);
-            _allegro_hline(bmp, x+2,  y+h-1, c-2,  color);
-            _allegro_hline(bmp, c+2, y+h-1, x+w-3, color);
-        }
-        else
-        {
-            _allegro_hline(bmp, x+2,  y,     x+w-3, color);
-            _allegro_hline(bmp, x+2,  y+h-1, x+w-3, color);
-        }
-        
-        if(h>=9)
-        {
-            rect(bmp, x-1,   m-1, x+1, m+1, color);
-            rect(bmp, x+w-2, m-1, x+w, m+1, color);
-            _allegro_vline(bmp, x,     y+2,  m-2,  color);
-            _allegro_vline(bmp, x,     m+2, y+h-3, color);
-            _allegro_vline(bmp, x+w-1, y+2,  m-2,  color);
-            _allegro_vline(bmp, x+w-1, m+2, y+h-3, color);
-        }
-        else
-        {
-            _allegro_vline(bmp, x,     y+2,  y+h-3, color);
-            _allegro_vline(bmp, x+w-1, y+2,  y+h-3, color);
-        }
-    }
-}
-
 
 /*** end of subscr.cc ***/
 

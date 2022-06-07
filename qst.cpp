@@ -658,19 +658,8 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
     bool oldquest = false;
     int ret;
     
-    if(show_progress)
-    {
-        box_start(1, "Loading Quest", lfont, font, true);
-    }
-    
-    box_out("Loading Quest...");
-    box_eol();
-    box_eol();
-    
     if(encrypted)
     {
-        box_out("Decrypting...");
-        box_save_x();
         ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_MAX-1, strstr(filename, ".dat#")!=NULL, passwd);
         
         if(ret)
@@ -678,16 +667,10 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
             switch(ret)
             {
             case 1:
-                box_out("error.");
-                box_eol();
-                box_end(true);
                 *open_error=qe_notfound;
                 return NULL;
                 
             case 2:
-                box_out("error.");
-                box_eol();
-                box_end(true);
                 *open_error=qe_internal;
                 return NULL;
                 // be sure not to delete tmpfilename now...
@@ -696,36 +679,24 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
             if(ret==5)                                              //old encryption?
             {
                 current_method++;
-                sprintf(percent_done, "%d%%", (current_method*100)/ENC_METHOD_MAX);
-                box_out(percent_done);
-                box_load_x();
                 ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_211B9, strstr(filename, ".dat#")!=NULL, passwd);
             }
             
             if(ret==5)                                              //old encryption?
             {
                 current_method++;
-                sprintf(percent_done, "%d%%", (current_method*100)/ENC_METHOD_MAX);
-                box_out(percent_done);
-                box_load_x();
                 ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B185, strstr(filename, ".dat#")!=NULL, passwd);
             }
             
             if(ret==5)                                              //old encryption?
             {
                 current_method++;
-                sprintf(percent_done, "%d%%", (current_method*100)/ENC_METHOD_MAX);
-                box_out(percent_done);
-                box_load_x();
                 ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B105, strstr(filename, ".dat#")!=NULL, passwd);
             }
             
             if(ret==5)                                              //old encryption?
             {
                 current_method++;
-                sprintf(percent_done, "%d%%", (current_method*100)/ENC_METHOD_MAX);
-                box_out(percent_done);
-                box_load_x();
                 ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B104, strstr(filename, ".dat#")!=NULL, passwd);
             }
             
@@ -736,15 +707,12 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
             }
         }
         
-        box_out("okay.");
-        box_eol();
     }
     else
     {
         oldquest = true;
     }
     
-    box_out("Opening...");
     f = pack_fopen_password(oldquest ? filename : tmpfilename, compressed ? F_READ_PACKED : F_READ, passwd);
     
     if(!f)
@@ -761,9 +729,6 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
                 delete_file(tmpfilename);
             }
             
-            box_out("error.");
-            box_eol();
-            box_end(true);
             *open_error=qe_invalid;
             return NULL;
         }
@@ -774,9 +739,6 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
         if(deletefilename)
             sprintf(deletefilename, "%s", tmpfilename);
     }
-    
-    box_out("okay.");
-    box_eol();
     
     return f;
 }
@@ -13524,12 +13486,9 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
         
     int ret=0;
     
-    //header
-    box_out("Reading Header...");
+    /*Reading Header...*/
     ret=readheader(f, &tempheader, true);
     checkstatus(ret);
-    box_out("okay.");
-    box_eol();
     al_trace("Made in ZQuest %x Beta %d\n",tempheader.zelda_version, tempheader.build);
     
     if(tempheader.zelda_version>=0x193)
@@ -13551,16 +13510,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //rules
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Rules...");
+                /*Reading Rules...*/
                 ret=readrules(f, &tempheader, keepall&&!get_bit(skip_flags, skip_rules));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_STRINGS:
@@ -13568,16 +13523,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //strings
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Strings...");
+                /*Reading Strings...*/
                 ret=readstrings(f, &tempheader, keepall&&!get_bit(skip_flags, skip_strings));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_MISC:
@@ -13585,16 +13536,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //misc data
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Misc. Data...");
+                /*Reading Misc. Data...*/
                 ret=readmisc(f, &tempheader, Misc, keepall&&!get_bit(skip_flags, skip_misc));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_TILES:
@@ -13602,16 +13549,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //tiles
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Tiles...");
+                /*Reading Tiles...*/
                 ret=readtiles(f, newtilebuf, &tempheader, tempheader.zelda_version, tempheader.build, 0, NEWMAXTILES, false, keepall&&!get_bit(skip_flags, skip_tiles));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_COMBOS:
@@ -13619,17 +13562,13 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //combos
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Combos...");
+                /*Reading Combos...*/
                 ret=readcombos(f, &tempheader, tempheader.zelda_version, tempheader.build, 0, MAXCOMBOS, keepall&&!get_bit(skip_flags, skip_combos));
                 combosread=true;
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_COMBOALIASES:
@@ -13637,16 +13576,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //combo aliases
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Combo Aliases...");
+                /*Reading Combo Aliases...*/
                 ret=readcomboaliases(f, &tempheader, tempheader.zelda_version, tempheader.build, keepall&&!get_bit(skip_flags, skip_comboaliases));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_CSETS:
@@ -13654,16 +13589,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //color data
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Color Data...");
+                /*Reading Color Data...*/
                 ret=readcolordata(f, Misc, tempheader.zelda_version, tempheader.build, 0, newerpdTOTAL, keepall&&!get_bit(skip_flags, skip_csets));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_MAPS:
@@ -13671,17 +13602,13 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //maps
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Maps...");
+                /*Reading Maps...*/
                 ret=readmaps(f, &tempheader, keepall&&!get_bit(skip_flags, skip_maps));
                 mapsread=true;
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_DMAPS:
@@ -13689,16 +13616,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //dmaps
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading DMaps...");
+                /*Reading DMaps...*/
                 ret=readdmaps(f, &tempheader, tempheader.zelda_version, tempheader.build, 0, MAXDMAPS, keepall&&!get_bit(skip_flags, skip_dmaps));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_DOORS:
@@ -13706,16 +13629,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //door combo sets
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Doors...");
+                /*Reading Doors...*/
                 ret=readdoorcombosets(f, &tempheader, keepall&&!get_bit(skip_flags, skip_doors));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_ITEMS:
@@ -13723,17 +13642,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //items
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Items...");
+                /*Reading Items...*/
                 ret=readitems(f, tempheader.zelda_version, tempheader.build, keepall&&!get_bit(skip_flags, skip_items));
                 checkstatus(ret);
-                
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_WEAPONS:
@@ -13741,16 +13655,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //weapons
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Weapons...");
+                /*Reading Weapons...*/
                 ret=readweapons(f, &tempheader, keepall&&!get_bit(skip_flags, skip_weapons));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_COLORS:
@@ -13758,16 +13668,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //misc. colors
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Misc. Colors...");
+                /*Reading Misc. Colors...*/
                 ret=readmisccolors(f, &tempheader, Misc, keepall&&!get_bit(skip_flags, skip_colors));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_ICONS:
@@ -13775,16 +13681,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //game icons
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Game Icons...");
+                /*Reading Game Icons...*/
                 ret=readgameicons(f, &tempheader, Misc, keepall&&!get_bit(skip_flags, skip_icons));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_INITDATA:
@@ -13792,16 +13694,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //initialization data
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Init. Data...");
+                /*Reading Init. Data...*/
                 ret=readinitdata(f, &tempheader, keepall&&!get_bit(skip_flags, skip_initdata));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 
                 if(keepall&&!get_bit(skip_flags, skip_subscreens))
                 {
@@ -13840,16 +13738,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //guys
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Custom Guy Data...");
+                /*Reading Custom Guy Data...*/
                 ret=readguys(f, &tempheader, keepall&&!get_bit(skip_flags, skip_guys));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_LINKSPRITES:
@@ -13857,16 +13751,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //link sprites
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Custom Link Sprite Data...");
+                /*Reading Custom Link Sprite Data...*/
                 ret=readlinksprites(f, &tempheader, keepall&&!get_bit(skip_flags, skip_linksprites));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_SUBSCREEN:
@@ -13874,16 +13764,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //custom subscreens
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Custom Subscreen Data...");
+                /*Reading Custom Subscreen Data...*/
                 ret=readsubscreens(f, &tempheader, keepall&&!get_bit(skip_flags, skip_subscreens));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_FFSCRIPT:
@@ -13891,16 +13777,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //Freeform combo scripts
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading FF Script Data...");
+                /*Reading FF Script Data...*/
                 ret=readffscript(f, &tempheader, keepall&&!get_bit(skip_flags, skip_ffscript));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_SFX:
@@ -13908,16 +13790,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //SFX data
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading SFX Data...");
+                /*Reading SFX Data...*/
                 ret=readsfx(f, &tempheader, keepall&&!get_bit(skip_flags, skip_sfx));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_MIDIS:
@@ -13925,16 +13803,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //midis
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Tunes...");
+                /*Reading Tunes...*/
                 ret=readtunes(f, &tempheader, tunes, keepall&&!get_bit(skip_flags, skip_midis));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_CHEATS:
@@ -13942,16 +13816,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //cheat codes
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Cheat Codes...");
+                /*Reading Cheat Codes...*/
                 ret=readcheatcodes(f, &tempheader, keepall&&!get_bit(skip_flags, skip_cheats));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_ITEMDROPSETS:
@@ -13959,16 +13829,12 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //item drop sets
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Item Drop Sets...");
+                /*Reading Item Drop Sets...*/
                 ret=readitemdropsets(f, tempheader.zelda_version, tempheader.build, keepall&&!get_bit(skip_flags, skip_itemdropsets));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             case ID_FAVORITES:
@@ -13976,23 +13842,18 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 //favorite combos and combo aliases
                 if(catchup)
                 {
-                    box_out("found.");
-                    box_eol();
                     catchup=false;
                 }
                 
-                box_out("Reading Favorite Combos...");
+                /*Reading Favorite Combos...*/
                 ret=readfavorites(f, tempheader.zelda_version, tempheader.build, keepall&&!get_bit(skip_flags, skip_favorites));
                 checkstatus(ret);
-                box_out("okay.");
-                box_eol();
                 break;
                 
             default:
                 if(!catchup)
                 {
-                    box_out("Bad token!  Searching...");
-                    box_eol();
+                    Z_message("Bad token!  Searching...");
                 }
                 
                 catchup=true;
@@ -14027,112 +13888,67 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
     }
     else
     {
-        //rules
-        box_out("Reading Rules...");
+        /*Reading Rules...*/
         ret=readrules(f, &tempheader, keepall&&!get_bit(skip_flags, skip_rules));
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        //strings
-        box_out("Reading Strings...");
+        /*Reading Strings...*/
         ret=readstrings(f, &tempheader, keepall&&!get_bit(skip_flags, skip_strings));
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        //door combo sets
-        box_out("Reading Doors...");
+        /*Reading Doors...*/
         ret=readdoorcombosets(f, &tempheader, keepall&&!get_bit(skip_flags, skip_doors));
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        //dmaps
-        box_out("Reading DMaps...");
+        /*Reading DMaps...*/
         ret=readdmaps(f, &tempheader, tempheader.zelda_version, tempheader.build, 0, MAXDMAPS, keepall&&!get_bit(skip_flags, skip_dmaps));
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        // misc data
-        box_out("Reading Misc. Data...");
+        /*Reading Misc. Data...*/
         ret=readmisc(f, &tempheader, Misc, keepall&&!get_bit(skip_flags, skip_misc));
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        //items
-        box_out("Reading Items...");
+        /*Reading Items...*/
         ret=readitems(f, tempheader.zelda_version, tempheader.build, keepall&&!get_bit(skip_flags, skip_items));
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        //weapons
-        box_out("Reading Weapons...");
+        /*Reading Weapons...*/
         ret=readweapons(f, &tempheader, keepall&&!get_bit(skip_flags, skip_weapons));
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        //guys
-        box_out("Reading Custom Guy Data...");
+        /*Reading Custom Guy Data...*/
         ret=readguys(f, &tempheader, keepall&&!get_bit(skip_flags, skip_guys));
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        //maps
-        box_out("Reading Maps...");
+        /*Reading Maps...*/
         ret=readmaps(f, &tempheader, keepall&&!get_bit(skip_flags, skip_maps));
         mapsread=true;
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        //combos
-        box_out("Reading Combos...");
+        /*Reading Combos...*/
         ret=readcombos(f, &tempheader, tempheader.zelda_version, tempheader.build, 0, MAXCOMBOS, keepall&&!get_bit(skip_flags, skip_combos));
         combosread=true;
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        //color data
-        box_out("Reading Color Data...");
+        /*Reading Color Data...*/
         ret=readcolordata(f, Misc, tempheader.zelda_version, tempheader.build, 0, newerpdTOTAL, keepall&&!get_bit(skip_flags, skip_csets));
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        //tiles
-        box_out("Reading Tiles...");
+        /*Reading Tiles...*/
         ret=readtiles(f, newtilebuf, &tempheader, tempheader.zelda_version, tempheader.build, 0, NEWMAXTILES, false, keepall&&!get_bit(skip_flags, skip_tiles));
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        //midis
-        box_out("Reading Tunes...");
+        /*Reading Tunes...*/
         ret=readtunes(f, &tempheader, tunes, keepall&&!get_bit(skip_flags, skip_midis));
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        //cheat codes
-        box_out("Reading Cheat Codes...");
+        /*Reading Cheat Codes...*/
         ret=readcheatcodes(f, &tempheader, keepall&&!get_bit(skip_flags, skip_cheats));
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        //initialization data
-        box_out("Reading Init. Data...");
+        /*Reading Init. Data...*/
         ret=readinitdata(f, &tempheader, keepall&&!get_bit(skip_flags, skip_initdata));
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
         if(keepall&&!get_bit(skip_flags, skip_subscreens))
         {
@@ -14146,25 +13962,18 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
             }
         }
         
-        box_out("Setting Up Default Sound Effects...");
+        /*Setting Up Default Sound Effects...*/
         
         if(keepall&&!get_bit(skip_flags, skip_sfx))
             setupsfx();
-            
-        box_out("okay.");
-        box_eol();
         
         //link sprites
-        box_out("Reading Custom Link Sprite Data...");
+        /*Reading Custom Link Sprite Data...*/
         ret=readlinksprites2(f, -1, 0, keepall&&!get_bit(skip_flags, skip_linksprites));
         checkstatus(ret);
-        box_out("okay.");
-        box_eol();
         
-        box_out("Setting Up Default Item Drop Sets...");
+        /*Setting Up Default Item Drop Sets...*/
         ret=readitemdropsets(f, -1, 0, keepall&&!get_bit(skip_flags, skip_itemdropsets));
-        box_out("okay.");
-        box_eol();
     }
     
     // check data
@@ -14203,10 +14012,6 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
         zinit.cont_heart=100;
     }
     
-    box_out("Done.");
-    box_eol();
-    box_end(false);
-    
 //  if (keepall==true||!get_bit(skip_flags, skip_header))
     if(keepall&&!get_bit(skip_flags, skip_header))
     {
@@ -14236,9 +14041,6 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
     return qe_OK;
     
 invalid:
-    box_out("error.");
-    box_eol();
-    box_end(true);
     
     if(f)
     {

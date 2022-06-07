@@ -273,7 +273,6 @@ int sso_y(subscreen_object *tempsso);
 int sso_h(subscreen_object *tempsso);
 int sso_w(subscreen_object *tempsso);
 int get_alignment(subscreen_object *tempsso);
-void sso_bounding_box(BITMAP *bmp, subscreen_group *tempss, int index, int color);
 
 #endif
 

@@ -15,6 +15,7 @@
 
 extern byte *colordata;
 extern void create_zc_trans_table(COLOR_MAP *table, AL_CONST PALETTE pal, int r, int g, int b);
+void create_rgb_table_range(RGB_MAP *table, AL_CONST PALETTE pal, unsigned char start, unsigned char end, void (*callback)(int pos));
 
 // offsets in "data sets"
 #define poFULL   0                                          // main palette

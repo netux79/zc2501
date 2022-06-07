@@ -10,8 +10,8 @@
 #ifndef _INIT_H_
 #define _INIT_H_
 
-#include "tab_ctl.h"
 #include "zc_alleg.h"
+#include "zdefs.h"
 
 #define MAXINITTABS 5
 
@@ -29,10 +29,6 @@ void build_biic_list();
 void deallocate_biic_list();
 const char *item_class_list(int index, int *list_size);
 
-int d_line_proc(int msg, DIALOG *d, int c);
-int d_maxbombsedit_proc(int msg,DIALOG *d,int c);
-int d_bombratio_proc(int msg,DIALOG *d,int c);
-extern TABPANEL init_tabs[];
 void resetItems(gamedata *data, zinitdata *zinit, bool lvlitems);
 #endif
 

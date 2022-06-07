@@ -33,8 +33,6 @@
 #include "pal.h"
 #include "zsys.h"
 #include "qst.h"
-#include "jwin.h"
-#include "jwinfsel.h"
 #include "fontsdat.h"
 #include "particles.h"
 #include "gamedata.h"
@@ -76,8 +74,6 @@ int passive_subscreen_offset=0;
 extern int directItem;
 extern int directItemA;
 extern int directItemB;
-
-bool is_large=false;
 
 int favorite_combos[MAXFAVORITECOMBOS];
 int favorite_comboaliases[MAXFAVORITECOMBOALIASES];
@@ -224,7 +220,6 @@ int sfxdat=1;
 BITMAP *hw_screen;
 int zqwin_scale;
 
-int jwin_pal[jcMAX];
 int gui_colorset=0;
 int fullscreen;
 byte frame_rest_suggest=0,forceExit=0,zc_vsync=0;
@@ -2634,8 +2629,6 @@ int main(int argc, char* argv[])
     //  int mode = VidMode;                                       // from config file
     int tempmode=GFX_AUTODETECT;
     
-    resolve_password(zeldapwd);
-
     // load the data files
     resolve_password(datapwd);
 //  setPackfilePassword(datapwd);
@@ -2846,13 +2839,6 @@ int main(int argc, char* argv[])
     }
     
     const int wait_ms_on_set_graphics = 20; //formerly 250. -Gleeok
-    
-    // set video mode
-    
-    if(resx>=640 && resy>=480)
-    {
-        is_large=true;
-    }
     
     //request_refresh_rate(60);
     
@@ -3219,17 +3205,6 @@ void quit_game()
     //if(ZCMaps != NULL) free(ZCMaps);
     //  dumb_exit();
 }
-
-
-int d_timer_proc(int, DIALOG *, int)
-{
-    return D_O_K;
-}
-
-
-
-
-
 
 /////////////////////////////////////////////////
 // malloc

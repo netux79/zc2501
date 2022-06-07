@@ -22,10 +22,8 @@
 #include <stdio.h>
 
 #include "zc_alleg.h"
-#include "jwin.h"
 #include "zdefs.h"
 #include "zsys.h"
-#include "gui.h"
 #include "init.h"
 #include "zelda.h"
 
@@ -40,7 +38,6 @@
 
 //using namespace std;
 
-extern int jwin_pal[jcMAX];
 extern FONT *sfont2;
 extern FONT *lfont;
 extern FONT *pfont;
@@ -49,14 +46,11 @@ extern itemdata *itemsbuf;
 extern byte quest_rules[20];
 extern char *item_string[];
 
-void initPopulate(int &i, DIALOG_PROC proc, int x, int y, int w, int h, int fg, int bg, int key, int flags, int d1, int d2,
-                  void *dp, void *dp2 = NULL, void *dp3 = NULL);
 void getitem(int id, bool nosound);
 
 static const int endEquipField = 33;
 
 void doFamily(int family, zinitdata *data);
-int jwin_initlist_proc(int msg,DIALOG *d,int c);
 
 class Family
 {
@@ -77,20 +71,6 @@ extern int startdmapxy[6];
 std::map<int, int> listidx2biic;
 //sorted by family id
 static std::map<int, std::vector<Family> > families;
-
-int d_line_proc(int msg, DIALOG *d, int c)
-{
-    //these are here to bypass compiler warnings about unused arguments
-    c=c;
-    
-    if(msg==MSG_DRAW)
-    {
-        int fg = (d->flags & D_DISABLED) ? gui_mg_color : d->fg;
-        line(screen, d->x, d->y, d->x+d->w, d->y+d->h, palette_color[fg]);
-    }
-    
-    return D_O_K;
-}
 
 static int init_equipment_list[] =
 {
@@ -683,165 +663,6 @@ static int init_const_list[] =
     1700, 1701, 1702, 1703, 1704, 1705, 1706, -1
 };
 
-
-static TABPANEL init_dmap_items_hundreds_tabs[] =
-{
-    // (text)
-    { (char *)"000",             D_SELECTED,   init_dmap_items_000s_list,    0, NULL },
-    { (char *)"100",             0,            init_dmap_items_100s_list,    0, NULL },
-    { (char *)"200",             0,            init_dmap_items_200s_list,    0, NULL },
-    { (char *)"300",             0,            init_dmap_items_300s_list,    0, NULL },
-    { (char *)"400",             0,            init_dmap_items_400s_list,    0, NULL },
-    { (char *)"500",             0,            init_dmap_items_500s_list,    0, NULL },
-    { NULL,                      0,            0,                            0, NULL }
-};
-
-
-static TABPANEL init_dmap_items_000s_tabs[] =
-{
-    // (text)
-    { (char *)"00",              D_SELECTED,   init_dmap_items_0_00s_list,   0, NULL },
-    { (char *)"10",              0,            init_dmap_items_0_10s_list,   0, NULL },
-    { (char *)"20",              0,            init_dmap_items_0_20s_list,   0, NULL },
-    { (char *)"30",              0,            init_dmap_items_0_30s_list,   0, NULL },
-    { (char *)"40",              0,            init_dmap_items_0_40s_list,   0, NULL },
-    { (char *)"50",              0,            init_dmap_items_0_50s_list,   0, NULL },
-    { (char *)"60",              0,            init_dmap_items_0_60s_list,   0, NULL },
-    { (char *)"70",              0,            init_dmap_items_0_70s_list,   0, NULL },
-    { (char *)"80",              0,            init_dmap_items_0_80s_list,   0, NULL },
-    { (char *)"90",              0,            init_dmap_items_0_90s_list,   0, NULL },
-    { NULL,                      0,            0,                            0, NULL }
-};
-
-static TABPANEL init_dmap_items_100s_tabs[] =
-{
-    // (text)
-    { (char *)"00",              D_SELECTED,   init_dmap_items_1_00s_list,   0, NULL },
-    { (char *)"10",              0,            init_dmap_items_1_10s_list,   0, NULL },
-    { (char *)"20",              0,            init_dmap_items_1_20s_list,   0, NULL },
-    { (char *)"30",              0,            init_dmap_items_1_30s_list,   0, NULL },
-    { (char *)"40",              0,            init_dmap_items_1_40s_list,   0, NULL },
-    { (char *)"50",              0,            init_dmap_items_1_50s_list,   0, NULL },
-    { (char *)"60",              0,            init_dmap_items_1_60s_list,   0, NULL },
-    { (char *)"70",              0,            init_dmap_items_1_70s_list,   0, NULL },
-    { (char *)"80",              0,            init_dmap_items_1_80s_list,   0, NULL },
-    { (char *)"90",              0,            init_dmap_items_1_90s_list,   0, NULL },
-    { NULL,                      0,            0,                            0, NULL }
-};
-
-static TABPANEL init_dmap_items_200s_tabs[] =
-{
-    // (text)
-    { (char *)"00",              D_SELECTED,   init_dmap_items_2_00s_list,   0, NULL },
-    { (char *)"10",              0,            init_dmap_items_2_10s_list,   0, NULL },
-    { (char *)"20",              0,            init_dmap_items_2_20s_list,   0, NULL },
-    { (char *)"30",              0,            init_dmap_items_2_30s_list,   0, NULL },
-    { (char *)"40",              0,            init_dmap_items_2_40s_list,   0, NULL },
-    { (char *)"50",              0,            init_dmap_items_2_50s_list,   0, NULL },
-    { (char *)"60",              0,            init_dmap_items_2_60s_list,   0, NULL },
-    { (char *)"70",              0,            init_dmap_items_2_70s_list,   0, NULL },
-    { (char *)"80",              0,            init_dmap_items_2_80s_list,   0, NULL },
-    { (char *)"90",              0,            init_dmap_items_2_90s_list,   0, NULL },
-    { NULL,                      0,            0,                            0, NULL }
-};
-
-static TABPANEL init_dmap_items_300s_tabs[] =
-{
-    // (text)
-    { (char *)"00",              D_SELECTED,   init_dmap_items_3_00s_list,   0, NULL },
-    { (char *)"10",              0,            init_dmap_items_3_10s_list,   0, NULL },
-    { (char *)"20",              0,            init_dmap_items_3_20s_list,   0, NULL },
-    { (char *)"30",              0,            init_dmap_items_3_30s_list,   0, NULL },
-    { (char *)"40",              0,            init_dmap_items_3_40s_list,   0, NULL },
-    { (char *)"50",              0,            init_dmap_items_3_50s_list,   0, NULL },
-    { (char *)"60",              0,            init_dmap_items_3_60s_list,   0, NULL },
-    { (char *)"70",              0,            init_dmap_items_3_70s_list,   0, NULL },
-    { (char *)"80",              0,            init_dmap_items_3_80s_list,   0, NULL },
-    { (char *)"90",              0,            init_dmap_items_3_90s_list,   0, NULL },
-    { NULL,                      0,            0,                            0, NULL }
-};
-
-static TABPANEL init_dmap_items_400s_tabs[] =
-{
-    // (text)
-    { (char *)"00",              D_SELECTED,   init_dmap_items_4_00s_list,   0, NULL },
-    { (char *)"10",              0,            init_dmap_items_4_10s_list,   0, NULL },
-    { (char *)"20",              0,            init_dmap_items_4_20s_list,   0, NULL },
-    { (char *)"30",              0,            init_dmap_items_4_30s_list,   0, NULL },
-    { (char *)"40",              0,            init_dmap_items_4_40s_list,   0, NULL },
-    { (char *)"50",              0,            init_dmap_items_4_50s_list,   0, NULL },
-    { (char *)"60",              0,            init_dmap_items_4_60s_list,   0, NULL },
-    { (char *)"70",              0,            init_dmap_items_4_70s_list,   0, NULL },
-    { (char *)"80",              0,            init_dmap_items_4_80s_list,   0, NULL },
-    { (char *)"90",              0,            init_dmap_items_4_90s_list,   0, NULL },
-    { NULL,                      0,            0,                            0, NULL }
-};
-
-static TABPANEL init_dmap_items_500s_tabs[] =
-{
-    // (text)
-    { (char *)"00",              D_SELECTED,   init_dmap_items_5_00s_list,   0, NULL },
-    { (char *)"10",              0,            init_dmap_items_5_10s_list,   0, NULL },
-    { NULL,                      0,            0,                            0, NULL }
-};
-
-TABPANEL init_tabs[] =
-{
-    // (text)
-    { (char *)"Equipment",       D_SELECTED,   init_equipment_list,          0, NULL },
-    { (char *)"Items",           0,            init_items_list,              0, NULL },
-    { (char *)"Level Items",     0,            init_dmap_items_list,         0, NULL },
-    { (char *)"Misc",            0,            init_misc_list,               0, NULL },
-    { (char *)"Constants",       0,            init_const_list,              0, NULL },
-    { NULL,                      0,            0,                            0, NULL }
-};
-
-//int startdmapxy[6] = {188-68,131-93,188-68,111-93,188-68,120-93};
-
-int d_maxbombsedit_proc(int msg,DIALOG *d,int c)
-{
-    int ret = jwin_edit_proc(msg,d,c);
-    
-    if(msg==MSG_DRAW)
-    {
-        scare_mouse();
-        int div = atoi((char*)((d+1589)->dp));
-        
-        if(div == 0)
-            div = 4;
-            
-        sprintf((char*)((d+6)->dp), "%d", atoi((char*)(d->dp))/div);
-        (d+6)->proc(MSG_DRAW,d+6,0);
-        unscare_mouse();
-    }
-    
-    return ret;
-}
-
-int d_bombratioedit_proc(int msg,DIALOG *d,int c)
-{
-    int ret = jwin_edit_proc(msg,d,c);
-    
-    if(msg==MSG_DRAW)
-    {
-        int sbombmax = 0;
-        int div = atoi((char*)(d->dp));
-        
-        if(div == 0)
-            div = 4;
-            
-        if(atoi((char*)(d->dp)))
-            sbombmax = atoi((char*)((d-1589)->dp))/div;
-            
-        scare_mouse();
-        sprintf((char*)((d-1583)->dp), "%d", sbombmax);
-        (d-1583)->proc(MSG_DRAW,d-1583,0);
-        unscare_mouse();
-    }
-    
-    return ret;
-}
-
 enum { ws_2_frame, ws_3_frame, ws_max };
 const char *walkstyles[]= { "2-frame", "3-frame" };
 
@@ -855,8 +676,6 @@ char *walkstylelist(int index, int *list_size)
     *list_size=ws_max;
     return NULL;
 }
-
-static ListData dmap_list(dmaplist, &font);
 
 const char *itype_names[itype_max] = { "Swords", "Boomerangs", "Arrows", "Candles", "Whistles",
                                        "Bait", "Letters", "Potions", "Wands", "Rings", "Wallets", "Amulets", "Shields", "Bows", "Rafts",

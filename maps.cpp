@@ -25,7 +25,6 @@
 #include "zelda.h"
 #include "tiles.h"
 #include "sprite.h"
-#include "jwin.h"
 #include "zsys.h"
 #include "subscr.h"
 #include "zc_subscr.h"
