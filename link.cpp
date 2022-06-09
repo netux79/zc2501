@@ -10,10 +10,6 @@
 //
 //--------------------------------------------------------
 
-#ifndef __GTHREAD_HIDE_WIN32API
-#define __GTHREAD_HIDE_WIN32API 1
-#endif                            //prevent indirectly including windows.h
-
 #include "precompiled.h" //always first
 
 #include <string.h>
@@ -772,10 +768,9 @@ void LinkClass::positionSword(weapon *w, int itemid)
     // Place a sword weapon at the right spot.
     int wy=1;
     int wx=1;
-    int f=0,t,cs2;
+    int f=0,t;
     
     t = w->o_tile;
-    cs2 = w->o_cset;
     slashxofs=0;
     slashyofs=0;
     
@@ -946,7 +941,6 @@ void LinkClass::positionSword(weapon *w, int itemid)
                 wy-=9;
                 wx-=3;
                 t = wpnsbuf[wpn2].tile;
-                cs2 = wpnsbuf[wpn2].csets&15;
                 f=0;
             }
             
@@ -963,7 +957,6 @@ void LinkClass::positionSword(weapon *w, int itemid)
                 wy+=15;
                 wx+=2;
                 t = wpnsbuf[wpn2].tile;
-                cs2 = wpnsbuf[wpn2].csets&15;
                 ++t;
                 f=0;
             }
@@ -982,7 +975,6 @@ void LinkClass::positionSword(weapon *w, int itemid)
                 wy+=3;
                 slashxofs-=1;
                 t = wpnsbuf[wpn2].tile;
-                cs2 = wpnsbuf[wpn2].csets&15;
                 t+=2;
                 f=0;
             }
@@ -1010,7 +1002,6 @@ void LinkClass::positionSword(weapon *w, int itemid)
                 wx+=15;
                 slashxofs+=1;
                 t = wpnsbuf[wpn2].tile;
-                cs2 = wpnsbuf[wpn2].csets&15;
                 
                 if(spins>0 || get_bit(quest_rules, qr_SLASHFLIPFIX))
                 {
@@ -1027,13 +1018,6 @@ void LinkClass::positionSword(weapon *w, int itemid)
             
             break;
         }
-    }
-    
-    int itemid2 = current_item_id(itype_chargering);
-    
-    if(charging>(itemid2>=0 ? itemsbuf[itemid2].misc1 : 64))
-    {
-        cs2=(BSZ ? (frame&3)+6 : ((frame>>2)&1)+7);
     }
     
     /*if(BSZ || ((isdungeon() && currscr<128) && !get_bit(quest_rules,qr_LINKDUNGEONPOSFIX)))
@@ -1221,7 +1205,7 @@ attack:
         {
             int wy=1;
             int wx=1;
-            int f=0,t,cs2;
+            int f=0,t;
             weapon *w=NULL;
             bool found = false;
             
@@ -1244,7 +1228,6 @@ attack:
             }
             
             t = w->o_tile;
-            cs2 = w->o_cset;
             
             switch(dir)
             {
@@ -4631,7 +4614,7 @@ bool LinkClass::startwpn(int itemid)
         
         Lwpns.add(new weapon(x,y,z,wWhistle,0,0,dir,itemid,getUID()));
         
-        if(whistleflag=findentrance(x,y,mfWHISTLE,false))
+        if((whistleflag=findentrance(x,y,mfWHISTLE,false)))
             didstuff |= did_whistle;
             
         if((didstuff&did_whistle && itemsbuf[itemid].flags&ITEM_FLAG1) || currscr>=128)
@@ -8197,7 +8180,6 @@ void LinkClass::checkpushblock()
     
     bool doit=false;
     bool changeflag=false;
-    bool changecombo=false;
     
     if(((f==mfPUSHUD || f==mfPUSHUDNS|| f==mfPUSHUDINS) && dir<=down) ||
             ((f==mfPUSHLR || f==mfPUSHLRNS|| f==mfPUSHLRINS) && dir>=left) ||
@@ -8219,7 +8201,6 @@ void LinkClass::checkpushblock()
             ((f2==mfPUSHR || f2==mfPUSHRNS || f2==mfPUSHRINS) && dir==right) ||
             f2==mfPUSH4 || f2==mfPUSH4NS || f2==mfPUSH4INS)&&(f!=mfPUSHED))
     {
-        changecombo=true;
         doit=true;
     }
     
@@ -15183,11 +15164,9 @@ void LinkClass::setNayrusLoveShieldClk(int newclk)
     
     if(decorations.idCount(dNAYRUSLOVESHIELD)==0)
     {
-        decoration *dec;
         decorations.add(new dNayrusLoveShield(LinkX(), LinkY(), dNAYRUSLOVESHIELD, 0));
         decorations.spr(decorations.Count()-1)->misc=0;
         decorations.add(new dNayrusLoveShield(LinkX(), LinkY(), dNAYRUSLOVESHIELD, 0));
-        dec=(decoration *)decorations.spr(decorations.Count()-1);
         decorations.spr(decorations.Count()-1)->misc=1;
     }
 }

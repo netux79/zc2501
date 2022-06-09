@@ -31,11 +31,6 @@ ArrayIterator<*>{
 	children	( #(ptr: *$e._ptr))
 }
 */
-#if defined (_MSC_VER) && defined (USING_ARRAY)
-#define ZCArray Array
-#define ZCArrayIterator ArrayIterator
-#endif
-
 
 #include "zdefs.h"
 

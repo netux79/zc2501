@@ -46,7 +46,7 @@ defdata.o: defdata.cpp defdata.h gamedata.h guys.h items.h sfx.h sprite.h weapon
 	$(CC) $(OPTS) $(CFLAG) -c defdata.cpp -o defdata.o $(SFLAG)
 ending.o: ending.cpp colors.h ending.h gamedata.h guys.h items.h link.h maps.h pal.h qst.h sfx.h sprite.h subscr.h tiles.h title.h weapons.h zc_alleg.h zc_custom.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h init.h
 	$(CC) $(OPTS) $(CFLAG) -c ending.cpp -o ending.o $(SFLAG)
-ffasm.o: ffasm.cpp ffasm.h ffscript.h gamedata.h sprite.h zc_alleg.h zcmusic.h zdefs.h zquest.h zsys.h
+ffasm.o: ffasm.cpp ffasm.h ffscript.h gamedata.h sprite.h zc_alleg.h zcmusic.h zdefs.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c ffasm.cpp -o ffasm.o $(SFLAG)
 ffscript.o: ffscript.cpp colors.h ffscript.h gamedata.h guys.h items.h link.h maps.h pal.h qst.h sfx.h sprite.h subscr.h tiles.h weapons.h zc_alleg.h zc_custom.h zc_init.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c ffscript.cpp -o ffscript.o $(SFLAG)
@@ -68,7 +68,7 @@ pal.o: pal.cpp colors.h gamedata.h items.h link.h maps.h pal.h qst.h sfx.h sprit
 	$(CC) $(OPTS) $(CFLAG) -c pal.cpp -o pal.o $(SFLAG)
 particles.o: particles.cpp gamedata.h particles.h sprite.h zc_alleg.h zdefs.h
 	$(CC) $(OPTS) $(CFLAG) -c particles.cpp -o particles.o $(SFLAG)
-qst.o: qst.cpp colors.h defdata.h gamedata.h guys.h items.h md5.h qst.h sfx.h sprite.h subscr.h tiles.h weapons.h zc_alleg.h zc_custom.h zcmusic.h zdefs.h zquest.h zsys.h
+qst.o: qst.cpp colors.h defdata.h gamedata.h guys.h items.h md5.h qst.h sfx.h sprite.h subscr.h tiles.h weapons.h zc_alleg.h zc_custom.h zcmusic.h zdefs.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c qst.cpp -o qst.o $(SFLAG)
 script_drawing.o: script_drawing.cpp ffscript.h maps.h rendertarget.h script_drawing.h tiles.h zc_alleg.h zelda.h
 	$(CC) $(OPTS) $(CFLAG) -c script_drawing.cpp -o script_drawing.o $(SFLAG)
@@ -84,7 +84,7 @@ weapons.o: weapons.cpp colors.h gamedata.h items.h link.h maps.h pal.h qst.h sfx
 	$(CC) $(OPTS) $(CFLAG) -c weapons.cpp -o weapons.o $(SFLAG)
 zc_custom.o: zc_custom.cpp gamedata.h sfx.h zc_alleg.h zc_custom.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c zc_custom.cpp -o zc_custom.o $(SFLAG)
-zc_init.o: zc_init.cpp colors.h gamedata.h init.h items.h link.h maps.h pal.h qst.h sfx.h sprite.h subscr.h tiles.h zc_alleg.h zc_custom.h zc_init.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zquest.h zsys.h
+zc_init.o: zc_init.cpp colors.h gamedata.h init.h items.h link.h maps.h pal.h qst.h sfx.h sprite.h subscr.h tiles.h zc_alleg.h zc_custom.h zc_init.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c zc_init.cpp -o zc_init.o $(SFLAG)
 zc_items.o: zc_items.cpp gamedata.h guys.h maps.h sfx.h sprite.h weapons.h zc_alleg.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c zc_items.cpp -o zc_items.o $(SFLAG)
@@ -92,7 +92,7 @@ zc_sprite.o: zc_sprite.cpp gamedata.h maps.h sfx.h sprite.h tiles.h zc_alleg.h z
 	$(CC) $(OPTS) $(CFLAG) -c zc_sprite.cpp -o zc_sprite.o $(SFLAG)
 zc_subscr.o: zc_subscr.cpp colors.h gamedata.h guys.h items.h link.h maps.h pal.h qst.h sfx.h sprite.h subscr.h tiles.h weapons.h zc_alleg.h zc_custom.h zc_subscr.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c zc_subscr.cpp -o zc_subscr.o $(SFLAG)
-zc_sys.o: zc_sys.cpp colors.h gamedata.h guys.h init.h items.h link.h maps.h pal.h particles.h qst.h sfx.h sprite.h subscr.h tiles.h title.h weapons.h zc_alleg.h zc_custom.h zc_init.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zquest.h zsys.h
+zc_sys.o: zc_sys.cpp colors.h gamedata.h guys.h init.h items.h link.h maps.h pal.h particles.h qst.h sfx.h sprite.h subscr.h tiles.h title.h weapons.h zc_alleg.h zc_custom.h zc_init.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c zc_sys.cpp -o zc_sys.o $(SFLAG)
 zcmusic.o: zcmusic.cpp zc_alleg.h zcmusic.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c zcmusic.cpp -o zcmusic.o $(SFLAG)

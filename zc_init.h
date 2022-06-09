@@ -14,4 +14,3 @@
 zinitdata *copyIntoZinit(gamedata *src);
 void resetItems(gamedata *game);
 #endif
- 

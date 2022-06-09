@@ -8,10 +8,6 @@
 //
 //--------------------------------------------------------
 
-#ifndef __GTHREAD_HIDE_WIN32API
-#define __GTHREAD_HIDE_WIN32API 1
-#endif                            //prevent indirectly including windows.h
-
 #include "precompiled.h" //always first
 
 #include <stdio.h>
@@ -27,7 +23,7 @@
 #include "tiles.h"
 #include "zsys.h"
 #include "qst.h"
-#include "zquest.h"
+#include "zelda.h"
 #include "defdata.h"
 #include "subscr.h"
 #include "zc_custom.h"
@@ -648,7 +644,6 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
 {
     char tmpfilename[32];
     temp_name(tmpfilename);
-    char percent_done[30];
     int current_method=0;
     
     PACKFILE *f;
@@ -3402,7 +3397,7 @@ int readdmaps(PACKFILE *f, zquestheader *Header, word, word, word start_dmap, wo
         
         if(s_version <= 4)
         {
-            byte tempbyte;
+            byte tempbyte=0;
             
             if(!p_getc(&tempbyte,f,keepdata))
             {
@@ -4723,7 +4718,7 @@ int readitems(PACKFILE *f, word version, word build, bool keepdata, bool zgpmode
                 }
                 
                 tempitem.count=-1;
-                tempitem.flags=tempitem.wpn=tempitem.wpn2=tempitem.wpn3=tempitem.wpn3=tempitem.pickup_hearts=
+                tempitem.flags=tempitem.wpn=tempitem.wpn2=tempitem.wpn3=tempitem.pickup_hearts=
                                                 tempitem.misc1=tempitem.misc2=tempitem.usesound=0;
                 tempitem.family=0xFF;
                 tempitem.playsound=WAV_SCALE;
@@ -5052,7 +5047,7 @@ int readitems(PACKFILE *f, word version, word build, bool keepdata, bool zgpmode
         {
             tempitem.count=-1;
             tempitem.family=itype_misc;
-            tempitem.flags=tempitem.wpn=tempitem.wpn2=tempitem.wpn3=tempitem.wpn3=tempitem.pickup_hearts=tempitem.misc1=tempitem.misc2=tempitem.usesound=0;
+            tempitem.flags=tempitem.wpn=tempitem.wpn2=tempitem.wpn3=tempitem.pickup_hearts=tempitem.misc1=tempitem.misc2=tempitem.usesound=0;
             tempitem.playsound=WAV_SCALE;
             reset_itembuf(&tempitem,i);
         }
@@ -6842,7 +6837,7 @@ int read_one_subscreen(PACKFILE *f, zquestheader *, bool keepdata, int i, word s
         
         if(s_version < 2)
         {
-            dword temp;
+            dword temp=0;
             if(!p_igetl(&temp,f,keepdata))
             {
                 return qe_invalid;
@@ -7746,7 +7741,7 @@ int readffscript(PACKFILE *f, zquestheader *Header, bool keepdata)
         
         for(int i=0; i<numffcbindings; i++)
         {
-            word id;
+            word id=0;
             p_igetw(&id, f, true);
             p_igetl(&bufsize, f, true);
             buf = new char[bufsize+1];
@@ -7765,7 +7760,7 @@ int readffscript(PACKFILE *f, zquestheader *Header, bool keepdata)
         
         for(int i=0; i<numglobalbindings; i++)
         {
-            word id;
+            word id=0;
             p_igetw(&id, f, true);
             p_igetl(&bufsize, f, true);
             buf = new char[bufsize+1];
@@ -13425,10 +13420,8 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
     mapsread=false;
     fixffcs=false;
     
-    //  show_progress=true;
     char tmpfilename[32];
     temp_name(tmpfilename);
-//  char percent_done[30];
     bool catchup=false;
     byte tempbyte;
     word old_map_count=map_count;

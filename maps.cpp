@@ -8,10 +8,6 @@
 //
 //--------------------------------------------------------
 
-#ifndef __GTHREAD_HIDE_WIN32API
-#define __GTHREAD_HIDE_WIN32API 1
-#endif                            //prevent indirectly including windows.h
-
 #include "precompiled.h" //always first
 
 #include <string.h>
@@ -36,19 +32,6 @@
 #define EPSILON 0.01 // Define your own tolerance
 #define FLOAT_EQ(x,v) (((v - EPSILON) < x) && (x <( v + EPSILON)))
 #define DegtoFix(d)     ((d)*0.71111111)
-
-
-//MSVC does not provide a log2 funcion in <cmath>
-#ifdef _MSC_VER
-double log2(double n)
-{
-    return log(n) / log(2.0);
-}
-float log2(float n)
-{
-    return log(n) / log(2.f);
-}
-#endif
 
 
 FONT *get_zc_font(int index);
@@ -1599,9 +1582,7 @@ bool findentrance(int x, int y, int flag, bool setflag)
     bool foundflag=false;
     bool foundcflag=false;
     bool foundnflag=false;
-    bool foundfflag=false;
     //bool ffcombosingle = false;
-    int ffcombos[4] = {-1, -1, -1, -1};
     bool single16=false;
     int scombo=-1;
     
@@ -1628,34 +1609,22 @@ bool findentrance(int x, int y, int flag, bool setflag)
     if(MAPFFCOMBOFLAG(x,y)==flag)
     {
         foundflag=true;
-        foundfflag=true;
     }
-    
-    ffcombos[0] = current_ffcombo;
     
     if(MAPFFCOMBOFLAG(x+15,y)==flag)
     {
         foundflag=true;
-        foundfflag=true;
     }
-    
-    ffcombos[1] = current_ffcombo;
     
     if(MAPFFCOMBOFLAG(x,y+15)==flag)
     {
         foundflag=true;
-        foundfflag=true;
     }
-    
-    ffcombos[2] = current_ffcombo;
     
     if(MAPFFCOMBOFLAG(x+15,y+15)==flag)
     {
         foundflag=true;
-        foundfflag=true;
     }
-    
-    ffcombos[3] = current_ffcombo;
     
     if(!foundflag)
     {
@@ -4058,7 +4027,6 @@ void loadscr(int tmp,int destdmap, int scr,int ldir,bool overlay=false)
             for(int i=0; i<(ZCMaps[currmap].tileWidth)*(ZCMaps[currmap].tileHeight); ++i)
             {
                 int c=layerscreen->data[i];
-                int cs=layerscreen->cset[i];
                 
                 // New screen flag: Cycle Combos At Screen Init
                 if(combobuf[c].nextcombo != 0 && (tmpscr[tmp].flags3 & fCYCLEONINIT) && (j<0 || get_bit(quest_rules,qr_CMBCYCLELAYERS)))
@@ -4070,7 +4038,6 @@ void loadscr(int tmp,int destdmap, int scr,int ldir,bool overlay=false)
                         layerscreen->data[i] = combobuf[c].nextcombo;
                         layerscreen->cset[i] = combobuf[c].nextcset;
                         c=layerscreen->data[i];
-                        cs=layerscreen->cset[i];
                     }
                 }
             }
@@ -4228,7 +4195,6 @@ void loadscr2(int tmp,int scr,int)
             for(int i=0; i<(ZCMaps[currmap].tileWidth)*(ZCMaps[currmap].tileHeight); ++i)
             {
                 int c=layerscreen->data[i];
-                int cs=layerscreen->cset[i];
                 
                 // New screen flag: Cycle Combos At Screen Init
                 if((tmpscr[tmp].flags3 & fCYCLEONINIT) && (j<0 || get_bit(quest_rules,qr_CMBCYCLELAYERS)))
@@ -4240,7 +4206,6 @@ void loadscr2(int tmp,int scr,int)
                         layerscreen->data[i] = combobuf[c].nextcombo;
                         layerscreen->cset[i] = combobuf[c].nextcset;
                         c=layerscreen->data[i];
-                        cs=layerscreen->cset[i];
                     }
                 }
             }

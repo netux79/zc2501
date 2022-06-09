@@ -3,10 +3,6 @@
 /* Wrapper for transparently extending */
 /* supported music file formats.       */
 
-#ifndef __GTHREAD_HIDE_WIN32API
-#define __GTHREAD_HIDE_WIN32API 1
-#endif                            //prevent indirectly including windows.h
-
 #include "precompiled.h" //always first
 
 #include "zc_alleg.h" // Has to be there or else OS X Universal 10.4 complains of fix overload - Taku
@@ -19,32 +15,11 @@
 #include "zcmusic.h"
 #include "pthread.h"
 
-#undef	int8_t
-#undef	uint8_t
-#undef	int16_t
-#undef	uint16_t
-#undef	int32_t
-#undef	uint32_t
-//short of fixing gme, these warnings will always be there...
-#pragma warning(disable:4512) //assignment operator could not be generated
-#pragma warning(disable:4100) //unreferenced formal parameter
 #include "gme/Nsf_Emu.h"
 #include "gme/Gbs_Emu.h"
 #include "gme/Spc_Emu.h"
 #include "gme/Vgm_Emu.h"
 #include "gme/Gym_Emu.h"
-#pragma warning(default:4100)
-#pragma warning(default:4512)
-#define int8_t       signed char
-#define uint8_t      unsigned char
-#define int16_t      signed short
-#define uint16_t     unsigned short
-#define int32_t      signed int
-#define uint32_t     unsigned int
-
-#ifdef _MSC_VER
-#define stricmp _stricmp
-#endif
 
 // might consider replacing the following with user defined values from the
 // 'sound' dialog in the player. This way, each person could tune it as needed.
@@ -86,9 +61,6 @@ typedef struct GMEFILE : public ZCMUSICBASE
     int samples;
 } GMEFILE;
 
-#ifndef __GTHREAD_HIDE_WIN32API
-#define __GTHREAD_HIDE_WIN32API 1
-#endif                            //prevent indirectly including windows.h
 #include <vector>
 static std::vector<ZCMUSIC*> playlist;                      //yeah, I'm too lazy to do it myself
 static int libflags = 0;

@@ -9,9 +9,6 @@
 //
 //--------------------------------------------------------
 
-// to prevent <map> from generating errors
-#define __GTHREAD_HIDE_WIN32API 1
-
 #include "precompiled.h" //always first
 
 #include <stdio.h>
@@ -23,7 +20,6 @@
 #include "zc_alleg.h"
 #include "gamedata.h"
 #include "zc_init.h"
-#include "zquest.h"
 #include "init.h"
 #include "zdefs.h"
 #include "zelda.h"
@@ -53,12 +49,6 @@ byte midi_patch_fix;
 bool midi_paused=false;
 //extern movingblock mblock2; //mblock[4]?
 //extern int db;
-
-static const char *ZC_str = "Zelda Classic";
-static  const char *qst_dir_name = "linux_qst_dir";
-#ifdef _MSC_VER
-#define getcwd _getcwd
-#endif
 
 bool rF12();
 bool rF5();
@@ -2727,7 +2717,7 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         if(tempitem<0) break;
                         
                         if((!key[KEY_N] && (lensclk&blink_rate))
-                                || key[KEY_N] && (frame&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -2769,7 +2759,7 @@ void draw_lens_under(BITMAP *dest, bool layer)
                         if(tempitem<0) break;
                         
                         if((!key[KEY_N] && (lensclk&blink_rate))
-                                || key[KEY_N] && (frame&blink_rate))
+                                || (key[KEY_N] && (frame&blink_rate)))
                         {
                             tempitemx=x;
                             tempitemy=y;
@@ -3423,8 +3413,6 @@ int onLightSwitch()
 
 void syskeys()
 {
-    int oldtitle_version;
-    
     if(close_button_quit)
     {
         close_button_quit=false;
@@ -4083,8 +4071,6 @@ const char *key_str[] =
 const char *pan_str[4] = { "MONO", " 1/2", " 3/4", "FULL" };
 //extern int zcmusic_bufsz;
 
-static char str_a[80],str_b[80],str_s[80],str_m[16],str_l[16],str_r[16],str_p[16],str_ex1[16],str_ex2[16],str_ex3[16],str_ex4[16];
-
 /*
 int midi_dp[3] = {0,147,104};
 int digi_dp[3] = {1,147,120};
@@ -4102,8 +4088,6 @@ int onQuit()
 {
     if(Playing)
     {
-        int ret=0;
-        
         if(get_bit(quest_rules, qr_NOCONTINUE))
         {
         }
@@ -4413,21 +4397,11 @@ void system_pal()
     memcpy(sys_pal,pal,sizeof(pal));
 }
 
-void switch_out_callback()
-{
-}
-
-void switch_in_callback()
-{
-}
-
 void game_pal()
 {
     clear_to_color(screen,BLACK);
     set_palette_range(RAMpal,0,255,false);
 }
-
-static char bar_str[] = "";
 
 void music_pause()
 {
@@ -4914,81 +4888,6 @@ bool joybtn(int b)
         return false;
         
     return joy[joystick_index].button[b-1].b !=0;
-}
-
-int next_press_key()
-{
-    char k[128];
-    
-    for(int i=0; i<128; i++)
-        k[i]=key[i];
-        
-    for(;;)
-    {
-        for(int i=0; i<128; i++)
-            if(key[i]!=k[i])
-                return i;
-    }
-    
-    //	return (readkey()>>8);
-}
-
-int next_press_btn()
-{
-    clear_keybuf();
-    bool b[MAX_BUTTONS_CHK];
-    
-    for(int i=1; i<MAX_BUTTONS_CHK; i++)
-        b[i]=joybtn(i);
-        
-    //first, we need to wait until they're pressing no buttons
-    for(;;)
-    {
-        if(keypressed())
-        {
-            switch(readkey()>>8)
-            {
-            case KEY_ESC:
-                return -1;
-                
-            case KEY_SPACE:
-                return 0;
-            }
-        }
-        
-        poll_joystick();
-        bool done = true;
-        
-        for(int i=1; i<MAX_BUTTONS_CHK; i++)
-        {
-            if(joybtn(i)) done = false;
-        }
-        
-        if(done) break;
-    }
-    
-    //now, we need to wait for them to press any button
-    for(;;)
-    {
-        if(keypressed())
-        {
-            switch(readkey()>>8)
-            {
-            case KEY_ESC:
-                return -1;
-                
-            case KEY_SPACE:
-                return 0;
-            }
-        }
-        
-        poll_joystick();
-        
-        for(int i=1; i<MAX_BUTTONS_CHK; i++)
-        {
-            if(joybtn(i)) return i;
-        }
-    }
 }
 
 static bool rButton(bool(proc)(),bool &flag)

@@ -29,16 +29,11 @@ void advanceframe(bool allowwavy, bool sfxcleaup = true);
 void updatescr(bool allowwavy);
 void syskeys();
 void system_pal();
-void switch_out_callback();
-void switch_in_callback();
 void game_pal();
-int  onSave();
 int  onQuit();
 int  onReset();
 int  onExit();
 
-int  next_press_key();
-int  next_press_btn();
 bool joybtn(int b);
 bool ReadKey(int k);
 void eat_buttons();

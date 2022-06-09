@@ -152,6 +152,7 @@ int get_homescr();
 int get_bmaps(int si);
 bool no_subscreen();
 bool is_zquest();
+void setZScriptVersion(int s_version);
 
 INLINE void sfx(int index)
 {

@@ -12,10 +12,6 @@
 //
 //--------------------------------------------------------
 
-#ifndef __GTHREAD_HIDE_WIN32API
-#define __GTHREAD_HIDE_WIN32API 1
-#endif                            //prevent indirectly including windows.h
-
 #include "precompiled.h" //always first
 
 #include <string.h>
@@ -3554,7 +3550,7 @@ void weapon::draw(BITMAP *dest)
     {
     case wSword:
     case wHammer:
-        if(get_bit(quest_rules,qr_LINKFLICKER)&&((getClock()||LinkHClk())&&(frame&1)) ||
+        if((get_bit(quest_rules,qr_LINKFLICKER)&&((getClock()||LinkHClk())&&(frame&1))) ||
                 Link.getDontDraw() || tmpscr->flags3&fINVISLINK)
             return;
             
@@ -3729,7 +3725,8 @@ void weapon::draw(BITMAP *dest)
         {
             if(parentitem>=0 && itemsbuf[parentitem].flags & ITEM_FLAG1)
             {
-                tile=o_tile+(frames*(itemsbuf[parentitem].flags & ITEM_FLAG2)?8:1);
+                int multiplier = (itemsbuf[parentitem].flags & ITEM_FLAG2) ? 8 : 1;
+                tile=o_tile+(frames*multiplier);
             }
             else
             {

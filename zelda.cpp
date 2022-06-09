@@ -15,7 +15,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-//#include <sdl/sdl.h>
 #include <string>
 #include <map>
 #include <vector>
@@ -42,11 +41,6 @@
 #include "zc_array.h"
 #include "rendertarget.h"
 #include "vectorset.h"
-
-#ifdef _MSC_VER
-#include <crtdbg.h>
-#define stricmp _stricmp
-#endif
 
 ZCMUSIC *zcmusic = NULL;
 zinitdata zinit;
@@ -122,24 +116,8 @@ void throttleFPS()
     logic_counter = 0;
 }
 
-static char dmap_str_buf[37];
 int dmap_list_size=MAXDMAPS;
 bool dmap_list_zero=true;
-
-const char *dmaplist(int index, int *list_size)
-{
-    if(index>=0)
-    {
-        bound(index,0,dmap_list_size-1);
-        sprintf(dmap_str_buf,"%3d-%s",index+(dmap_list_zero?0:1), DMaps[index].name);
-        return dmap_str_buf;
-    }
-    
-    *list_size=dmap_list_size;
-    return NULL;
-}
-
-int startdmapxy[6] = {0,0,0,0,0,0};
 
 /**********************************/
 /******** Global Variables ********/

@@ -4,16 +4,9 @@
 #include<allegro.h>
 
 
-#ifdef _MSC_VER
-#ifndef _FORCE_INLINE
-#define _FORCE_INLINE __forceinline
-#endif
-#else
 #ifndef _FORCE_INLINE
 #define _FORCE_INLINE inline
 #endif
-#endif
-
 
 
 class ZScriptDrawingRenderTarget

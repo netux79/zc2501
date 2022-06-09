@@ -23,10 +23,6 @@ using std::string;
 #include "zsys.h"
 #include "zc_sys.h"
 
-#ifdef _MSC_VER
-#define stricmp _stricmp
-#endif
-
 //#ifdef _ZQUEST_SCALE_
 extern volatile int myvsync;
 extern int zqwin_scale;
@@ -191,17 +187,8 @@ int used_switch(int argc,char *argv[],const char *s)
             
     return 0;
 }
-//There is some hardcore constant truncation here...
-#ifdef _MSC_VER
-#pragma warning(disable: 4309)
-#pragma warning(disable: 4310)
-#endif
 
 char datapwd[8]   = { char('l'+11),char('o'+22),char('n'+33),char('g'+44),char('t'+55),char('a'+66),char('n'+77),char(0+88) };
-
-#ifdef _MSC_VER
-#pragma warning(default: 4309)
-#endif
 
 void resolve_password(char *pwd)
 {
@@ -791,54 +778,6 @@ void copy_file(const char *src, const char *dest)
         
     fclose(fin);
     fclose(fout);
-}
-/*
-#define BOX_W     MIN(512, SCREEN_W-16)
-#define BOX_H     MIN(256, (SCREEN_H-64)&0xFFF0)
-
-#define BOX_L     ((SCREEN_W - BOX_W) / 2)
-#define BOX_R     ((SCREEN_W + BOX_W) / 2)
-#define BOX_T     ((SCREEN_H - BOX_H) / 2)
-#define BOX_B     ((SCREEN_H + BOX_H) / 2)
-*/
-static int box_x = 0;
-static int box_y = 0;
-static bool box_active=false;
-static int box_store_x = 0;
-static FONT *box_title_font=font;
-static FONT *box_message_font=font;
-static int box_style=0;
-static int box_titlebar_height=0;
-static int box_message_height=0;
-static int box_w=304;
-static int box_h=176;
-static int box_l=8;
-static int box_r=312;
-static int box_t=32;
-static int box_b=208;
-static bool box_log=true;
-static char box_log_msg[480];
-static int box_msg_pos=0;
-static int box_store_pos=0;
-
-void set_default_box_size()
-{
-    int screen_w=SCREEN_W;
-    int screen_h=SCREEN_H;
-    
-    if(zqwin_scale>1)
-    {
-        screen_w/=zqwin_scale;
-        screen_h/=zqwin_scale;
-    }
-    
-    box_w=MIN(512, screen_w-16);
-    box_h=MIN(256, (screen_h-64)&0xFFF0);
-    
-    box_l=(screen_w-box_w)/2;
-    box_t=(screen_h-box_h)/2;
-    box_r=box_l+box_w;
-    box_b=box_t+box_h;
 }
 
 void textout_shadow_ex(BITMAP *bmp, const FONT *f, const char *s, int x, int y, int shadow, int bg)

@@ -1,7 +1,3 @@
-#ifndef __GTHREAD_HIDE_WIN32API
-#define __GTHREAD_HIDE_WIN32API 1
-#endif                            //prevent indirectly including windows.h
-
 #include "precompiled.h" //always first
 
 #include <deque>
@@ -31,11 +27,6 @@ T zc_max(T a, T b)
 }*/
 
 #define zc_min(a,b)  ((a)<(b)?(a):(b))
-
-#ifdef _MSC_VER
-#pragma warning ( disable : 4800 ) //int to bool town. population: lots.
-#endif
-
 
 using std::string;
 
@@ -4401,7 +4392,7 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
         break;
         
     case GAMECLICKFREEZE:
-        value==0;
+        //No longer used
         break;
         
 ///----------------------------------------------------------------------------------------------------//
@@ -6081,9 +6072,9 @@ void do_set_dmap_enh_music(const bool v)
         return;
         
         
-    ArrayH::getString(arrayptr, filename_str, 256);
+    ArrayH::getString(arrayptr, filename_str, sizeof(DMaps[ID].tmusic));
     strncpy(DMaps[ID].tmusic, filename_str.c_str(), sizeof(DMaps[ID].tmusic));
-    DMaps[ID].tmusic[255]='\0';
+    DMaps[ID].tmusic[sizeof(DMaps[ID].tmusic)-1]='\0';
     DMaps[ID].tmusictrack=track;
 }
 

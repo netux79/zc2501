@@ -5678,9 +5678,6 @@ bool eBoulder::animate(int index)
         removearmos(x,y);
     }
     
-    fix *vert;
-    vert = get_bit(quest_rules,qr_ENEMIESZAXIS) ? &z : &y;
-    
     if(++clk2==0)                                             // start it
     {
         x=rand()&0xF0;
@@ -8927,8 +8924,6 @@ bool eMoldorm::animate(int index)
             
             if(segment->hp <= 0)
             {
-                int offset=1;
-                
                 for(int j=i; j<index+segcnt; j++)
                 {
                     // Triple-check
@@ -12064,7 +12059,6 @@ void activate_fireball_statues()
 void load_default_enemies()
 {
     wallm_load_clk=frame-80;
-    int Id=0;
     
     if(tmpscr->enemyflags&efZORA)
     {

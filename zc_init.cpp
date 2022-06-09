@@ -7,12 +7,6 @@
 //  Main code for the quest editor.
 //
 //--------------------------------------------------------
-/*
-  #include "zq_custom.h"
-  */
-#ifndef __GTHREAD_HIDE_WIN32API
-#define __GTHREAD_HIDE_WIN32API 1
-#endif                            //prevent indirectly including windows.h
 
 #include "precompiled.h" //always first
 
@@ -22,7 +16,6 @@
 #include "zc_alleg.h"
 #include "zdefs.h"
 #include "zsys.h"
-#include "zquest.h"
 #include "gamedata.h"
 #include "link.h"
 #include "zc_init.h"

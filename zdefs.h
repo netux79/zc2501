@@ -1777,32 +1777,6 @@ struct MsgStr
     byte vspace;
     byte hspace;
     byte stringflags;
-    
-    // Copy everything except listpos
-    MsgStr& operator=(MsgStr &other)
-    {
-        strncpy(s, other.s, MSGSIZE+1);
-        nextstring=other.nextstring;
-        copyStyle(other);
-        return *this;
-    }
-    
-    // Copy style data - everything except s, nextstring, and listpos
-    void copyStyle(MsgStr& other)
-    {
-        tile=other.tile;
-        cset=other.cset;
-        trans=other.trans;
-        font=other.font;
-        x=other.x;
-        y=other.y;
-        w=other.w;
-        h=other.h;
-        sfx=other.sfx;
-        vspace=other.vspace;
-        hspace=other.hspace;
-        stringflags=other.stringflags;
-    }
 };
 
 enum {dt_pass=0, dt_lock, dt_shut, dt_boss, dt_olck, dt_osht, dt_obos, dt_wall, dt_bomb, dt_walk, dt_max};
