@@ -213,8 +213,6 @@ enum {ENC_METHOD_192B104=0, ENC_METHOD_192B105, ENC_METHOD_192B185, ENC_METHOD_2
 #define CV_SFX             5
 #define CV_FAVORITES       1
 
-extern int curr_tb_page;
-extern bool triplebuffer_not_available;
 extern int original_playing_field_offset;
 extern int playing_field_offset;
 extern int passive_subscreen_height;

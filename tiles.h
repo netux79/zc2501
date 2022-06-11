@@ -19,7 +19,7 @@
 #include "zdefs.h"
 
 //extern byte *tilebuf;
-extern tiledata *newtilebuf, *grabtilebuf;
+extern tiledata *newtilebuf;
 extern newcombo *combobuf;
 extern word animated_combo_table[MAXCOMBOS][2];             //[0]=position in act2, [1]=original tile
 extern word animated_combo_table4[MAXCOMBOS][2];            //[0]=combo, [1]=clock

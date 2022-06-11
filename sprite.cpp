@@ -18,10 +18,8 @@
 #include "sprite.h"
 #include "tiles.h"
 
-extern bool halt;
 extern bool show_sprites;
 extern bool show_hitboxes;
-extern bool is_zquest();
 extern void debugging_box(int x1, int y1, int x2, int y2);
 
 /**********************************/
@@ -250,10 +248,6 @@ bool sprite::hit(sprite *s)
     if(!(scriptcoldet&1)) return false;
     
     if(id<0 || s->id<0 || clk<0) return false;
-    
-    if(halt)
-    {
-    }
     
     return hit(s->x+s->hxofs,s->y+s->hyofs,s->z+s->zofs,s->hxsz,s->hysz,s->hzsz);
 }
@@ -605,7 +599,7 @@ void sprite::draw(BITMAP* dest)
         }
     }
     
-    if(show_hitboxes && !is_zquest())
+    if(show_hitboxes)
         rect(dest,x+hxofs,y+playing_field_offset+hyofs-(z+zofs),x+hxofs+hxsz-1,(y+playing_field_offset+hyofs+hysz-(z+zofs))-1,vc((id+16)%255));
 }
 

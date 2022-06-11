@@ -1,7 +1,6 @@
 #include "precompiled.h" //always first
 
 #include <deque>
-//#include <algorithm>
 #include <string>
 #include <sstream>
 #include <math.h>

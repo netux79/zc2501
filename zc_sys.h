@@ -28,7 +28,6 @@ void f_Quit(int type);
 void advanceframe(bool allowwavy, bool sfxcleaup = true);
 void updatescr(bool allowwavy);
 void syskeys();
-void system_pal();
 void game_pal();
 int  onQuit();
 int  onReset();
@@ -109,8 +108,6 @@ bool DrunkrPbtn();
 
 enum {bosCIRCLE=0, bosOVAL, bosTRIANGLE, bosSMAS, bosMAX};
 
-void go();
-void comeback();
 void dump_pal(BITMAP *dest);
 void show_paused(BITMAP *target);
 void show_fps(BITMAP *target);
@@ -141,7 +138,6 @@ int current_item(int item_type);
 int current_item(int item_type, bool checkenabled);
 int current_item_power(int item_type);
 int current_item_id(int item_type, bool checkmagic = true);
-int high_flag(int i, int item_type, bool consecutive);
 int item_tile_mod(bool);
 int dmap_tile_mod();
 
@@ -170,9 +166,6 @@ void stop_item_sfx(int family);
 void kill_sfx();
 int  pan(int x);
 void zc_putpixel(int layer, int x, int y, int cset, int color, int timer);
-int onKeyboardEntry();
-int onLetterGridEntry();
-int onExtLetterGridEntry();
 
 #endif                                                      // _ZC_SYS_H_
 

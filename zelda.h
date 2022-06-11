@@ -87,8 +87,6 @@ enum
 
   // zc_sys.cc
   void color_layer(RGB *src,RGB *dest,char r,char g,char b,char pos,int from,int to);
-  void go();
-  void comeback();
   void waitvsync(bool fast);
   void hit_close_button();
   */
@@ -151,7 +149,6 @@ int get_currscr();
 int get_homescr();
 int get_bmaps(int si);
 bool no_subscreen();
-bool is_zquest();
 void setZScriptVersion(int s_version);
 
 INLINE void sfx(int index)
@@ -184,7 +181,7 @@ extern int strike_hint;
 
 extern RGB_MAP rgb_table;
 extern COLOR_MAP trans_table, trans_table2;
-extern BITMAP     *framebuf, *scrollbuf, *tmp_bmp, *tmp_scr, *screen2, *fps_undo, *msgbmpbuf, *msgdisplaybuf, *pricesdisplaybuf, *tb_page[3], *real_screen, *temp_buf, *temp_buf2, *prim_bmp;
+extern BITMAP     *framebuf, *scrollbuf, *tmp_bmp, *tmp_scr, *screen2, *fps_undo, *msgbmpbuf, *msgdisplaybuf, *pricesdisplaybuf, *real_screen, *temp_buf, *temp_buf2, *prim_bmp;
 extern DATAFILE *data, *sfxdata, *fontsdata, *mididata;
 extern SAMPLE   wav_refill;
 extern FONT  *nfont, *zfont, *z3font, *z3smallfont, *deffont, *lfont, *lfont_l, *pfont, *mfont, *ztfont, *sfont, *sfont2, *sfont3, *spfont, *ssfont1, *ssfont2, *ssfont3, *ssfont4, *gblafont,
@@ -204,7 +201,6 @@ extern byte     use_tiles;
 extern char     palnames[MAXLEVELS][17];
 
 /*
-extern tiledata *newtilebuf, *grabtilebuf;
 extern newcombo *combobuf;
 extern word animated_combo_table[MAXCOMBOS][2];             //[0]=position in act2, [1]=original tile
 extern word animated_combo_table4[MAXCOMBOS][2];            //[0]=combo, [1]=clock
@@ -237,15 +233,11 @@ extern volatile int logic_counter;
 #ifdef _SCRIPT_COUNTER
 extern volatile int script_counter;
 #endif
-extern bool halt;
 extern bool screenscrolling;
 extern bool close_button_quit;
-extern int gui_colorset;
 extern int fullscreen;
-extern byte disable_triplebuffer, can_triplebuffer_in_windowed_mode;
 extern byte frame_rest_suggest, forceExit, zc_vsync;
 extern byte zc_color_depth;
-extern byte use_debug_console, use_win32_proc; //windows only
 
 #ifdef _SCRIPT_COUNTER
 void update_script_counter();
@@ -259,7 +251,7 @@ extern int newscr_clk,opendoors,currdmap,fadeclk,currgame,listpos;
 extern int lastentrance,lastentrance_dmap, prices[3],loadside, Bwpn, Awpn;
 extern int digi_volume,midi_volume,sfx_volume,emusic_volume,currmidi,hasitem,whistleclk,pan_style;
 extern int joystick_index,Akey,Bkey,Skey,Lkey,Rkey,Pkey,Exkey1,Exkey2,Exkey3,Exkey4,Abtn,Bbtn,Sbtn,Mbtn,Lbtn,Rbtn,Pbtn,Exbtn1,Exbtn2,Exbtn3,Exbtn4,Quit;
-extern int DUkey, DDkey, DLkey, DRkey, ss_after, ss_speed, ss_density, ss_enable;
+extern int DUkey, DDkey, DLkey, DRkey;
 extern int hs_startx, hs_starty, hs_xdist, hs_ydist, clockclk, clock_zoras[eMAXGUYS];
 extern int swordhearts[4], currcset, gfc, gfc2, pitx, pity, refill_what, refill_why;
 extern int heart_beep_timer, new_enemy_tile_start, nets, magicitem, nayruitem, title_version;
@@ -273,7 +265,7 @@ extern bool Throttlefps, Paused, Advance, ShowFPS, Showpal, Playing, FrameSkip, 
 extern bool refreshpal,blockpath,loaded_guys,freeze_guys;
 extern bool loaded_enemies,drawguys,details,watch;
 extern bool Udown,Ddown,Ldown,Rdown,Adown,Bdown,Sdown,Mdown,LBdown,RBdown,Pdown,Ex1down,Ex2down,Ex3down,Ex4down,AUdown,ADdown,ALdown,ARdown,F12,F11,F5,keyI, keyQ;
-extern bool SystemKeys,NESquit,boughtsomething;
+extern bool NESquit,boughtsomething;
 extern bool fixed_door, darkroom,naturaldark,BSZ;            //,NEWSUBSCR;
 extern bool hookshot_used, hookshot_frozen, pull_link, add_chainlink;
 extern bool del_chainlink, hs_fix, cheat_superman, gofast, checklink;
@@ -282,8 +274,6 @@ extern bool add_df1asparkle, add_df1bsparkle, add_nl1asparkle, add_nl1bsparkle, 
 extern bool is_on_conveyor, activated_timed_warp;
 
 extern byte COOLSCROLL;
-
-extern int SnapshotFormat;
 
 extern int add_asparkle, add_bsparkle;
 
@@ -318,7 +308,6 @@ dword getNumGlobalArrays();
 
 extern int  resx,resy,scrx,scry;
 extern bool sbig;                                           // big screen
-extern bool sbig2;	//BIGGER SCREEN!!!!
 extern int screen_scale; //user adjustable screen size.
 
 extern bool scanlines;                                      //do scanlines if sbig==1
@@ -326,7 +315,6 @@ extern bool toogam;
 
 extern int cheat;                                           // 0 = none; 1,2,3,4 = cheat level
 
-extern int  mouse_down;                                     // used to hold the last reading of 'gui_mouse_b()' status
 extern int idle_count, active_count;
 extern char *quest_path;
 extern gamedata *saves;

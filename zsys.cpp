@@ -29,8 +29,6 @@ extern int zqwin_scale;
 extern BITMAP *hw_screen;
 //#endif
 
-extern bool is_zquest();
-
 char *time_str_long(dword time)
 {
     static char s[16];

@@ -1150,19 +1150,6 @@ int get_qst_buffers()
     clear_tiles(newtilebuf);
     Z_message("OK\n");                                        // Allocating tile buffer...
     
-    if(is_zquest())
-    {
-        memrequested+=(NEWMAXTILES*(sizeof(tiledata)+tilesize(tf4Bit)));
-        Z_message("Allocating tile grab buffer (%s)... ", byte_conversion2(NEWMAXTILES*sizeof(tiledata),memrequested,-1,-1));
-        
-        if((grabtilebuf=(tiledata*)malloc(NEWMAXTILES*sizeof(tiledata)))==NULL)
-            return 0;
-            
-        memset(grabtilebuf, 0, NEWMAXTILES*sizeof(tiledata));
-        clear_tiles(grabtilebuf);
-        Z_message("OK\n");                                        // Allocating tile grab buffer...
-    }
-    
     memrequested+=(100000);
     Z_message("Allocating trash buffer (%s)... ", byte_conversion2(100000,memrequested,-1,-1));
     
@@ -1228,20 +1215,6 @@ void free_newtilebuf()
     }
 }
 
-void free_grabtilebuf()
-{
-    if(is_zquest())
-    {
-        if(grabtilebuf)
-        {
-            for(int i=0; i<NEWMAXTILES; i++)
-                if(grabtilebuf[i].data) free(grabtilebuf[i].data);
-                
-            free(grabtilebuf);
-        }
-    }
-}
-
 void del_qst_buffers()
 {
     al_trace("Cleaning maps. \n");
@@ -1260,7 +1233,6 @@ void del_qst_buffers()
     
     al_trace("Cleaning tile buffers. \n");
     free_newtilebuf();
-    free_grabtilebuf();
     
     al_trace("Cleaning misc. \n");
     
@@ -11183,7 +11155,7 @@ int readcombos(PACKFILE *f, zquestheader *Header, word version, word build, word
         }
         
         //June 3 2012; ladder only is broken in 2.10 and allows the hookshot also. -Gleeok
-        if(version == 0x210 && !is_zquest())
+        if(version == 0x210)
         {
             for(int tmpcounter=0; tmpcounter<MAXCOMBOS; tmpcounter++)
                 if(combobuf[tmpcounter].type == cLADDERONLY)

@@ -40,7 +40,6 @@
 #include <assert.h>
 #include "zc_array.h"
 #include "rendertarget.h"
-#include "vectorset.h"
 
 ZCMUSIC *zcmusic = NULL;
 zinitdata zinit;
@@ -60,7 +59,6 @@ using std::string;
 using std::pair;
 extern std::map<int, pair<string,string> > ffcmap;
 
-int zq_screen_w, zq_screen_h;
 int passive_subscreen_height=56;
 int original_playing_field_offset=56;
 int playing_field_offset=original_playing_field_offset;
@@ -123,13 +121,10 @@ bool dmap_list_zero=true;
 /******** Global Variables ********/
 /**********************************/
 
-int curr_tb_page=0;
-bool triplebuffer_not_available=false;
-
 RGB_MAP rgb_table;
 COLOR_MAP trans_table, trans_table2;
 
-BITMAP     *framebuf, *scrollbuf, *tmp_bmp, *tmp_scr, *screen2, *fps_undo, *msgdisplaybuf, *pricesdisplaybuf, *tb_page[3], *real_screen, *temp_buf, *prim_bmp;
+BITMAP     *framebuf, *scrollbuf, *tmp_bmp, *tmp_scr, *screen2, *fps_undo, *msgdisplaybuf, *pricesdisplaybuf, *real_screen, *temp_buf, *prim_bmp;
 DATAFILE   *data, *sfxdata, *fontsdata, *mididata;
 FONT       *nfont, *zfont, *z3font, *z3smallfont, *deffont, *lfont, *lfont_l, *pfont, *mfont, *ztfont, *sfont, *sfont2, *sfont3, *spfont, *ssfont1, *ssfont2, *ssfont3, *ssfont4, *gblafont,
            *goronfont, *zoranfont, *hylian1font, *hylian2font, *hylian3font, *hylian4font, *gboraclefont, *gboraclepfont, *dsphantomfont, *dsphantompfont;
@@ -146,7 +141,6 @@ byte       use_cheats;
 byte       use_tiles;
 char       palnames[MAXLEVELS][PALNAMESIZE];
 /*
-tiledata   *newtilebuf, *grabtilebuf;
 newcombo   *combobuf;
 word animated_combo_table[MAXCOMBOS][2];                    //[0]=position in act2, [1]=original tile
 word animated_combo_table4[MAXCOMBOS][2];                   //[0]=combo, [1]=clock
@@ -182,7 +176,6 @@ int     lensid; // Lens's item id. -1 if lens is off.
 int    Bpos;
 byte screengrid[22];
 byte ffcgrid[4];
-bool halt=false;
 bool screenscrolling=false;
 bool close_button_quit=false;
 PALETTE tempbombpal;
@@ -198,18 +191,15 @@ int sfxdat=1;
 BITMAP *hw_screen;
 int zqwin_scale;
 
-int gui_colorset=0;
 int fullscreen;
 byte frame_rest_suggest=0,forceExit=0,zc_vsync=0;
-byte disable_triplebuffer=0,can_triplebuffer_in_windowed_mode=0;
 byte zc_color_depth=8;
-byte use_debug_console=0, use_win32_proc=1; //windows-build configs
 int homescr,currscr,frame=0,currmap=0,dlevel,warpscr,worldscr;
 int newscr_clk=0,opendoors=0,currdmap=0,fadeclk=-1,currgame=0,listpos=0;
 int lastentrance=0,lastentrance_dmap=0,prices[3],loadside, Bwpn, Awpn;
 int digi_volume,midi_volume,sfx_volume,emusic_volume,currmidi,hasitem,whistleclk,pan_style;
 int joystick_index=0,Akey,Bkey,Skey,Lkey,Rkey,Pkey,Exkey1,Exkey2,Exkey3,Exkey4,Abtn,Bbtn,Sbtn,Mbtn,Lbtn,Rbtn,Pbtn,Exbtn1,Exbtn2,Exbtn3,Exbtn4,Quit=0;
-int DUkey, DDkey, DLkey, DRkey, ss_after, ss_speed, ss_density, ss_enable;
+int DUkey, DDkey, DLkey, DRkey;
 int hs_startx, hs_starty, hs_xdist, hs_ydist, clockclk, clock_zoras[eMAXGUYS];
 int cheat_goto_dmap=0, cheat_goto_screen=0, currcset;
 int gfc, gfc2, pitx, pity, refill_what, refill_why, heart_beep_timer=0, new_enemy_tile_start=1580;
@@ -232,7 +222,7 @@ bool refreshpal,blockpath,loaded_guys,freeze_guys,
      loaded_enemies,drawguys,details=false,watch;
 bool darkroom=false,naturaldark=false,BSZ;                         //,NEWSUBSCR;
 bool Udown,Ddown,Ldown,Rdown,Adown,Bdown,Sdown,Mdown,LBdown,RBdown,Pdown,Ex1down,Ex2down,Ex3down,Ex4down,AUdown,ADdown,ALdown,ARdown,F12,F11, F5,keyI, keyQ,
-     SystemKeys=true,NESquit,boughtsomething=false,
+     NESquit,boughtsomething=false,
      fixed_door=false, hookshot_used=false, hookshot_frozen=false,
      pull_link=false, add_chainlink=false, del_chainlink=false, hs_fix=false,
      cheat_superman=false, gofast=false, checklink=true, didpit=false, heart_beep=true,
@@ -242,7 +232,6 @@ bool Udown,Ddown,Ldown,Rdown,Adown,Bdown,Sdown,Mdown,LBdown,RBdown,Pdown,Ex1down
 byte COOLSCROLL;
 
 int  add_asparkle=0, add_bsparkle=0;
-int SnapshotFormat;
 
 char   zeldadat_sig[52];
 char   sfxdat_sig[52];
@@ -354,14 +343,12 @@ dword getNumGlobalArrays()
 
 int resx,resy,scrx,scry;
 bool sbig;                                                  // big screen
-bool sbig2;													// bigger screen
 int screen_scale = 2; //default = 2 (640x480)
 bool scanlines;                                             //do scanlines if sbig==1
 bool toogam=false;
 
 int cheat=0;                                                // 0 = none; 1,2,3,4 = cheat level
 
-int mouse_down;                                             // used to hold the last reading of 'gui_mouse_b()' status
 int idle_count, active_count;
 
 
@@ -2328,81 +2315,6 @@ bool no_subscreen()
 /********** Main **********/
 /**************************/
 
-bool is_zquest()
-{
-    return false;
-}
-
-class TB_Handler //Dear Santa: please kill Easter bunny. I've been a good boy.
-{
-public:
-
-    TB_Handler() {}
-    ~TB_Handler() {}
-    
-    bool CanEnable() const
-    {
-        if(is_windowed_mode() && can_triplebuffer_in_windowed_mode == FALSE)
-        {
-            triplebuffer_not_available = true;
-            return false;
-        }
-        
-        return (disable_triplebuffer == FALSE);
-    }
-    bool GFX_can_triple_buffer() const
-    {
-        if(!CanEnable())
-        {
-            triplebuffer_not_available = true;
-            return false;
-        }
-        
-        triplebuffer_not_available = false;
-        
-        if(!(gfx_capabilities & GFX_CAN_TRIPLE_BUFFER)) enable_triple_buffer();
-        
-        if(!(gfx_capabilities & GFX_CAN_TRIPLE_BUFFER)) triplebuffer_not_available = true;
-        
-        return !triplebuffer_not_available;
-    }
-    void Destroy() const
-    {
-        if(disable_triplebuffer != FALSE || triplebuffer_not_available) return;
-        
-        for(int i=0; i<3; i++)
-            if(tb_page[i])
-                destroy_bitmap(tb_page[i]);
-    }
-    void Create() const
-    {
-        if(!CanEnable())
-        {
-            triplebuffer_not_available = true;
-            return;
-        }
-        
-        for(int i=0; i<3; ++i)
-        {
-            tb_page[i]=create_video_bitmap(SCREEN_W, SCREEN_H);
-            
-            if(!tb_page[i])
-            {
-                triplebuffer_not_available = true;
-                break;
-            }
-        }
-        
-        Clear();
-    }
-    void Clear() const
-    {
-        for(int i=0; i<3; i++)
-            clear_bitmap(tb_page[i]);
-    }
-}
-static Triplebuffer;
-
 // Returns the first no switch (-) argv param
 char *get_cmd_arg(int argc, char *argv[])
 {
@@ -2802,20 +2714,6 @@ int main(int argc, char* argv[])
     
     Z_init_sound();
     
-    //use only page flipping
-    if(used_switch(argc,argv,"-doublebuffer"))
-    {
-        disable_triplebuffer = 1;
-        Z_message("used switch: -doublebuffer\n");
-    }
-    
-    //allow video bitmaps in windowed mode
-    if(used_switch(argc,argv,"-triplebuffer"))
-    {
-        can_triplebuffer_in_windowed_mode = 1;
-        Z_message("used switch: -triplebuffer\n");
-    }
-    
     const int wait_ms_on_set_graphics = 20; //formerly 250. -Gleeok
     
     //request_refresh_rate(60);
@@ -2896,17 +2794,8 @@ int main(int argc, char* argv[])
     
     sbig = (screen_scale > 1);
     set_display_switch_mode(is_windowed_mode()?SWITCH_BACKGROUND:SWITCH_BACKAMNESIA);
-    zq_screen_w = resx;
-    zq_screen_h = resy;
     
     real_screen = screen;
-    
-    if(Triplebuffer.GFX_can_triple_buffer())
-    {
-        Triplebuffer.Create();
-    }
-    
-    Z_message("Triplebuffer %savailable\n", triplebuffer_not_available?"not ":"");
     
     set_close_button_callback((void (*)()) hit_close_button);
     set_window_title("Zelda Classic");
@@ -3007,7 +2896,6 @@ int main(int argc, char* argv[])
     show_saving(screen);
     save_savedgames();
     save_game_configs();
-    Triplebuffer.Destroy();
     set_gfx_mode(GFX_TEXT,80,25,0,0);
     //rest(250); // ???
     quit_game();
@@ -3184,91 +3072,4 @@ void quit_game()
     //  dumb_exit();
 }
 
-/////////////////////////////////////////////////
-// malloc
-/////////////////////////////////////////////////
-
-//Want Logging:
-//Set this to 1 to allow malloc/free to track pointers and
-//write logging data to allegro.log
-#define ZC_DEBUG_MALLOC_WANT_LOGGING_INFO 0
-
-
-#include "vectorset.h"
-
-#if (defined(NDEBUG) || !defined(_DEBUG)) && (ZC_DEBUG_MALLOC_ENABLED) && (ZC_DEBUG_MALLOC_WANT_LOGGING_INFO) //this is not fun with debug
-#define ZC_WANT_DETAILED_MALLOC_LOGGING 1
-#endif
-
-
-#if ZC_WANT_DETAILED_MALLOC_LOGGING
-size_t totalBytesAllocated = 0;
-typedef vectorset<void*> debug_malloc_pool_type;
-debug_malloc_pool_type debug_zc_malloc_allocated_pool;
-#endif
-
-void* __zc_debug_malloc(size_t numBytes, const char* file, int line)
-{
-#if ZC_WANT_DETAILED_MALLOC_LOGGING
-    static bool zcDbgMallocInit = false;
-    
-    if(!zcDbgMallocInit)
-    {
-        zcDbgMallocInit = true;
-        debug_zc_malloc_allocated_pool.reserve(1 << 17);
-        //yeah. completely ridiculous... there's no reason zc should ever need this many..
-        //BUT it does... go figure
-    }
-    
-    totalBytesAllocated += numBytes;
-    
-    //char buf[1024];
-    //sprintf(buf, "%i : %s, line %i, %u bytes allocated.\n", 0, file, line, numBytes);
-    //al_trace("%s", buf);
-    
-    al_trace("info: %i : %s, line %i, %u bytes, pool size %u, total %u,",
-             0,
-             file,
-             line,
-             numBytes,
-             debug_zc_malloc_allocated_pool.size(),
-             totalBytesAllocated / 1024
-            );
-#endif
-    
-    void* p = malloc(numBytes);
-    
-#if ZC_WANT_DETAILED_MALLOC_LOGGING
-    al_trace("at address %x\n", (int)p);
-    
-    if(!p)
-        al_trace("____________ ERROR: __zc_debug_malloc: returned null. out of memory.\n");
-        
-    debug_malloc_pool_type::insert_iterator_type it = debug_zc_malloc_allocated_pool.insert(p);
-    
-    if(!it.second)
-        al_trace("____________ ERROR: malloc returned identical address to one in use... No way Jose!\n");
-        
-#endif
-        
-    return p;
-}
-
-void __zc_always_assert(bool e, const char* expression, const char* file, int line)
-{
-    if(!e)
-    {
-        //for best results set a breakpoint in here.
-        char buf[1024];
-        sprintf(buf, "ASSERTION FAILED! : %s, %s line %i\n", expression, file, line);
-        
-        al_trace("%s", buf);
-        set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
-        allegro_message("%s", buf);
-        //exit(-1); //flashing lights are probably enough.
-    }
-}
-
-
 /*** end of zelda.cc ***/
-

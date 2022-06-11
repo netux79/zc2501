@@ -2010,7 +2010,6 @@ static bool register_name()
     memset(name,0,9);
     register_mode();
     clear_keybuf();
-    SystemKeys=true;
     refreshpal=true;
     bool done=false;
     bool cancel=false;
@@ -2266,7 +2265,6 @@ static bool register_name()
             listpos=zc_max(listpos-3,0);
     }
     
-    SystemKeys=true;
     selectscreen();
     list_saves();
     select_mode();

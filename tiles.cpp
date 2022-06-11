@@ -26,7 +26,7 @@ extern wpndata    *wpnsbuf;
 extern byte        quest_rules[QUESTRULES_SIZE];
 //extern byte *tilebuf;
 //BITMAP* tilebuf[NEWMAXTILES];
-tiledata *newtilebuf, *grabtilebuf;
+tiledata *newtilebuf;
 newcombo *combobuf;
 word animated_combo_table[MAXCOMBOS][2];                    //[0]=position in act2, [1]=original tile
 word animated_combo_table4[MAXCOMBOS][2];                   //[0]=combo, [1]=clock

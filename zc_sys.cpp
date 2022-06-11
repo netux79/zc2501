@@ -42,10 +42,7 @@ static int sfx_voice[WAV_COUNT];
 extern FONT *lfont;
 extern LinkClass Link;
 extern sprite_list  guys, items, Ewpns, Lwpns, Sitems, chainlinks, decorations, particles;
-byte disable_direct_updating;
-byte use_dwm_flush;
 byte use_save_indicator;
-byte midi_patch_fix;
 bool midi_paused=false;
 //extern movingblock mblock2; //mblock[4]?
 //extern int db;
@@ -55,7 +52,6 @@ bool rF5();
 bool rF11();
 bool rI();
 bool rQ();
-bool zc_key_pressed();
 
 /**********************************/
 /******** System functions ********/
@@ -108,7 +104,6 @@ void load_game_configs()
     zc_vsync = get_config_int(cfg_sect,"vsync",0);
     Throttlefps = get_config_int(cfg_sect,"throttlefps",1)!=0;
     TransLayers = get_config_int(cfg_sect,"translayers",1)!=0;
-    SnapshotFormat = get_config_int(cfg_sect,"snapshot_format",3);
     ShowFPS = get_config_int(cfg_sect,"showfps",0)!=0;
     NESquit = get_config_int(cfg_sect,"fastquit",0)!=0;
     title_version = get_config_int(cfg_sect,"title",2);
@@ -119,24 +114,15 @@ void load_game_configs()
     //screen_scale = get_config_int(cfg_sect,"screen_scale",2);
     
     scanlines = get_config_int(cfg_sect,"scanlines",0)!=0;
-    fullscreen = get_config_int(cfg_sect,"fullscreen",1);
-    disable_triplebuffer = (byte) get_config_int(cfg_sect,"doublebuffer",0);
-    can_triplebuffer_in_windowed_mode = (byte) get_config_int(cfg_sect,"triplebuffer",0);
-    
+    fullscreen = get_config_int(cfg_sect,"fullscreen",1);    
     zc_color_depth = (byte) get_config_int(cfg_sect,"color_depth",8);
     
     frame_rest_suggest = (byte) get_config_int(cfg_sect,"frame_rest_suggest",1);
     frame_rest_suggest = zc_min(2, frame_rest_suggest);
     
     forceExit = (byte) get_config_int(cfg_sect,"force_exit",0);
-	ss_enable = get_config_int(cfg_sect,"ss_enable",1) ? 1 : 0;
-    ss_after = vbound(get_config_int(cfg_sect,"ss_after",14), 0, 14);
-    ss_speed = vbound(get_config_int(cfg_sect,"ss_speed",2), 0, 6);
-    ss_density = vbound(get_config_int(cfg_sect,"ss_density",3), 0, 6);
     heart_beep = get_config_int(cfg_sect,"heart_beep",1)!=0;
-    gui_colorset = get_config_int(cfg_sect,"gui_colorset",0);
     sfxdat = get_config_int(cfg_sect,"use_sfx_dat",1);
-    fullscreen = get_config_int(cfg_sect,"fullscreen",1);
     use_save_indicator = get_config_int(cfg_sect,"save_indicator",0);
 }
 
@@ -180,7 +166,6 @@ void save_game_configs()
     set_config_int(cfg_sect,"vsync",zc_vsync);
     set_config_int(cfg_sect,"throttlefps", (int)Throttlefps);
     set_config_int(cfg_sect,"translayers",(int)TransLayers);
-    set_config_int(cfg_sect,"snapshot_format",SnapshotFormat);
     set_config_int(cfg_sect,"showfps",(int)ShowFPS);
     set_config_int(cfg_sect,"fastquit",(int)NESquit);
     set_config_int(cfg_sect,"title",title_version);
@@ -191,19 +176,11 @@ void save_game_configs()
     //sbig depricated as of 2.5 RC3. handled exclusively by resx, resy now.
     //set_config_int(cfg_sect,"screen_scale",screen_scale);
     //set_config_int(cfg_sect,"sbig",sbig);
-    //set_config_int(cfg_sect,"sbig2",sbig2);
     
     set_config_int(cfg_sect,"scanlines",scanlines);
-    set_config_int(cfg_sect,"ss_enable",ss_enable);
-    set_config_int(cfg_sect,"ss_after",ss_after);
-    set_config_int(cfg_sect,"ss_speed",ss_speed);
-    set_config_int(cfg_sect,"ss_density",ss_density);
     set_config_int(cfg_sect,"heart_beep",heart_beep);
-    set_config_int(cfg_sect,"gui_colorset",gui_colorset);
     set_config_int(cfg_sect,"use_sfx_dat",sfxdat);
     set_config_int(cfg_sect,"fullscreen",fullscreen);
-    set_config_int(cfg_sect,"doublebuffer",disable_triplebuffer);
-    set_config_int(cfg_sect,"triplebuffer",can_triplebuffer_in_windowed_mode);
     set_config_int(cfg_sect,"color_depth",zc_color_depth);
     set_config_int(cfg_sect,"frame_rest_suggest",frame_rest_suggest);
     set_config_int(cfg_sect,"force_exit",forceExit);
@@ -257,20 +234,6 @@ void Z_remove_timers()
 }
 
 //----------------------------------------------------------------
-
-void go()
-{
-    scare_mouse();
-    blit(screen,tmp_scr,scrx,scry,0,0,screen->w,screen->h);
-    unscare_mouse();
-}
-
-void comeback()
-{
-    scare_mouse();
-    blit(tmp_scr,screen,0,0,scrx,scry,screen->w,screen->h);
-    unscare_mouse();
-}
 
 void dump_pal(BITMAP *dest)
 {
@@ -3161,13 +3124,7 @@ void updatescr(bool allowwavy)
     BITMAP *source = nosubscr ? panorama : wavybuf;
     BITMAP *target = NULL;
     
-    bool dontusetb = triplebuffer_not_available ||
-                     !(Throttlefps ^ (true && key[KEY_TILDE]));
-                     
-    if(dontusetb)
-        target=screen;
-    else
-        target=tb_page[curr_tb_page];
+    target=screen;
         
 //  static BITMAP *tempscreen=NULL;
     static BITMAP *scanlinesbmp=NULL;
@@ -3237,24 +3194,12 @@ void updatescr(bool allowwavy)
         textprintf_ex(target,font,0,SCREEN_H-8,254,BLACK,"%-6d (%s)", idle_count, time_str_long(idle_count));
     }
     
-    if(!dontusetb)
-    {
-        if(!poll_scroll())
-        {
-            request_video_bitmap(tb_page[curr_tb_page]);
-            curr_tb_page=(curr_tb_page+1)%3;
-            clear_to_color(tb_page[curr_tb_page],BLACK);
-        }
-    }
-    
     //if(panorama!=NULL) destroy_bitmap(panorama);
     
     ++framecnt;
 }
 
 //----------------------------------------------------------------
-
-PALETTE sys_pal;
 
 void f_Quit(int type)
 {
@@ -3263,7 +3208,6 @@ void f_Quit(int type)
         
     music_pause();
     pause_all_sfx();
-    system_pal();
     clear_keybuf();
     
     switch(type)
@@ -3289,7 +3233,7 @@ void f_Quit(int type)
     }
     else
     {
-        game_pal();
+        //game_pal();
         music_resume();
         resume_all_sfx();
     }
@@ -3421,27 +3365,11 @@ void syskeys()
     
     poll_joystick();
     
-    mouse_down=gui_mouse_b();
-    
     if(ReadKey(KEY_F1))
     {
-        if(key[KEY_ZC_LCONTROL] || key[KEY_ZC_RCONTROL])
-        {
-            halt=!halt;
-            //zinit.subscreen=(zinit.subscreen+1)%ssdtMAX;
-        }
-        else
-        {
-            Throttlefps=!Throttlefps;
-            logic_counter=0;
-        }
+        Throttlefps=!Throttlefps;
+        logic_counter=0;
     }
-    
-    //  if(ReadKey(KEY_F1))    Vsync=!Vsync;
-    /*
-      if(ReadKey(KEY_F1))    set_bit(QHeader.rules4,qr4_NEWENEMYTILES,
-      1-((get_bit(QHeader.rules4,qr4_NEWENEMYTILES))));
-      */
     
     if(ReadKey(KEY_OPENBRACE))    if(frame_rest_suggest > 0) frame_rest_suggest--;
     
@@ -3529,9 +3457,6 @@ void syskeys()
         if(ReadKey(KEY_L))   onLightSwitch();
     }
     
-    if(!SystemKeys)
-        goto bottom;
-        
     if(ReadKey(KEY_D))
     {
         details = !details;
@@ -3638,10 +3563,6 @@ void syskeys()
     
     verifyBothWeapons();
     
-bottom:
-
-    //while(Playing && keypressed())
-    //readkey();
     // What's the Playing check for?
     clear_keybuf();
 }
@@ -4130,271 +4051,6 @@ void color_layer(RGB *src,RGB *dest,char r,char g,char b,char pos,int from,int t
     }
     
     fade_interpolate(src,tmp,dest,pos,from,to);
-}
-
-
-void system_pal()
-{
-    PALETTE pal;
-    copy_pal((RGB*)data[PAL_GUI].dat, pal);
-    
-    // set up the grayscale palette
-    for(int i=128; i<192; i++)
-    {
-        pal[i].r = i-128;
-        pal[i].g = i-128;
-        pal[i].b = i-128;
-    }
-    
-    
-    switch(gui_colorset)
-    {
-        /*
-          enum
-          {
-          jcBOX, jcLIGHT, jcMEDLT, jcMEDDARK, jcDARK, jcBOXFG,
-          jcTITLEL, jcTITLER, jcTITLEFG, jcTEXTBG, jcTEXTFG, jcSELBG, jcSELFG,
-          jcMAX
-          };
-          */
-    case 1:  //Windows 98
-    {
-        pal[dvc(1)] = _RGB(0*63/255,   0*63/255,   0*63/255);
-        pal[dvc(2)] = _RGB(128*63/255, 128*63/255, 128*63/255);
-        pal[dvc(3)] = _RGB(192*63/255, 192*63/255, 192*63/255);
-        pal[dvc(4)] = _RGB(223*63/255, 223*63/255, 223*63/255);
-        pal[dvc(5)] = _RGB(255*63/255, 255*63/255, 255*63/255);
-        pal[dvc(6)] = _RGB(255*63/255, 255*63/255, 225*63/255);
-        pal[dvc(7)] = _RGB(255*63/255, 225*63/255, 160*63/255);
-        pal[dvc(8)] = _RGB(0*63/255,   0*63/255,  80*63/255);
-        
-        byte palrstart=  0*63/255, palrend=166*63/255,
-             palgstart=  0*63/255, palgend=202*63/255,
-             palbstart=128*63/255, palbend=240*63/255,
-             paldivs=7;
-             
-        for(int i=0; i<paldivs; i++)
-        {
-            pal[dvc(15-paldivs+1)+i].r = palrstart+((palrend-palrstart)*i/(paldivs-1));
-            pal[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
-            pal[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
-        }
-    }
-    break;
-    
-    case 2:  //Windows 99
-    {
-        pal[dvc(1)] = _RGB(0*63/255,   0*63/255,   0*63/255);
-        pal[dvc(2)] = _RGB(64*63/255,  64*63/255,  64*63/255);
-        pal[dvc(3)] = _RGB(128*63/255, 128*63/255, 128*63/255);
-        pal[dvc(4)] = _RGB(192*63/255, 192*63/255, 192*63/255);
-        pal[dvc(5)] = _RGB(223*63/255, 223*63/255, 223*63/255);
-        pal[dvc(6)] = _RGB(255*63/255, 255*63/255, 255*63/255);
-        pal[dvc(7)] = _RGB(255*63/255, 255*63/255, 225*63/255);
-        pal[dvc(8)] = _RGB(255*63/255, 225*63/255, 160*63/255);
-        pal[dvc(9)] = _RGB(0*63/255,   0*63/255,  80*63/255);
-        
-        byte palrstart=  0*63/255, palrend=166*63/255,
-             palgstart=  0*63/255, palgend=202*63/255,
-             
-             palbstart=128*63/255, palbend=240*63/255,
-             paldivs=6;
-             
-        for(int i=0; i<paldivs; i++)
-        {
-            pal[dvc(15-paldivs+1)+i].r = palrstart+((palrend-palrstart)*i/(paldivs-1));
-            pal[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
-            pal[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
-        }
-    }
-    break;
-    
-    case 3:  //Windows 2000 Blue
-    {
-        pal[dvc(1)] = _RGB(0*63/255,   0*63/255,   0*63/255);
-        pal[dvc(2)] = _RGB(16*63/255,  15*63/255, 116*63/255);
-        pal[dvc(3)] = _RGB(82*63/255,  80*63/255, 182*63/255);
-        pal[dvc(4)] = _RGB(162*63/255, 158*63/255, 250*63/255);
-        pal[dvc(5)] = _RGB(255*63/255, 255*63/255, 255*63/255);
-        pal[dvc(6)] = _RGB(255*63/255, 255*63/255, 127*63/255);
-        pal[dvc(7)] = _RGB(255*63/255, 225*63/255,  63*63/255);
-        pal[dvc(8)] = _RGB(0*63/255,   0*63/255,  80*63/255);
-        
-        byte palrstart=  0*63/255, palrend=162*63/255,
-             palgstart=  0*63/255, palgend=158*63/255,
-             palbstart= 80*63/255, palbend=250*63/255,
-             paldivs=7;
-             
-        for(int i=0; i<paldivs; i++)
-        {
-            pal[dvc(15-paldivs+1)+i].r = palrstart+((palrend-palrstart)*i/(paldivs-1));
-            pal[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
-            pal[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
-        }
-    }
-    break;
-    
-    case 687:  //Windows 2000 Gold (6-87 was the North American release date of LoZ)
-    {
-        pal[dvc(1)] = _RGB(0*63/255,   0*63/255,   0*63/255);
-        pal[dvc(2)] = _RGB(64*63/255,  64*63/255,  43*63/255);
-        pal[dvc(3)] = _RGB(128*63/255, 128*63/255,  85*63/255);
-        pal[dvc(4)] = _RGB(223*63/255, 200*63/255, 128*63/255); // Old Gold
-        pal[dvc(5)] = _RGB(223*63/255, 223*63/255, 149*63/255);
-        pal[dvc(6)] = _RGB(255*63/255, 255*63/255, 255*63/255);
-        pal[dvc(7)] = _RGB(255*63/255, 255*63/255, 225*63/255);
-        pal[dvc(8)] = _RGB(255*63/255, 225*63/255, 160*63/255);
-        pal[dvc(9)] = _RGB(80*63/255,  80*63/255,   0*63/255);
-        
-        byte palrstart=128*63/255, palrend=240*63/255,
-             palgstart=128*63/255, palgend=202*63/255,
-             palbstart=  0*63/255, palbend=166*63/255,
-             paldivs=6;
-             
-        for(int i=0; i<paldivs; i++)
-        {
-            pal[dvc(15-paldivs+1)+i].r = palrstart+((palrend-palrstart)*i/(paldivs-1));
-            pal[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
-            pal[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
-        }
-    }
-    break;
-    
-    case 4104:  //Windows 2000 Easter (4-1-04 is April Fools Day, the date of this release)
-    {
-        pal[dvc(1)] = _RGB(0*63/255,   0*63/255,   0*63/255);
-        pal[dvc(2)] = _RGB(64*63/255,  64*63/255,  64*63/255);
-        pal[dvc(3)] = _RGB(128*63/255, 128*63/255, 128*63/255);
-        pal[dvc(4)] = _RGB(252*63/255, 186*63/255, 188*63/255);
-        pal[dvc(5)] = _RGB(254*63/255, 238*63/255, 238*63/255);
-        pal[dvc(6)] = _RGB(244*63/255, 243*63/255, 161*63/255);
-        pal[dvc(7)] = _RGB(120*63/255, 173*63/255, 189*63/255);
-        pal[dvc(8)] = _RGB(220*63/255, 183*63/255, 227*63/255);
-        
-        byte palrstart=244*63/255, palrend=220*63/255,
-             palgstart=243*63/255, palgend=183*63/255,
-             palbstart=161*63/255, palbend=227*63/255,
-             paldivs=7;
-             
-        for(int i=0; i < paldivs; i++)
-        {
-            pal[dvc(15-paldivs+1)+i].r = palrstart+((palrend-palrstart)*i/(paldivs-1));
-            pal[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
-            pal[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
-        }
-    }
-    break;
-    
-    default:  //Windows 2000
-    {
-        pal[dvc(1)] = _RGB(0*63/255,   0*63/255,   0*63/255);
-        pal[dvc(2)] = _RGB(66*63/255,  65*63/255,  66*63/255);
-        pal[dvc(3)] = _RGB(132*63/255, 130*63/255, 132*63/255);
-        pal[dvc(4)] = _RGB(212*63/255, 208*63/255, 200*63/255);
-        pal[dvc(5)] = _RGB(255*63/255, 255*63/255, 255*63/255);
-        pal[dvc(6)] = _RGB(255*63/255, 255*63/255, 225*63/255);
-        pal[dvc(7)] = _RGB(255*63/255, 225*63/255, 160*63/255);
-        pal[dvc(8)] = _RGB(0*63/255,   0*63/255,  80*63/255);
-        
-        byte palrstart= 10*63/255, palrend=166*63/255,
-             palgstart= 36*63/255, palgend=202*63/255,
-             palbstart=106*63/255, palbend=240*63/255,
-             paldivs=7;
-             
-        for(int i=0; i<paldivs; i++)
-        {
-            pal[dvc(15-paldivs+1)+i].r = palrstart+((palrend-palrstart)*i/(paldivs-1));
-            pal[dvc(15-paldivs+1)+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
-            pal[dvc(15-paldivs+1)+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
-        }
-    }
-    break;
-    }
-    
-    color_layer(pal, pal, 24,16,16, 28, 128,191);
-    
-    for(int i=0; i<256; i+=2)
-    {
-        int v = (i>>3)+2;
-        int c = (i>>3)+192;
-        pal[c] = _RGB(v,v,v+(v>>1));
-        /*
-          if(i<240)
-          {
-          _allegro_hline(tmp_scr,0,i,319,c);
-          _allegro_hline(tmp_scr,0,i+1,319,c);
-          }
-          */
-    }
-    
-    // draw the vertical screen gradient
-    for(int i=0; i<240; ++i)
-    {
-        _allegro_hline(tmp_scr,0,i,319,192+(i*31/239));
-    }
-    
-    /*
-      palrstart= 10*63/255; palrend=166*63/255;
-      palgstart= 36*63/255; palgend=202*63/255;
-      palbstart=106*63/255; palbend=240*63/255;
-      paldivs=32;
-      for(int i=0; i<paldivs; i++)
-      {
-      pal[223-paldivs+1+i].r = palrstart+((palrend-palrstart)*i/(paldivs-1));
-      pal[223-paldivs+1+i].g = palgstart+((palgend-palgstart)*i/(paldivs-1));
-      pal[223-paldivs+1+i].b = palbstart+((palbend-palbstart)*i/(paldivs-1));
-      }
-      */
-    BITMAP *panorama = create_bitmap_ex(8,256,224);
-    int ts_height, ts_start;
-    
-    if(tmpscr->flags3&fNOSUBSCR && !(tmpscr->flags3&fNOSUBSCROFFSET))
-    {
-        clear_to_color(panorama,0);
-        blit(framebuf,panorama,0,playing_field_offset,0,28,256,224-passive_subscreen_height);
-        ts_height=224-passive_subscreen_height;
-        ts_start=28;
-    }
-    else
-    {
-        blit(framebuf,panorama,0,0,0,0,256,224);
-        ts_height=224;
-        ts_start=0;
-    }
-    
-    // gray scale the current frame
-    for(int y=0; y<ts_height; y++)
-    {
-        for(int x=0; x<256; x++)
-        {
-            int c = panorama->line[y+ts_start][x];
-            int gray = zc_min((RAMpal[c].r*42 + RAMpal[c].g*75 + RAMpal[c].b*14) >> 7, 63);
-            tmp_scr->line[y+8+ts_start][x+32] = gray+128;
-        }
-    }
-    
-    destroy_bitmap(panorama);
-    
-    // save the fps_undo section
-    blit(tmp_scr,fps_undo,40,216,0,0,64,16);
-    
-    // display everything
-    vsync();
-    set_palette_range(pal,0,255,false);
-    
-    if(sbig)
-        stretch_blit(tmp_scr,screen,0,0,320,240,scrx-(160*(screen_scale-1)),scry-(120*(screen_scale-1)),screen_scale*320,screen_scale*240);
-    else
-        blit(tmp_scr,screen,0,0,scrx,scry,320,240);
-        
-    if(ShowFPS)
-        show_fps(screen);
-        
-    if(Paused)
-        show_paused(screen);
-        
-    //  sys_pal = pal;
-    memcpy(sys_pal,pal,sizeof(pal));
 }
 
 void game_pal()
@@ -4960,29 +4616,6 @@ void load_control_state()
     button_press[16]=rButton(AxisLeft,button_hold[16]);
     button_press[17]=rButton(AxisRight,button_hold[17]);
     
-}
-
-// Returns true if any game key is pressed. This is needed because keypressed()
-// doesn't detect modifier keys and control_state[] can be modified by scripts.
-bool zc_key_pressed()
-{
-    if((key[DUkey]||joy[joystick_index].stick[0].axis[1].d1||joy[joystick_index].stick[0].axis[1].pos< -STICK_PRECISION) ||
-       (key[DDkey]||joy[joystick_index].stick[0].axis[1].d2||joy[joystick_index].stick[0].axis[1].pos > STICK_PRECISION) ||
-       (key[DLkey]||joy[joystick_index].stick[0].axis[0].d1||joy[joystick_index].stick[0].axis[0].pos< -STICK_PRECISION) ||
-       (key[DRkey]||joy[joystick_index].stick[0].axis[0].d2||joy[joystick_index].stick[0].axis[0].pos > STICK_PRECISION) ||
-       (key[Akey]||joybtn(Abtn)) ||
-       (key[Bkey]||joybtn(Bbtn)) ||
-       (key[Skey]||joybtn(Sbtn)) ||
-       (key[Lkey]||joybtn(Lbtn)) ||
-       (key[Rkey]||joybtn(Rbtn)) ||
-       (key[Pkey]||joybtn(Pbtn)) ||
-       (key[Exkey1]||joybtn(Exbtn1)) ||
-       (key[Exkey2]||joybtn(Exbtn2)) ||
-       (key[Exkey3]||joybtn(Exbtn3)) ||
-       (key[Exkey4]||joybtn(Exbtn4))) // Skipping joystick axes
-        return true;
-    
-    return false;
 }
 
 bool Up()
