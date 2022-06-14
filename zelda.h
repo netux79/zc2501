@@ -22,7 +22,6 @@
 #include "zeldadat.h"
 #include "sfx.h"
 #include "zcmusic.h"
-#include "gamedata.h"
 #include "zsys.h"
 #include "script_drawing.h"
 
@@ -80,18 +79,6 @@ enum
 /*********** Procedures **********/
 /*********************************/
 
-/*
-
-  // title.cc
-  void update_game_icons();
-
-  // zc_sys.cc
-  void color_layer(RGB *src,RGB *dest,char r,char g,char b,char pos,int from,int to);
-  void waitvsync(bool fast);
-  void hit_close_button();
-  */
-
-
 void Z_eventlog(const char *format, ...);
 void Z_scripterrlog(const char * const format, ...);
 
@@ -140,7 +127,6 @@ int  init_game();
 int  cont_game();
 void restart_level();
 int  load_quest(gamedata *g);
-void show_details();
 void show_ffscript_names();
 
 int get_currdmap();
@@ -169,9 +155,6 @@ INLINE void sfx(int index,int pan)
 
 extern ZCMUSIC *zcmusic;
 
-extern int colordepth;
-extern int db;
-extern int detail_int[10];                                  //temporary holder for things you want to detail
 extern zinitdata  zinit;
 extern int lens_hint_item[MAXITEMS][2];                     //aclk, aframe
 extern int lens_hint_weapon[MAXWPNS][5];                    //aclk, aframe, dir, x, y
@@ -186,7 +169,6 @@ extern DATAFILE *data, *sfxdata, *fontsdata, *mididata;
 extern SAMPLE   wav_refill;
 extern FONT  *nfont, *zfont, *z3font, *z3smallfont, *deffont, *lfont, *lfont_l, *pfont, *mfont, *ztfont, *sfont, *sfont2, *sfont3, *spfont, *ssfont1, *ssfont2, *ssfont3, *ssfont4, *gblafont,
        *goronfont, *zoranfont, *hylian1font, *hylian2font, *hylian3font, *hylian4font, *gboraclefont, *gboraclepfont, *dsphantomfont, *dsphantompfont;
-//extern FONT custom_fonts[MAXFONTS];
 extern PALETTE  RAMpal;
 extern byte     *colordata;
 //extern byte     *tilebuf;
@@ -196,9 +178,6 @@ extern comboclass *combo_class_buf;
 extern guydata  *guysbuf;
 extern item_drop_object    item_drop_sets[MAXITEMDROPSETS];
 extern ZCHEATS  zcheats;
-extern byte     use_cheats;
-extern byte     use_tiles;
-extern char     palnames[MAXLEVELS][17];
 
 /*
 extern newcombo *combobuf;
@@ -236,7 +215,6 @@ extern volatile int script_counter;
 extern bool screenscrolling;
 extern bool close_button_quit;
 extern int fullscreen;
-extern byte frame_rest_suggest, forceExit, zc_vsync;
 extern byte zc_color_depth;
 
 #ifdef _SCRIPT_COUNTER
@@ -256,28 +234,23 @@ extern int hs_startx, hs_starty, hs_xdist, hs_ydist, clockclk, clock_zoras[eMAXG
 extern int swordhearts[4], currcset, gfc, gfc2, pitx, pity, refill_what, refill_why;
 extern int heart_beep_timer, new_enemy_tile_start, nets, magicitem, nayruitem, title_version;
 extern int magiccastclk, castx, casty, quakeclk, wavy, df_x, df_y, nl1_x, nl1_y, nl2_x, nl2_y, magicdrainclk, conveyclk, memrequested;
-extern dword fps_secs;
-extern float avgfps;
 
-extern bool do_cheat_goto, do_cheat_light;
 extern bool blockmoving;
-extern bool Throttlefps, Paused, Advance, ShowFPS, Showpal, Playing, FrameSkip, TransLayers;
+extern bool Throttlefps, Paused, ShowFPS, Playing, FrameSkip, TransLayers;
 extern bool refreshpal,blockpath,loaded_guys,freeze_guys;
-extern bool loaded_enemies,drawguys,details,watch;
+extern bool loaded_enemies,drawguys,watch;
 extern bool Udown,Ddown,Ldown,Rdown,Adown,Bdown,Sdown,Mdown,LBdown,RBdown,Pdown,Ex1down,Ex2down,Ex3down,Ex4down,AUdown,ADdown,ALdown,ARdown,F12,F11,F5,keyI, keyQ;
 extern bool NESquit,boughtsomething;
 extern bool fixed_door, darkroom,naturaldark,BSZ;            //,NEWSUBSCR;
 extern bool hookshot_used, hookshot_frozen, pull_link, add_chainlink;
-extern bool del_chainlink, hs_fix, cheat_superman, gofast, checklink;
-extern bool ewind_restart, didpit, heart_beep, pausenow, castnext;
+extern bool del_chainlink, hs_fix, cheat_superman, checklink;
+extern bool ewind_restart, didpit, heart_beep, castnext;
 extern bool add_df1asparkle, add_df1bsparkle, add_nl1asparkle, add_nl1bsparkle, add_nl2asparkle, add_nl2bsparkle;
 extern bool is_on_conveyor, activated_timed_warp;
 
 extern byte COOLSCROLL;
 
 extern int add_asparkle, add_bsparkle;
-
-extern bool show_layer_0, show_layer_1, show_layer_2, show_layer_3, show_layer_4, show_layer_5, show_layer_6, show_layer_over, show_layer_push, show_sprites, show_ffcs, show_hitboxes, show_walkflags, show_ff_scripts;
 
 extern int    cheat_goto_dmap, cheat_goto_screen;
 extern char   cheat_goto_dmap_str[4];
@@ -311,11 +284,7 @@ extern bool sbig;                                           // big screen
 extern int screen_scale; //user adjustable screen size.
 
 extern bool scanlines;                                      //do scanlines if sbig==1
-extern bool toogam;
 
-extern int cheat;                                           // 0 = none; 1,2,3,4 = cheat level
-
-extern int idle_count, active_count;
 extern char *quest_path;
 extern gamedata *saves;
 extern gamedata *game;

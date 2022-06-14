@@ -15,7 +15,6 @@
 
 #define UNPACKSIZE 256
 
-#include "zc_alleg.h"
 #include "zdefs.h"
 
 //extern byte *tilebuf;

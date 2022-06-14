@@ -9,9 +9,6 @@
 //--------------------------------------------------------
 
 
-#include "precompiled.h" //always first
-
-#include "zc_alleg.h"
 #include "zdefs.h"
 #include "maps.h"
 #include "zelda.h"

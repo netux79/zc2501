@@ -9,10 +9,7 @@
 //
 //--------------------------------------------------------
 
-#include "precompiled.h" //always first
-
 #include <stdio.h>
-#include "zc_alleg.h"
 #include "zdefs.h"
 #include "zelda.h"
 #include "items.h"
@@ -164,11 +161,6 @@ byte gamedata::get_quest()
 void gamedata::set_quest(byte q)
 {
     _quest=q;
-    return;
-}
-void gamedata::change_quest(short q)
-{
-    _quest+=q;
     return;
 }
 

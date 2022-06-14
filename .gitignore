@@ -33,8 +33,7 @@
 zelda
 
 #Folders
-DEPRECATED
-RELEASE
+.vscode
 
 #other
 output

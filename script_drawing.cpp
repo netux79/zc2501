@@ -1,7 +1,5 @@
 
 
-#include "precompiled.h" //always first
-
 #include <allegro.h>
 #include "rendertarget.h"
 #include "maps.h"

@@ -9,12 +9,9 @@
 //
 //--------------------------------------------------------
 
-#include "precompiled.h" //always first
-
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#include "zc_alleg.h"
 
 #include "zdefs.h"
 #include "zelda.h"
@@ -26,7 +23,6 @@
 #include "sprite.h"
 #include "subscr.h"
 #include "title.h"
-#include "gamedata.h"
 #include "link.h"
 
 extern int skipcont;
@@ -1905,21 +1901,6 @@ static void list_save(int save_num, int ypos)
         
         if(saves[save_num].get_quest())
             textprintf_ex(framebuf,zfont,72,ypos+24,1,0,"%3d",saves[save_num].get_deaths());
-            
-        if(saves[save_num].get_quest()==2)
-            overtile16(framebuf,41,56,ypos+14,9,0);             //put sword on second quests
-            
-        if(saves[save_num].get_quest()==3)
-        {
-            overtile16(framebuf,41,56,ypos+14,9,0);             //put sword on second quests
-            overtile16(framebuf,41,41,ypos+14,9,0);             //put sword on third quests
-        }
-        
-        if(saves[save_num].get_quest()==4)
-        {
-            overtile16(framebuf,176,52,ypos+14,0,1);             //dust pile
-            overtile16(framebuf,175,52,ypos+14,9,0);             //triforce
-        }
         
         textprintf_ex(framebuf,zfont,72,ypos+16,1,0,"%s",saves[save_num].get_name());
     }
@@ -1944,14 +1925,7 @@ static void list_save(int save_num, int ypos)
 
 static void list_saves()
 {
-    // Fourth Quest turns the menu red.
-    bool red = false;
-    
-    for(int i=0; i<savecnt; i++)
-        if(saves[i].get_quest()==4)
-            red = true;
-            
-    loadpalset(0,red ? pSprite(spPILE) : 0);
+    loadpalset(0, 0);
     
     for(int i=0; i<3; i++)
     {
@@ -1969,8 +1943,6 @@ static void list_saves()
             
         textprintf_ex(framebuf,zfont,112,60,3,0,"%2d - %-2d",listpos+1,listpos+3);
     }
-    
-    
 }
 
 static void draw_cursor(int pos,int mode)
@@ -2176,7 +2148,6 @@ static bool register_name()
         
         saves[s].set_name(name);
         blit(scrollbuf,framebuf,0,0,0,0,256,224);
-//    list_saves();
         list_save(s,56);
         
         int x2=letter_grid_x + grid_x*letter_grid_spacing;
@@ -2346,18 +2317,8 @@ static int game_details(int file)
     textout_ex(framebuf,zfont,"QUEST",40,112,3,0);
     textout_ex(framebuf,zfont,"STATUS",40,120,3,0);
     
-    if(saves[file].get_quest()<0xFF)
-    {
-        textout_ex(framebuf,zfont,"Normal Game",120,104,1,0);
-        textprintf_ex(framebuf,zfont,120,112,1,0,"%s Quest",
-                      ordinal(saves[file].get_quest()));
-    }
-    else
-    {
-        textout_ex(framebuf,zfont,"Custom Quest",120,104,1,0);
-        textprintf_ex(framebuf,zfont,120,112,1,0,"%s",
-                      get_filename(saves[file].qstpath));
-    }
+    textout_ex(framebuf,zfont,"Custom Quest",120,104,1,0);
+    textprintf_ex(framebuf,zfont,120,112,1,0,"%s", get_filename(saves[file].qstpath));
     
     if(!saves[file].get_hasplayed())
         textout_ex(framebuf,zfont,"Empty Game",120,120,1,0);
@@ -2397,16 +2358,6 @@ static int game_details(int file)
 }
 
 static int saveslot = -1;
-
-int getsaveslot()
-{
-    if(saveslot >= 0 && (!saves[saveslot].get_quest() || saves[saveslot].get_hasplayed()))
-    {
-        return -1;
-    }
-    
-    return saveslot;
-}
 
 static void select_game()
 {
@@ -2747,8 +2698,6 @@ void game_over(int type)
         
         if(pos==1&&(!type))
         {
-            game->set_cheat(game->get_cheat() | cheat);
-            
             saves[currgame]=*game;
             
             int ring=0;
@@ -2779,8 +2728,6 @@ void save_game(bool savepoint)
         lastentrance_dmap = currdmap;
         lastentrance = game->get_continue_scrn();
     }
-    
-    game->set_cheat(game->get_cheat() | cheat);
     
     saves[currgame]=*game;
     
@@ -2907,8 +2854,6 @@ bool save_game(bool savepoint, int type)
                     lastentrance = game->get_continue_scrn();
                 }
                 
-                game->set_cheat(game->get_cheat() | cheat);
-                
                 saves[currgame]=*game;
                 
                 int ring=0;
@@ -3028,66 +2973,4 @@ bool save_game(bool savepoint, int type)
     return saved;
 }
 
-
-/*
-static void list_saves2()
-{
-  if(savecnt>3)
-  {
-    if(listpos>=3)
-      textout_ex(framebuf,zfont,(char *)left_arrow_str,96,60,3,0);
-    if(listpos+3<savecnt)
-      textout_ex(framebuf,zfont,(char *)right_arrow_str,176,60,3,0);
-    textprintf_ex(framebuf,zfont,112,60,3,0,"%2d - %-2d",listpos+1,listpos+3);
-  }
-
-  bool r = refreshpal;
-
-  for(int i=0; i<3; i++)
-  {
-    if(listpos+i<savecnt)
-    {
-      game->set_maxlife( saves[listpos+i].get_maxlife());
-      game->set_life( saves[listpos+i].get_maxlife());
-      //boogie!
-      lifemeter(framebuf,144,i*24+56+((game->get_maxlife()>16*(HP_PER_HEART))?8:0),0,0);
-      textout_ex(framebuf,zfont,saves[listpos+i].get_name(),72,i*24+72,1,0);
-
-      if(saves[listpos+i].get_quest())
-        textprintf_ex(framebuf,zfont,72,i*24+80,1,0,"%3d",saves[listpos+i].get_deaths());
-
-      if(saves[listpos+i].get_quest()==2)
-        overtile16(framebuf,41,56,i*24+70,9,0);             //put sword on second quests
-
-      if(saves[listpos+i].get_quest()==3)
-      {
-        overtile16(framebuf,41,56,i*24+70,9,0);             //put sword on second quests
-        overtile16(framebuf,41,41,i*24+70,9,0);             //put sword on third quests
-      }
-      // maybe the triforce for the 4th quest?
-      textprintf_ex(framebuf,zfont,72,i*24+72,1,0,"%s",saves[listpos+i].get_name());
-    }
-
-    byte *hold = newtilebuf[0].data;
-    byte holdformat=newtilebuf[0].format;
-    newtilebuf[0].format=tf4Bit;
-    newtilebuf[0].data = saves[listpos+i].icon;
-    overtile16(framebuf,0,48,i*24+73,i+10,0);               //link
-    newtilebuf[0].format=holdformat;
-    newtilebuf[0].data = hold;
-
-    hold = colordata;
-    colordata = saves[listpos+i].pal;
-    loadpalset(i+10,0);
-    colordata = hold;
-
-    textout_ex(framebuf,zfont,"-",136,i*24+72,1,0);
-  }
-
-  refreshpal = r;
-}
-
-*/
-
 /*** end of title.cc ***/
-

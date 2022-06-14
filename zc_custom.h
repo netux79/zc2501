@@ -39,6 +39,5 @@ extern int holdspr[2][2][3];                                //     land/water, h
 void linktile(int *tile, int *flip, int state, int dir, int style);
 void linktile(int *tile, int *flip, int *extend, int state, int dir, int style);
 void setuplinktiles(int style);
-void setlinktile(int tile, int flip, int extend, int state, int dir);
 #endif
 

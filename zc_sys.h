@@ -28,10 +28,8 @@ void f_Quit(int type);
 void advanceframe(bool allowwavy, bool sfxcleaup = true);
 void updatescr(bool allowwavy);
 void syskeys();
-void game_pal();
-int  onQuit();
-int  onReset();
-int  onExit();
+/*void game_pal();*/
+void  onQuit();
 
 bool joybtn(int b);
 bool ReadKey(int k);
@@ -108,7 +106,6 @@ bool DrunkrPbtn();
 
 enum {bosCIRCLE=0, bosOVAL, bosTRIANGLE, bosSMAS, bosMAX};
 
-void dump_pal(BITMAP *dest);
 void show_paused(BITMAP *target);
 void show_fps(BITMAP *target);
 void show_saving(BITMAP *target);

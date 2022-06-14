@@ -8,8 +8,6 @@
 //
 //--------------------------------------------------------
 
-#include "precompiled.h" //always first
-
 #include <stdio.h>
 #include <string.h>
 #include <string>
@@ -17,7 +15,6 @@
 #include <vector>
 #include <assert.h>
 
-#include "zc_alleg.h"
 #include "zdefs.h"
 #include "colors.h"
 #include "tiles.h"
@@ -57,9 +54,8 @@ extern comboclass          *combo_class_buf;
 extern guydata             *guysbuf;
 extern ZCHEATS             zcheats;
 extern zinitdata           zinit;
-extern char                palnames[MAXLEVELS][17];
+//extern char                palnames[MAXLEVELS][17];
 extern int                 memrequested;
-extern char                *byte_conversion(int number, int format);
 extern char                *byte_conversion2(int number1, int number2, int format1, int format2);
 string				             zScript;
 std::map<int, pair<string,string> > ffcmap;
@@ -123,56 +119,6 @@ char *VerStr(int version)
     static char ver_str[16];
     sprintf(ver_str,"v%d.%02X",version>>8,version&0xFF);
     return ver_str;
-}
-
-char *byte_conversion(int number, int format)
-{
-    static char num_str[40];
-    
-    if(format==-1)                                            //auto
-    {
-        format=1;                                               //bytes
-        
-        if(number>1024)
-        {
-            format=2;                                             //kilobytes
-        }
-        
-        if(number>1024*1024)
-        {
-            format=3;                                             //megabytes
-        }
-        
-        if(number>1024*1024*1024)
-        {
-            format=4;                                             //gigabytes (dude, what are you doing?)
-        }
-    }
-    
-    switch(format)
-    {
-    case 1:                                                 //bytes
-        sprintf(num_str,"%db",number);
-        break;
-        
-    case 2:                                                 //kilobytes
-        sprintf(num_str,"%.2fk",float(number)/1024);
-        break;
-        
-    case 3:                                                 //megabytes
-        sprintf(num_str,"%.2fM",float(number)/(1024*1024));
-        break;
-        
-    case 4:                                                 //gigabytes
-        sprintf(num_str,"%.2fG",float(number)/(1024*1024*1024));
-        break;
-        
-    default:
-        exit(1);
-        break;
-    }
-    
-    return num_str;
 }
 
 char *byte_conversion2(int number1, int number2, int format1, int format2)
@@ -466,179 +412,12 @@ bool find_section(PACKFILE *f, long section_id_requested)
 
 bool valid_zqt(PACKFILE *f)
 {
-
-    //word tiles_used;
-    //word combos_used;
-    //open the file
-    //PACKFILE *f = pack_fopen(path, F_READ_PACKED);
     if(!f)
         return false;
         
     //for now, everything else is valid
     return true;
-    
-    /*short version;
-    byte build;
-    
-    //read the version and make sure it worked
-    if(!p_igetw(&version,f,true))
-    {
-      goto error;
-    }
-    
-    //read the build and make sure it worked
-    if(!p_getc(&build,f,true))
-      goto error;
-    
-    //read the tile info and make sure it worked
-    if(!p_igetw(&tiles_used,f,true))
-    {
-      goto error;
-    }
-    
-    for (int i=0; i<tiles_used; i++)
-    {
-      if(!pfread(trashbuf,tilesize(tf4Bit),f,true))
-      {
-        goto error;
-      }
-    }
-    
-    //read the combo info and make sure it worked
-    if(!p_igetw(&combos_used,f,true))
-    {
-      goto error;
-    }
-    for (int i=0; i<combos_used; i++)
-    {
-      if(!pfread(trashbuf,sizeof(newcombo),f,true))
-      {
-        goto error;
-      }
-    }
-    
-    //read the palette info and make sure it worked
-    for (int i=0; i<48; i++)
-    {
-      if(!pfread(trashbuf,newpdTOTAL,f,true))
-      {
-        goto error;
-      }
-    }
-    if(!pfread(trashbuf,sizeof(palcycle)*256*3,f,true))
-    {
-      goto error;
-    }
-    for (int i=0; i<MAXLEVELS; i++)
-    {
-      if(!pfread(trashbuf,PALNAMESIZE,f,true))
-      {
-        goto error;
-      }
-    }
-    
-    //read the sprite info and make sure it worked
-    for (int i=0; i<MAXITEMS; i++)
-    {
-      if(!pfread(trashbuf,sizeof(itemdata),f,true))
-      {
-        goto error;
-      }
-    }
-    
-    for (int i=0; i<MAXWPNS; i++)
-    {
-      if(!pfread(trashbuf,sizeof(wpndata),f,true))
-      {
-        goto error;
-      }
-    }
-    
-    //read the triforce pieces info and make sure it worked
-    for (int i=0; i<8; ++i)
-    {
-      if(!p_getc(&trashbuf,f,true))
-      {
-        goto error;
-      }
-    }
-    
-    
-    
-    //read the game icons info and make sure it worked
-    for (int i=0; i<4; ++i)
-    {
-      if(!p_igetw(&trashbuf,f,true))
-      {
-        goto error;
-      }
-    }
-    
-    //read the misc colors info and map styles info and make sure it worked
-    if(!pfread(trashbuf,sizeof(zcolors),f,true))
-    {
-      goto error;
-    }
-    
-    //read the template screens and make sure it worked
-    byte num_maps;
-    if(!p_getc(&num_maps,f,true))
-    {
-      goto error;
-    }
-    for (int i=0; i<TEMPLATES; i++)
-    {
-      if(!pfread(trashbuf,sizeof(mapscr),f,true))
-      {
-        goto error;
-      }
-    }
-    if (num_maps>1)                                           //dungeon templates
-    {
-      for (int i=0; i<TEMPLATES; i++)
-      {
-        if(!pfread(trashbuf,sizeof(mapscr),f,true))
-        {
-          goto error;
-        }
-      }
-    }
-    
-    //yay!  it worked!  close the file and say everything was ok.
-    pack_fclose(f);
-    return true;
-    
-    error:
-    pack_fclose(f);
-    return false;*/
 }
-
-bool valid_zqt(const char *filename)
-{
-    PACKFILE *f=NULL;
-    bool isvalid;
-    char deletefilename[1024];
-    deletefilename[0]=0;
-    int error;
-    f=open_quest_file(&error, filename, deletefilename, true, true,false);
-    
-    if(!f)
-    {
-//      setPackfilePassword(NULL);
-        return false;
-    }
-    
-    isvalid=valid_zqt(f);
-    
-    if(deletefilename[0])
-    {
-        delete_file(deletefilename);
-    }
-    
-//  setPackfilePassword(NULL);
-    return isvalid;
-}
-
 
 PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefilename, bool compressed,bool encrypted, bool show_progress)
 {
@@ -1252,6 +1031,7 @@ void del_qst_buffers()
     if(combo_class_buf) free(combo_class_buf);
 }
 
+/*
 bool init_palnames()
 {
     if(palnames==NULL)
@@ -1281,6 +1061,7 @@ bool init_palnames()
     
     return true;
 }
+*/
 
 static void *read_block(PACKFILE *f, int size, int alloc_size, bool keepdata)
 {
@@ -3098,175 +2879,6 @@ int readdoorcombosets(PACKFILE *f, zquestheader *Header, bool keepdata)
     }
     
     return 0;
-}
-
-int count_dmaps()
-{
-    int i=MAXDMAPS-1;
-    bool found=false;
-    
-    while(i>=0 && !found)
-    {
-        if((DMaps[i].map!=0)||(DMaps[i].level!=0)||(DMaps[i].xoff!=0)||
-                (DMaps[i].compass!=0)||(DMaps[i].color!=0)||(DMaps[i].midi!=0)||
-                (DMaps[i].cont!=0)||(DMaps[i].type!=0))
-            found=true;
-            
-        for(int j=0; j<8; j++)
-        {
-            if(DMaps[i].grid[j]!=0)
-            
-                found=true;
-        }
-        
-        if((DMaps[i].name[0]!=0)||(DMaps[i].title[0]!=0)||
-                (DMaps[i].intro[0]!=0)||(DMaps[i].tmusic[0]!=0))
-            found=true;
-            
-        if((DMaps[i].minimap_1_tile!=0)||(DMaps[i].minimap_2_tile!=0)||
-                (DMaps[i].largemap_1_tile!=0)||(DMaps[i].largemap_2_tile!=0)||
-                (DMaps[i].minimap_1_cset!=0)||(DMaps[i].minimap_2_cset!=0)||
-                (DMaps[i].largemap_1_cset!=0)||(DMaps[i].largemap_2_cset!=0))
-            found=true;
-            
-        if(!found)
-        {
-            i--;
-        }
-    }
-    
-    return i+1;
-}
-
-
-int count_shops(miscQdata *Misc)
-{
-    int i=255,j;
-    bool found=false;
-    
-    while(i>=0 && !found)
-    {
-        j=2;
-        
-        while(j>=0 && !found)
-        {
-            if((Misc->shop[i].hasitem[j]!=0)||(Misc->shop[i].price[j]!=0))
-            {
-                found=true;
-            }
-            else
-            {
-                j--;
-            }
-        }
-        
-        if(Misc->shop[i].name[0]!=0)
-        {
-            found=true;
-        }
-        
-        if(!found)
-        {
-            i--;
-        }
-    }
-    
-    return i+1;
-}
-
-int count_infos(miscQdata *Misc)
-{
-    int i=255,j;
-    bool found=false;
-    
-    while(i>=0 && !found)
-    {
-        j=2;
-        
-        while(j>=0 && !found)
-        {
-            if((Misc->info[i].str[j]!=0)||(Misc->info[i].price[j]!=0))
-            {
-                found=true;
-            }
-            else
-            {
-                j--;
-            }
-        }
-        
-        if(Misc->info[i].name[0]!=0)
-        {
-            found=true;
-        }
-        
-        if(!found)
-        {
-            i--;
-        }
-    }
-    
-    return i+1;
-}
-
-int count_warprings(miscQdata *Misc)
-{
-    int i=15,j;
-    bool found=false;
-    
-    while(i>=0 && !found)
-    {
-        j=7;
-        
-        while(j>=0 && !found)
-        {
-            if((Misc->warp[i].dmap[j]!=0)||(Misc->warp[i].scr[j]!=0))
-            {
-                found=true;
-            }
-            else
-            {
-                j--;
-            }
-        }
-        
-        if(!found)
-        {
-            i--;
-        }
-    }
-    
-    return i+1;
-}
-
-int count_palcycles(miscQdata *Misc)
-{
-    int i=255,j;
-    bool found=false;
-    
-    while(i>=0 && !found)
-    {
-        j=2;
-        
-        while(j>=0 && !found)
-        {
-            if(Misc->cycles[i][j].count!=0)
-            {
-                found=true;
-            }
-            else
-            {
-                j--;
-            }
-        }
-        
-        if(!found)
-        {
-            i--;
-        }
-    }
-    
-    return i+1;
 }
 
 void clear_screen(mapscr *temp_scr)
@@ -11473,10 +11085,11 @@ int readcolordata(PACKFILE *f, miscQdata *Misc, word version, word build, word s
     
     if((version < 0x192)||((version == 0x192)&&(build<76)))
     {
+        /* Removed since it is used on zquest, unuseful for this port.
         if(keepdata==true)
         {
             init_palnames();
-        }
+        }*/
     }
     else
     {
@@ -11485,30 +11098,33 @@ int readcolordata(PACKFILE *f, miscQdata *Misc, word version, word build, word s
         if(s_version < 3)
             palnamestoread = OLDMAXLEVELS;
         else
-            palnamestoread = 512;
+            palnamestoread = MAXLEVELS;
             
         for(int i=0; i<palnamestoread; ++i)
         {
-            memset(temp_palname, 0, PALNAMESIZE);
+            /* Removed since it is used on zquest, unuseful for this port.
+            memset(temp_palname, 0, PALNAMESIZE);*/
             
             if(!pfread(temp_palname,PALNAMESIZE,f,true))
             {
                 return qe_invalid;
             }
             
+            /* Removed since it is used on zquest, unuseful for this port.
             if(keepdata==true)
             {
                 memcpy(palnames[i], temp_palname, PALNAMESIZE);
-            }
+            }*/
         }
         
+        /* Removed since it is used on zquest, unuseful for this port.
         if(keepdata)
         {
             for(int i=palnamestoread; i<MAXLEVELS; i++)
             {
                 memset(palnames[i], 0, PALNAMESIZE);
             }
-        }
+        }*/
     }
     
     if(version > 0x192)

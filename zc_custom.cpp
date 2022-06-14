@@ -8,8 +8,6 @@
 //
 //--------------------------------------------------------
 
-#include "precompiled.h" //always first
-
 #include "zc_custom.h"
 #include "zelda.h"
 #include "zdefs.h"
@@ -99,98 +97,6 @@ void linktile(int *tile, int *flip, int *extend, int state, int dir, int style)
     }
     
     linktile(tile, flip, state, dir, style);
-}
-void setlinktile(int tile, int flip, int extend, int state, int dir)
-{
-    switch(state)
-    {
-    case ls_float:
-        floatspr[dir][spr_tile] = tile;
-        floatspr[dir][spr_flip] = flip;
-        floatspr[dir][spr_extend] = extend;
-        break;
-        
-    case ls_swim:
-        swimspr[dir][spr_tile] = tile;
-        swimspr[dir][spr_flip] = flip;
-        swimspr[dir][spr_extend] = extend;
-        break;
-        
-    case ls_dive:
-        divespr[dir][spr_tile] = tile;
-        divespr[dir][spr_flip] = flip;
-        divespr[dir][spr_extend] = extend;
-        break;
-        
-    case ls_slash:
-        slashspr[dir][spr_tile] = tile;
-        slashspr[dir][spr_flip] = flip;
-        slashspr[dir][spr_extend] = extend;
-        break;
-        
-    case ls_walk:
-        walkspr[dir][spr_tile] = tile;
-        walkspr[dir][spr_flip] = flip;
-        walkspr[dir][spr_extend] = extend;
-        break;
-        
-    case ls_stab:
-        stabspr[dir][spr_tile] = tile;
-        stabspr[dir][spr_flip] = flip;
-        stabspr[dir][spr_extend] = extend;
-        break;
-        
-    case ls_pound:
-        poundspr[dir][spr_tile] = tile;
-        poundspr[dir][spr_flip] = flip;
-        poundspr[dir][spr_extend] = extend;
-        break;
-        
-    case ls_jump:
-        jumpspr[dir][spr_tile] = tile;
-        jumpspr[dir][spr_flip] = flip;
-        jumpspr[dir][spr_extend] = extend;
-        break;
-        
-    case ls_charge:
-        chargespr[dir][spr_tile] = tile;
-        chargespr[dir][spr_flip] = flip;
-        chargespr[dir][spr_extend] = extend;
-        break;
-        
-    case ls_cast:
-        castingspr[spr_tile] = tile;
-        castingspr[spr_flip] = flip;
-        castingspr[spr_extend] = extend;
-        break;
-        
-    case ls_landhold1:
-        holdspr[spr_landhold][spr_hold1][spr_tile] = tile;
-        holdspr[spr_landhold][spr_hold1][spr_flip] = flip;
-        holdspr[spr_landhold][spr_hold1][spr_extend] = extend;
-        break;
-        
-    case ls_landhold2:
-        holdspr[spr_landhold][spr_hold2][spr_tile] = tile;
-        holdspr[spr_landhold][spr_hold2][spr_flip] = flip;
-        holdspr[spr_landhold][spr_hold2][spr_extend] = extend;
-        break;
-        
-    case ls_waterhold1:
-        holdspr[spr_waterhold][spr_hold1][spr_tile] = tile;
-        holdspr[spr_waterhold][spr_hold1][spr_flip] = flip;
-        holdspr[spr_waterhold][spr_hold1][spr_extend] = extend;
-        break;
-        
-    case ls_waterhold2:
-        holdspr[spr_waterhold][spr_hold2][spr_tile] = tile;
-        holdspr[spr_waterhold][spr_hold2][spr_flip] = flip;
-        holdspr[spr_waterhold][spr_hold2][spr_extend] = extend;
-        break;
-        
-    default:
-        break;
-    }
 }
 
 void linktile(int *tile, int *flip, int state, int dir, int)

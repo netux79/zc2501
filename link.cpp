@@ -10,8 +10,6 @@
 //
 //--------------------------------------------------------
 
-#include "precompiled.h" //always first
-
 #include <string.h>
 #include <set>
 #include <stdio.h>
@@ -21,7 +19,6 @@
 #include "subscr.h"
 #include "zc_subscr.h"
 #include "decorations.h"
-#include "gamedata.h"
 #include "zc_custom.h"
 #include "title.h"
 #include "ffscript.h"
@@ -1581,8 +1578,6 @@ attack:
                 
                 if(action == walking || action == hopping || action == climbcoverbottom || action == climbcovertop)
                 {
-                    //tile+=(extend==2?2:1);
-                    //tile+=(((active_count>>2)%8)*(extend==2?2:1));
                     int l = link_count / link_animation_speed;
                     l -= ((l > 3) ? 1 : 0) + ((l > 12) ? 1 : 0);
                     tile += (l / 2) * (extend == 2 ? 2 : 1);
@@ -2256,8 +2251,6 @@ void LinkClass::check_slash_block(int bx, int by)
                 s->cset[i] = s->undercset;
                 s->sflag[i] = 0;
             }
-            
-            //pausenow=true;
         }
     }
     
@@ -3512,23 +3505,6 @@ bool LinkClass::animate(int)
 {
     int lsave=0;
     
-    if(do_cheat_goto)
-    {
-        didpit=true;
-        pitx=x;
-        pity=y;
-        dowarp(3,0);
-        do_cheat_goto=false;
-        return false;
-    }
-    
-    if(do_cheat_light)
-    {
-        naturaldark = !naturaldark;
-        lighting(false, false);
-        do_cheat_light = false;
-    }
-    
     if(action!=climbcovertop&&action!=climbcoverbottom)
     {
         climb_cover_x=-1000;
@@ -3557,7 +3533,7 @@ bool LinkClass::animate(int)
     if(tmpscr->flags7&fSIDEVIEW)  // Sideview gravity
     {
         // Fall, unless on a ladder, rafting, using the hookshot, drowning or cheating.
-        if(!(toogam && Up()) && !drownclk && action!=rafting && !pull_link && !((ladderx || laddery) && fall>0))
+        if(!Up() && !drownclk && action!=rafting && !pull_link && !((ladderx || laddery) && fall>0))
         {
             int ydiff = fall/(spins && fall<0 ? 200:100);
             falling_oldy = y; // Stomp Boots-related variable
@@ -5747,13 +5723,6 @@ void LinkClass::do_hopping()
 
 void LinkClass::do_rafting()
 {
-
-    if(toogam)
-    {
-        action=none;
-        return;
-    }
-    
     do_lens();
     
     linkstep();
@@ -6267,7 +6236,7 @@ void LinkClass::movelink()
         
         if(DrunkUp()&&(holddir==-1||holddir==up))
         {
-            if(isdungeon() && (x<=26 || x>=214) && !get_bit(quest_rules,qr_FREEFORM) && !toogam)
+            if(isdungeon() && (x<=26 || x>=214) && !get_bit(quest_rules,qr_FREEFORM))
             {
             }
             else
@@ -6293,7 +6262,7 @@ void LinkClass::movelink()
                 }
                 
                 //walkable if Ladder can be placed or is already placed vertically
-                if(tmpscr->flags7&fSIDEVIEW && !toogam && !(can_deploy_ladder() || (ladderx && laddery && ladderdir==up)))
+                if(tmpscr->flags7&fSIDEVIEW && !(can_deploy_ladder() || (ladderx && laddery && ladderdir==up)))
                 {
                     walkable=false;
                 }
@@ -6436,7 +6405,7 @@ void LinkClass::movelink()
         
         if(DrunkDown()&&(holddir==-1||holddir==down))
         {
-            if(isdungeon() && (x<=26 || x>=214) && !get_bit(quest_rules,qr_FREEFORM) && !toogam)
+            if(isdungeon() && (x<=26 || x>=214) && !get_bit(quest_rules,qr_FREEFORM))
             {
             }
             else
@@ -6462,7 +6431,7 @@ void LinkClass::movelink()
                 }
                 
                 //bool walkable;
-                if(tmpscr->flags7&fSIDEVIEW && !toogam)
+                if(tmpscr->flags7&fSIDEVIEW)
                 {
                     walkable=false;
                 }
@@ -6611,7 +6580,7 @@ void LinkClass::movelink()
         
         if(DrunkLeft()&&(holddir==-1||holddir==left))
         {
-            if(isdungeon() && (y<=26 || y>=134) && !get_bit(quest_rules,qr_FREEFORM) && !toogam)
+            if(isdungeon() && (y<=26 || y>=134) && !get_bit(quest_rules,qr_FREEFORM))
             {
             }
             else
@@ -6778,7 +6747,7 @@ void LinkClass::movelink()
         
         if(DrunkRight()&&(holddir==-1||holddir==right))
         {
-            if(isdungeon() && (y<=26 || y>=134) && !get_bit(quest_rules,qr_FREEFORM) && !toogam)
+            if(isdungeon() && (y<=26 || y>=134) && !get_bit(quest_rules,qr_FREEFORM))
             {
             }
             else
@@ -6972,7 +6941,7 @@ void LinkClass::movelink()
         return;
     } //endif (LTTPWALK)
     
-    if(isdungeon() && (x<=26 || x>=214) && !get_bit(quest_rules,qr_FREEFORM) && !toogam)
+    if(isdungeon() && (x<=26 || x>=214) && !get_bit(quest_rules,qr_FREEFORM))
     {
         goto LEFTRIGHT;
     }
@@ -7170,7 +7139,7 @@ void LinkClass::movelink()
     
 LEFTRIGHT:
 
-    if(isdungeon() && (y<=26 || y>=134) && !get_bit(quest_rules,qr_FREEFORM) && !toogam)
+    if(isdungeon() && (y<=26 || y>=134) && !get_bit(quest_rules,qr_FREEFORM))
     {
         return;
     }
@@ -7607,12 +7576,6 @@ void LinkClass::move(int d2)
 LinkClass::WalkflagInfo LinkClass::walkflag(int wx,int wy,int cnt,byte d2)
 {
     WalkflagInfo ret;
-    
-    if(toogam)
-    {
-        ret.setUnwalkable(false);
-        return ret;
-    }
     
     if(blockpath && wy<(bigHitbox?80:88))
     {
@@ -8051,8 +8014,6 @@ LinkClass::WalkflagInfo LinkClass::walkflagMBlock(int wx,int wy)
 
 void LinkClass::checkpushblock()
 {
-    if(toogam) return;
-    
     if(z!=0) return;
     
     // Return early in some cases..
@@ -8317,8 +8278,6 @@ bool islockeddoor(int x, int y, int lock)
 
 void LinkClass::checklockblock()
 {
-    if(toogam) return;
-    
     int bx = int(x)&0xF0;
     int bx2 = int(x+8)&0xF0;
     int by = int(y)&0xF0;
@@ -8394,8 +8353,6 @@ void LinkClass::checklockblock()
 
 void LinkClass::checkbosslockblock()
 {
-    if(toogam) return;
-    
     int bx = int(x)&0xF0;
     int bx2 = int(x+8)&0xF0;
     int by = int(y)&0xF0;
@@ -8470,7 +8427,7 @@ void LinkClass::checkbosslockblock()
 void LinkClass::checkchest(int type)
 {
     // chests aren't affected by tmpscr->flags2&fAIRCOMBOS
-    if(toogam || z>0) return;
+    if(z>0) return;
     
     int bx = int(x)&0xF0;
     int bx2 = int(x+8)&0xF0;
@@ -8565,8 +8522,6 @@ void LinkClass::checkchest(int type)
 
 void LinkClass::checklocked()
 {
-    if(toogam) return;
-    
     if(!isdungeon()) return;
     
     if(pushing!=8) return;
@@ -8862,8 +8817,6 @@ int touchcombo(int x,int y)
 
 void LinkClass::checktouchblk()
 {
-    if(toogam) return;
-    
     if(!pushing)
         return;
         
@@ -9250,8 +9203,6 @@ void LinkClass::checkspecial2(int *ls)
         if(int(x)&7)
             return;
     }
-    
-    if(toogam) return;
     
     bool didstrig = false;
     
@@ -9853,9 +9804,6 @@ void LinkClass::checkspecial2(int *ls)
         }
     }
     else stepnext = -1;
-    
-    detail_int[0]=tx;
-    detail_int[1]=ty;
     
     if(!((type==cCAVE || type==cCAVE2) && z==0) && type!=cSTAIR &&
             type!=cPIT && type!=cSWIMWARP && type!=cRESET &&
@@ -11424,7 +11372,7 @@ void LinkClass::stepout() // Step out of item cellars and passageways
 
 bool LinkClass::nextcombo_wf(int d2)
 {
-    if(toogam || action!=swimming || hopclk==0)
+    if(action!=swimming || hopclk==0)
         return false;
         
     // assumes Link is about to scroll screens
@@ -11503,7 +11451,7 @@ bool LinkClass::nextcombo_wf(int d2)
 
 bool LinkClass::nextcombo_solid(int d2)
 {
-    if(toogam || currscr>=128)
+    if(currscr>=128)
         return false;
         
     // assumes Link is about to scroll screens
@@ -11629,17 +11577,6 @@ void LinkClass::checkscroll()
     if(action == casting)
         return;
         
-    if(toogam)
-    {
-        if(x<0 && (currscr&15)==0) x=0;
-        
-        if(y<0 && currscr<16) y=0;
-        
-        if(x>240 && (currscr&15)==15) x=240;
-        
-        if(y>160 && currscr>=112) y=160;
-    }
-    
     if(y<0)
     {
         bool doit=true;
@@ -12625,9 +12562,6 @@ fade((specialcave > 0) ? (specialcave >= GUYCAVE) ? 10 : 11 : currcset, true, fa
         do_layer(framebuf, -2, oldscr, tx2, ty2, 3); //push blocks
         do_layer(framebuf, -2, newscr, tx, ty, 2);
         
-        do_walkflags(framebuf, oldscr, tx2, ty2,3); //show walkflags if the cheat is on
-        do_walkflags(framebuf, newscr, tx, ty,2);
-        
         if(get_bit(quest_rules, qr_FFCSCROLL))
         {
             do_layer(framebuf, -3, oldscr, tx2, ty2, 3, true); //ffcs
@@ -12744,7 +12678,7 @@ fade((specialcave > 0) ? (specialcave >= GUYCAVE) ? 10 : 11 : currcset, true, fa
     putscrdoors(scrollbuf,0,0,newscr);
     
     // Check for raft flags
-    if(action!=rafting && hopclk==0 && !toogam)
+    if(action!=rafting && hopclk==0)
     {
         if(MAPFLAG(x,y)==mfRAFT||MAPCOMBOFLAG(x,y)==mfRAFT)
         {

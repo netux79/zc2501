@@ -8,8 +8,6 @@
 //
 //--------------------------------------------------------
 
-#include "precompiled.h" //always first
-
 #include <string.h>
 #include <stdio.h>
 
@@ -23,8 +21,6 @@
 #include "guys.h"
 #include "title.h"
 #include "subscr.h"
-#include "init.h"
-#include "gamedata.h"
 
 extern LinkClass   Link;
 extern sprite_list  guys, items, Ewpns, Lwpns, Sitems, chainlinks, decorations;
@@ -209,8 +205,6 @@ void ending()
     kill_sfx();
     sfx(WAV_ZELDA);
     Quit=0;
-    
-    game->set_cheat(game->get_cheat() | (cheat>1)?1:0);
     
     draw_screen_clip_rect_x1=0;
     draw_screen_clip_rect_x2=255;
@@ -411,12 +405,7 @@ void ending()
     // draw the brick
     puttile16(scrollbuf,3,256,0,csBOSS,0);
     
-    int len=600*2;
-    
-    if(game->get_quest()>1)
-    {
-        len=720*2;
-    }
+    int len=720*2;
     
     int creditsLine=0;
     int endTextLine=0;
@@ -426,33 +415,10 @@ void ending()
     int deathsYPos=-1;
     int timeYPos=-1;
     
-    switch(game->get_quest())
-    {
-    case 1:
-        endText=quest1End;
-        numEndTextLines=numQuest1EndLines;
-        break;
-        
-    case 2:
-        endText=quest2End;
-        numEndTextLines=numQuest2EndLines;
-        deathsYPos=792;
-        break;
-        
-    case 3:
-    case 4:
-        endText=quest34End;
-        numEndTextLines=numQuest34EndLines;
-        deathsYPos=792;
-        break;
-        
-    default:
-        endText=customQuestEnd;
-        numEndTextLines=numCustomQuestEndLines;
-        deathsYPos=784;
-        timeYPos=800;
-        break;
-    }
+    endText=customQuestEnd;
+    numEndTextLines=numCustomQuestEndLines;
+    deathsYPos=784;
+    timeYPos=800;
     
     for(int f=0; f<len; f++)
     {
@@ -507,7 +473,7 @@ void ending()
                                   "%-8s -%3d", game->get_name(), game->get_deaths());
                 else if(y==timeYPos)
                 {
-                    if(game->get_timevalid() && !game->get_cheat())
+                    if(game->get_timevalid())
                         textout_centre_ex(scrollbuf, zfont, time_str_med(game->get_time()), 128, 224, blue, 0);
                 }
             }
@@ -562,20 +528,6 @@ void ending()
     }
     while(!rSbtn());
     
-    if(game->get_quest()>0 && game->get_quest()<3)
-    {
-        inc_quest();
-        removeItemsOfFamily(game, itemsbuf, itype_ring);
-        int maxring = getHighestLevelOfFamily(&zinit,itemsbuf,itype_ring);
-        
-        if(maxring != -1)
-        {
-            getitem(maxring,true);
-        }
-        
-        ringcolor(false);
-    }
-    
     stop_midi();
     
     if(zcmusic != NULL)
@@ -598,36 +550,3 @@ void ending()
     show_saving(scrollbuf);
     save_savedgames();
 }
-
-void inc_quest()
-{
-    char name[9];
-    strcpy(name,game->get_name());
-    // Go to quest 3 if you got some heart containers,
-    // or quest 4 if you got them all.
-    int quest;
-    
-    if(game->get_quest()==2 && game->get_maxlife()>=HP_PER_HEART*16)
-        quest = 4;
-    else
-        quest = zc_min(game->get_quest()+1,4);
-        
-    int deaths = game->get_deaths();
-    
-    game->Clear();
-    
-    game->set_name(name);
-    game->set_quest(quest);
-    game->set_deaths(deaths);
-    game->set_maxlife(3*HP_PER_HEART);
-    game->set_life(3*HP_PER_HEART);
-    game->set_maxbombs(8);
-    game->set_hasplayed(true);
-    game->set_continue_dmap(zinit.start_dmap);
-    game->set_continue_scrn(0x77);
-    resetItems(game,&zinit,true);
-    load_quest(game);
-    load_game_icon_to_buffer(false,currgame);
-    load_game_icon(game,false,currgame);
-}
-

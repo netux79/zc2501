@@ -8,15 +8,12 @@
 //
 //--------------------------------------------------------
 
-#include "precompiled.h" //always first
-
 #include "subscr.h"
 #include "zelda.h"
 #include "tiles.h"
 #include "zsys.h"
 #include "guys.h"
 #include "link.h"
-#include "gamedata.h"
 #include "items.h"
 #include <stdio.h>
 #include <string.h>

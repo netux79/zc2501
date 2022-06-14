@@ -8,10 +8,6 @@
 //
 //--------------------------------------------------------
 
-#if defined(ALLEGRO_WINDOWS)
-#include <conio.h>
-#endif
-
 #ifndef _ZSYS_H_
 #define _ZSYS_H_
 

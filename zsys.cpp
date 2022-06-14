@@ -8,12 +8,10 @@
 //
 //--------------------------------------------------------
 
-#include "precompiled.h" //always first
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include "zc_alleg.h"
+#include <allegro.h>
 #include <allegro/internal/aintern.h>
 #include <string>
 
@@ -23,11 +21,8 @@ using std::string;
 #include "zsys.h"
 #include "zc_sys.h"
 
-//#ifdef _ZQUEST_SCALE_
-extern volatile int myvsync;
 extern int zqwin_scale;
 extern BITMAP *hw_screen;
-//#endif
 
 char *time_str_long(dword time)
 {

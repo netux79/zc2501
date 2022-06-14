@@ -9,8 +9,6 @@
 //
 //--------------------------------------------------------
 
-#include "precompiled.h" //always first
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,10 +16,6 @@
 #include <string>
 #include <map>
 #include <vector>
-
-#include "zc_alleg.h"
-
-#include <stdlib.h>
 
 #include "zscriptversion.h"
 #include "zcmusic.h"
@@ -34,19 +28,12 @@
 #include "qst.h"
 #include "fontsdat.h"
 #include "particles.h"
-#include "gamedata.h"
 #include "ffscript.h"
-#include "init.h"
-#include <assert.h>
 #include "zc_array.h"
 #include "rendertarget.h"
 
 ZCMUSIC *zcmusic = NULL;
 zinitdata zinit;
-int colordepth;
-int db=0;
-//zinitdata  zinit;
-int detail_int[10];                                         //temporary holder for things you want to detail
 int lens_hint_item[MAXITEMS][2];                            //aclk, aframe
 int lens_hint_weapon[MAXWPNS][5];                           //aclk, aframe, dir, x, y
 int strike_hint_counter=0;
@@ -91,23 +78,14 @@ END_OF_FUNCTION(update_script_counter)
 
 void throttleFPS()
 {
-    if(Throttlefps ^ (key[KEY_TILDE]!=0))
+    if(Throttlefps)
     {
-        if(zc_vsync == FALSE)
+        int t = 0;
+        while(logic_counter < 1)
         {
-			int t = 0;
-            while(logic_counter < 1)
-			{
-				// bugfix: win xp/7/8 have incompatible timers.
-				// preserve 60 fps and CPU based on user settings. -Gleeok
-				int ms = t >= 16 ? 0 : frame_rest_suggest;
-                rest(ms);
-				t += frame_rest_suggest;
-			}
-        }
-        else
-        {
-            vsync();
+            int ms = t >= 16 ? 0 : 1;
+            rest(ms);
+            t++;
         }
     }
     
@@ -137,9 +115,7 @@ comboclass *combo_class_buf;
 guydata    *guysbuf;
 item_drop_object    item_drop_sets[MAXITEMDROPSETS];
 ZCHEATS    zcheats;
-byte       use_cheats;
-byte       use_tiles;
-char       palnames[MAXLEVELS][PALNAMESIZE];
+/*char       palnames[MAXLEVELS][PALNAMESIZE];*/
 /*
 newcombo   *combobuf;
 word animated_combo_table[MAXCOMBOS][2];                    //[0]=position in act2, [1]=original tile
@@ -192,7 +168,6 @@ BITMAP *hw_screen;
 int zqwin_scale;
 
 int fullscreen;
-byte frame_rest_suggest=0,forceExit=0,zc_vsync=0;
 byte zc_color_depth=8;
 int homescr,currscr,frame=0,currmap=0,dlevel,warpscr,worldscr;
 int newscr_clk=0,opendoors=0,currdmap=0,fadeclk=-1,currgame=0,listpos=0;
@@ -205,28 +180,20 @@ int cheat_goto_dmap=0, cheat_goto_screen=0, currcset;
 int gfc, gfc2, pitx, pity, refill_what, refill_why, heart_beep_timer=0, new_enemy_tile_start=1580;
 int nets=1580, magicitem=-1,nayruitem=-1, title_version, magiccastclk, quakeclk=0, wavy=0, castx, casty, df_x, df_y, nl1_x, nl1_y, nl2_x, nl2_y;
 int magicdrainclk=0, conveyclk=3, memrequested=0;
-float avgfps=0;
-dword fps_secs=0;
-bool do_cheat_goto=false, do_cheat_light=false;
 int checkx, checky;
 int skipcont=0;
 
-bool show_layer_0=true, show_layer_1=true, show_layer_2=true, show_layer_3=true, show_layer_4=true, show_layer_5=true, show_layer_6=true,
-//oveheard combos     //pushblocks
-     show_layer_over=true, show_layer_push=true, show_sprites=true, show_ffcs=true, show_hitboxes=false, show_walkflags=false, show_ff_scripts=false;
-
-
-bool Throttlefps, Paused=false, Advance=false, ShowFPS, Showpal=false;
+bool Throttlefps, Paused=false, ShowFPS;
 bool Playing, FrameSkip=false, TransLayers;
 bool refreshpal,blockpath,loaded_guys,freeze_guys,
-     loaded_enemies,drawguys,details=false,watch;
+     loaded_enemies,drawguys,watch;
 bool darkroom=false,naturaldark=false,BSZ;                         //,NEWSUBSCR;
 bool Udown,Ddown,Ldown,Rdown,Adown,Bdown,Sdown,Mdown,LBdown,RBdown,Pdown,Ex1down,Ex2down,Ex3down,Ex4down,AUdown,ADdown,ALdown,ARdown,F12,F11, F5,keyI, keyQ,
      NESquit,boughtsomething=false,
      fixed_door=false, hookshot_used=false, hookshot_frozen=false,
      pull_link=false, add_chainlink=false, del_chainlink=false, hs_fix=false,
-     cheat_superman=false, gofast=false, checklink=true, didpit=false, heart_beep=true,
-     pausenow=false, castnext=false, add_df1asparkle, add_df1bsparkle, add_nl1asparkle, add_nl1bsparkle, add_nl2asparkle, add_nl2bsparkle,
+     cheat_superman=false, checklink=true, didpit=false, heart_beep=true,
+     castnext=false, add_df1asparkle, add_df1bsparkle, add_nl1asparkle, add_nl1bsparkle, add_nl2asparkle, add_nl2bsparkle,
      is_on_conveyor, activated_timed_warp=false;
 
 byte COOLSCROLL;
@@ -345,11 +312,6 @@ int resx,resy,scrx,scry;
 bool sbig;                                                  // big screen
 int screen_scale = 2; //default = 2 (640x480)
 bool scanlines;                                             //do scanlines if sbig==1
-bool toogam=false;
-
-int cheat=0;                                                // 0 = none; 1,2,3,4 = cheat level
-
-int idle_count, active_count;
 
 
 // quest file data
@@ -373,7 +335,6 @@ gamedata *saves=NULL;
 
 volatile int lastfps=0;
 volatile int framecnt=0;
-volatile int myvsync=0;
 
 /**********************************/
 /*********** Misc Data ************/
@@ -945,6 +906,90 @@ void init_dmap()
     return;
 }
 
+// NOTE: This method has been severely hacked to fix an annoying problem at game start:
+// items (ie the Small Wallet) which modify max counter values need to be processed after
+// the values for those counters specified in init data, as the author expects these items
+// to modify the max counter. BUT the counter value should NOT be updated, ie, starting with
+// the bomb item does not give 8 free bombs at quest start.
+// I don't like this solution one bit, but can't come up with anything better -DD
+
+void resetItems(gamedata *game2, zinitdata *zinit2, bool lvlitems)
+{
+    game2->set_maxlife(zinit2->hc*HP_PER_HEART);
+    game2->set_maxbombs(zinit2->max_bombs);
+    game2->set_maxcounter(zinit2->max_bombs/zc_max(1,zinit2->bomb_ratio), 6);
+    game2->set_maxmagic(zinit2->max_magic);
+    game2->set_maxarrows(zinit2->max_arrows);
+    game2->set_maxcounter(zinit2->max_rupees, 1);
+    game2->set_maxcounter(zinit2->max_keys, 5);
+    
+    //set up the items
+    for(int i=0; i<MAXITEMS; i++)
+    {
+        if(zinit2->items[i] && (itemsbuf[i].flags & ITEM_GAMEDATA))
+        {
+            if(!game2->get_item(i))
+                getitem(i,true);
+        }
+        else
+            game2->set_item_no_flush(i,false);
+            
+        game2->items_off[i] = 0;
+        
+        // Fix them DMap items
+        // Since resetItems() gets called before AND after init_dmap()...
+        if(get_currdmap() > -1)
+            game2->items_off[i] |= DMaps[get_currdmap()].disableditems[i];
+    }
+    
+    flushItemCache();
+    
+    //Then set up the counters
+    game2->set_bombs(zinit2->bombs);
+    
+    if(zinit2->bombs > 0 && zinit2->max_bombs > 0) game2->set_item(iBombs, true);
+    
+    game2->set_keys(zinit2->keys);
+    game2->set_sbombs(zinit2->super_bombs);
+    
+    if(zinit2->super_bombs > 0 && (zinit2->max_bombs/zc_max(1,zinit2->bomb_ratio)) > 0) game2->set_item(iSBomb, true);
+    
+    game2->set_HCpieces(zinit2->hcp);
+    game2->set_rupies(zinit2->rupies);
+    game2->set_hcp_per_hc(zinit2->hcp_per_hc);
+    game2->set_cont_hearts(zinit2->cont_heart);
+    game2->set_cont_percent(get_bit(zinit2->misc, idM_CONTPERCENT) != 0);
+    
+    for(int i=0; i<MAXLEVELS; i++)
+    {
+        // Kludge to prevent two bits (liTRIFORCE and liBOSS) which aren't
+        // completely stored in Init Data, from being erased when this is run in-game.
+        if(lvlitems)
+            game2->lvlitems[i]=0;
+        else
+            game2->lvlitems[i]&=~(liMAP|liCOMPASS|liBOSSKEY| (i>0 && i<=8 ? liTRIFORCE : 0));
+            
+        game2->lvlitems[i]|=get_bit(zinit2->map,i)?liMAP:0;
+        game2->lvlitems[i]|=get_bit(zinit2->compass,i)?liCOMPASS:0;
+        game2->lvlitems[i]|=get_bit(zinit2->boss_key,i)?liBOSSKEY:0;
+        game2->lvlkeys[i]=zinit2->level_keys[i];
+    }
+    
+    for(int i=0; i<8; i++)
+    {
+        game2->lvlitems[i+1]|=get_bit(&zinit2->triforce,i)?liTRIFORCE:0;
+    }
+    
+    game2->set_magic(zc_min(zinit2->magic,zinit2->max_magic));
+    game2->set_magicdrainrate(get_bit(zinit2->misc,idM_DOUBLEMAGIC)?1:2);
+    game2->set_canslash(get_bit(zinit2->misc,idM_CANSLASH)?1:0);
+    
+    game2->set_arrows(zinit2->arrows);
+    
+    //flush the cache again (in case bombs became illegal to use by setting bombs to 0)
+    flushItemCache();
+}
+
 int init_game()
 {
     srand(time(0));
@@ -965,13 +1010,9 @@ int init_game()
     add_nl1bsparkle=false;
     add_nl2asparkle=false;
     add_nl2bsparkle=false;
-    gofast=false;
     
-    cheat=0;
     wavy=quakeclk=0;
-    show_layer_0=show_layer_1=show_layer_2=show_layer_3=show_layer_4=show_layer_5=show_layer_6=true;
-    show_layer_over=show_layer_push=show_sprites=show_ffcs=true;
-    cheat_superman=do_cheat_light=do_cheat_goto=show_walkflags=show_ff_scripts=show_hitboxes=false;
+    cheat_superman=false;
     
     for(int x = 0; x < MAXITEMS; x++)
     {
@@ -1015,7 +1056,6 @@ int init_game()
     
     char keyfilename[2048];
     replace_extension(keyfilename, quest_path, "key", 2047);
-    bool gotfromkey=false;
     
     if(exists(keyfilename))
     {
@@ -1033,24 +1073,12 @@ int init_game()
             p_getc(&bld,fp,true);
             memset(password,0,32);
             pfread(password, 30, fp,true);
-            /*
-            get-questpwd(&QHeader, pwd);
-            if (strcmp(pwd,password)==0)
-            {
-            	gotfromkey=true;
-            }
-            */
-            gotfromkey=check_questpwd(&QHeader, password);
+            //check_questpwd(&QHeader, password);
             memset(password,0,32);
             memset(pwd,0,32);
         }
         
         pack_fclose(fp);
-    }
-    
-    if(gotfromkey)
-    {
-        cheat=4;
     }
     
     bool firstplay = (game->get_hasplayed() == 0);
@@ -1485,42 +1513,6 @@ void putintro()
 
 //static char *dirstr[4] = {"Up","Down","Left","Right"};
 //static char *dirstr[32] = {"U","D","L","R"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "};
-
-//use detail_int[x] for global detail info
-void show_details()
-{
-    //textprintf_ex(framebuf,font,-3,-5,WHITE,BLACK,"%-4d",whistleclk);
-    textprintf_ex(framebuf,font,0,8,WHITE,BLACK,"dlvl:%-2d dngn:%d", dlevel, isdungeon());
-    textprintf_ex(framebuf,font,0,176,WHITE,BLACK,"%d %s",game->get_time(),time_str_long(game->get_time()));
-    
-//    textprintf_ex(framebuf,font,200,16,WHITE,BLACK,"%3d",Link.getPushing());
-//    for(int i=0; i<Lwpns.Count(); i++)
-//      textprintf_ex(framebuf,font,200,(i<<3)+16,WHITE,BLACK,"%3d",items.spr(i)->id);
-
-//    for(int i=0; i<Ewpns.Count(); i++)
-//      textprintf_ex(framebuf,font,90,(i<<3)+16,WHITE,BLACK,"%3d %3d %3d %3d %3d",((weapon*)Ewpns.spr(i))->id, ((weapon*)Ewpns.spr(i))->tile, ((weapon*)Ewpns.spr(i))->clk, ((weapon*)Ewpns.spr(i))->aframe, wpnsbuf[((weapon*)Ewpns.spr(i))->id].frames);
-
-//    for(int i=0; i<items.Count(); i++)
-//      textprintf_ex(framebuf,font,90,(i<<3)+16,WHITE,BLACK,"%3d %3d %3d",((weapon*)Lwpns.spr(i))->tile, ((weapon*)Lwpns.spr(i))->dir, ((weapon*)Lwpns.spr(i))->flip);
-
-    for(int i=0; i<guys.Count(); i++)
-        textprintf_ex(framebuf,font,90,(i<<3)+16,WHITE,BLACK,"%d",(int)((enemy*)guys.spr(i))->id);
-        
-//      textprintf_ex(framebuf,font,90,16,WHITE,BLACK,"%3d, %3d",int(LinkModifiedX()),int(LinkModifiedY()));
-    //textprintf_ex(framebuf,font,90,24,WHITE,BLACK,"%3d, %3d",detail_int[0],detail_int[1]);
-//      textprintf_ex(framebuf,font,200,16,WHITE,BLACK,"%3d",Link.getAction());
-
-    /*
-      for(int i=0; i<Ewpns.Count(); i++)
-      {
-      sprite *s=Ewpns.spr(i);
-      textprintf_ex(framebuf,font,100,(i<<3)+16,WHITE,BLACK,"%3d>%3d %3d>%3d %3d<%3d %3d<%3d ",
-      int(Link.getX()+0+16), int(s->x+s->hxofs),  int(Link.getY()+0+16), int(s->y+s->hyofs),
-      int(Link.getX()+0), int(s->x+s->hxofs+s->hxsz), int(Link.getY()+0), int(s->y+s->hyofs+s->hysz));
-      }
-      */
-//        textprintf_ex(framebuf,font,200,16,WHITE,BLACK,"gi=%3d",guycarryingitem);
-}
 
 void show_ffscript_names()
 {
@@ -2096,7 +2088,7 @@ void game_loop()
         Ewpns.animate();
         checklink = true;
         
-        for(int i = 0; i < (gofast ? 8 : 1); i++)
+        for(int i = 0; i < 1; i++)
         {
             if(Link.animate(0))
             {
@@ -2413,12 +2405,6 @@ int main(int argc, char* argv[])
     }
     
     if(install_keyboard() < 0)
-    {
-        Z_error(allegro_error);
-        quit_game();
-    }
-    
-    if(install_mouse() < 0)
     {
         Z_error(allegro_error);
         quit_game();
@@ -2800,9 +2786,6 @@ int main(int argc, char* argv[])
     set_close_button_callback((void (*)()) hit_close_button);
     set_window_title("Zelda Classic");
     
-    gui_mouse_focus = FALSE;
-    position_mouse(resx-16,resy-16);
-    
 // load saved games
     Z_message("Loading saved games... ");
     
@@ -2830,7 +2813,6 @@ int main(int argc, char* argv[])
     {
         // this is here to continually fix the keyboard repeat
         set_keyboard_rate(250,33);
-        toogam = false;
         titlescreen(0);
         
         setup_combo_animations();
@@ -2855,7 +2837,6 @@ int main(int argc, char* argv[])
             show_subscreen_numbers=true;
             show_subscreen_items=true;
             show_subscreen_life=true;
-            show_ff_scripts=false;
             introclk=intropos=0;
             
             initZScriptGlobalRAM();
@@ -2903,9 +2884,6 @@ int main(int argc, char* argv[])
     Z_message("Zelda Classic web site: http://www.zeldaclassic.com\n");
     Z_message("Zelda Classic wiki: http://www.shardstorm.com/ZCwiki/\n");
     
-    if(forceExit) //fix for the allegro at_exit() hang.
-        exit(0);
-        
     allegro_exit();
     return 0;
 }

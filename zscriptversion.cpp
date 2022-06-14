@@ -1,6 +1,4 @@
 
-#include "precompiled.h" //always first
-
 #include "zscriptversion.h"
 #include "zelda.h"
 #include "link.h"

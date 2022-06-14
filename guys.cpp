@@ -8,11 +8,8 @@
 //
 //--------------------------------------------------------
 
-#include "precompiled.h" //always first
-
 #include <string.h>
 #include <stdio.h>
-#include "zc_alleg.h"
 #include "guys.h"
 #include "zelda.h"
 #include "zsys.h"
@@ -20,7 +17,6 @@
 #include "link.h"
 #include "subscr.h"
 #include "ffscript.h"
-#include "gamedata.h"
 #include "defdata.h"
 #include "zscriptversion.h"
 
@@ -1713,7 +1709,6 @@ bool enemy::canmove(int ndir,fix s,int special,int dx1,int dy1,int dx2,int dy2)
         break;
         
     default:
-        db=99;
         return true;
     }
     
@@ -8702,9 +8697,7 @@ void eGanon::draw(BITMAP *dest)
     case 0:
         if((clk&3)==3)
             tile=(rand()%5)*2+o_tile;
-            
-        if(db!=999)
-            break;
+        break;
             
     case 2:
         if(Stunclk<64 && (Stunclk&1))

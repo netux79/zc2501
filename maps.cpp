@@ -8,8 +8,6 @@
 //
 //--------------------------------------------------------
 
-#include "precompiled.h" //always first
-
 #include <string.h>
 #include <assert.h>
 #include <math.h>
@@ -82,44 +80,6 @@ void Z_message_d(const char *format,...)
 //bool draw_screen_clip_rect_show_link=true;
 //bool draw_screen_clip_rect_show_guys=false;
 bool checktrigger=false;
-
-void debugging_box(int x1, int y1, int x2, int y2)
-{
-    //reference/optimization: the start of the unused drawing command index can now be queried. -Gleeok
-    int index = script_drawing_commands.GetNext();
-    
-    if(index < 0)
-        return;
-        
-    int *sdci = &script_drawing_commands[index][0];
-    
-    sdci[0] = RECTR;
-    sdci[1] = 30000;
-    sdci[2] = x1*10000;
-    sdci[3] = y1*10000;
-    sdci[4] = x2*10000;
-    sdci[5] = y2*10000;
-    sdci[6] = 10000;
-    sdci[7] = 10000;
-    sdci[8] = 0;
-    sdci[9] = 0;
-    sdci[10] = 0;
-    sdci[11] = 10000;
-    sdci[12] = 1280000;
-}
-
-void clear_dmap(word i)
-{
-    memset(&DMaps[i],0,sizeof(dmap));
-}
-
-void clear_dmaps()
-{
-    for(int i=0; i<MAXDMAPS; i++)
-    {
-        clear_dmap(i);
-    }
-}
 
 int isdungeon(int dmap, int scr) // The arg is only used by loadscr2 and loadscr
 {
@@ -2596,82 +2556,6 @@ void do_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, int tempscreen
 {
     bool showlayer = true;
     
-    switch(type)
-    {
-    case -4:
-    case -3:
-        if(!show_ffcs)
-        {
-            showlayer = false;
-        }
-        
-        break;
-        
-    case -2:
-        if(!show_layer_push)
-        {
-            showlayer = false;
-        }
-        
-        break;
-        
-    case -1:
-        if(!show_layer_over)
-        {
-            showlayer = false;
-        }
-        
-        break;
-        
-    case 0:
-        if(!show_layer_1)
-        {
-            showlayer = false;
-        }
-        
-        break;
-        
-    case 1:
-        if(!show_layer_2)
-        {
-            showlayer = false;
-        }
-        
-        break;
-        
-    case 2:
-        if(!show_layer_3)
-        {
-            showlayer = false;
-        }
-        
-        break;
-        
-    case 3:
-        if(!show_layer_4)
-        {
-            showlayer = false;
-        }
-        
-        break;
-        
-    case 4:
-        if(!show_layer_5)
-        {
-            showlayer = false;
-        }
-        
-        break;
-        
-    case 5:
-        if(!show_layer_6)
-        {
-            showlayer = false;
-        }
-        
-        break;
-    }
-    
     if(type==(int)(layer->lens_layer&7) && ((layer->lens_layer&llLENSSHOWS && !lensclk) || (layer->lens_layer&llLENSHIDES && lensclk)))
     {
         showlayer = false;
@@ -2684,98 +2568,6 @@ void do_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, int tempscreen
         if(drawprimitives && type >= 0 && type <= 5)
         {
             do_primitives(bmp, type+1, layer, 0,  playing_field_offset);
-        }
-    }
-}
-
-
-// Called by do_walkflags
-void put_walkflags(BITMAP *dest,int x,int y,int xofs,int yofs, word cmbdat,int lyr)
-{
-    newcombo c = combobuf[cmbdat];
-    
-    int xx = x-xofs;
-    int yy = y+playing_field_offset-yofs;
-    
-    for(int i=0; i<4; i++)
-    {
-        int tx=((i&2)<<2)+xx;
-        int ty=((i&1)<<3)+yy;
-        
-        if(lyr==0 && iswater(cmbdat)!=0 && get_bit(quest_rules, qr_DROWN))
-            rectfill(dest,tx,ty,tx+7,ty+7,makecol(85,85,255));
-            
-        if(c.walk&(1<<i) && !(iswater_type(c.type) && DRIEDLAKE))  // Check for dried lake (watertype && not water)
-        {
-            if(c.type==cLADDERHOOKSHOT && isstepable(cmbdat) && ishookshottable(xx,yy))
-            {
-                for(int k=0; k<8; k+=2)
-                    for(int j=0; j<8; j+=2)
-                        rectfill(dest,tx+k,ty+j,tx+k+1,ty+j+1,((k+j)/2)%2 ? makecol(165,105,8) : makecol(170,170,170));
-            }
-            else
-            {
-                int color = makecol(255,85,85);
-                
-                if(isstepable(cmbdat))
-                    color=makecol(165,105,8);
-                else if((c.type==cHOOKSHOTONLY || c.type==cLADDERHOOKSHOT) && ishookshottable(xx,yy))
-                    color=makecol(170,170,170);
-                    
-                rectfill(dest,tx,ty,tx+7,ty+7,color);
-            }
-        }
-    }
-    
-    // Draw damage combos
-    bool dmg = combo_class_buf[combobuf[MAPCOMBO2(-1,xx,yy)].type].modify_hp_amount
-               || combo_class_buf[combobuf[MAPCOMBO2(0,xx,yy)].type].modify_hp_amount
-               || combo_class_buf[combobuf[MAPCOMBO2(1,xx,yy)].type].modify_hp_amount;
-               
-    if(dmg)
-    {
-        for(int k=0; k<16; k+=2)
-            for(int j=0; j<16; j+=2)
-                if(((k+j)/2)%2)
-                    rectfill(dest,x+k,y+j,x+k+1,y+j+1,vc(14));
-    }
-}
-
-// Walkflags L4 cheat
-void do_walkflags(BITMAP *dest,mapscr* layer,int x, int y, int tempscreen)
-{
-    if(show_walkflags)
-    {
-        for(int i=0; i<176; i++)
-        {
-            put_walkflags(dest,((i&15)<<4),(i&0xF0),x,y,layer->data[i], 0);
-        }
-        
-        int layermap;
-        
-        for(int k=0; k<2; k++)
-        {
-            layermap=layer->layermap[k%2];
-            
-            if(layermap>0)
-            {
-                if(tempscreen==2)
-                {
-                    for(int i=0; i<176; i++)
-                    {
-                        put_walkflags(temp_buf,((i&15)<<4),(i&0xF0),x,y,tmpscr2[k].data[i], k%2+1);
-                        put_walkflags(scrollbuf,((i&15)<<4),(i&0xF0),x,y,tmpscr2[k].data[i], k%2+1);
-                    }
-                }
-                else
-                {
-                    for(int i=0; i<176; i++)
-                    {
-                        put_walkflags(temp_buf,((i&15)<<4),(i&0xF0),x,y,tmpscr3[k].data[i], k%2+1);
-                        put_walkflags(scrollbuf,((i&15)<<4),(i&0xF0),x,y,tmpscr3[k].data[i], k%2+1);
-                    }
-                }
-            }
         }
     }
 }
@@ -2844,8 +2636,7 @@ void draw_screen(mapscr* this_screen, bool showlink)
         draw_lens_under(scrollbuf, false);
     }
     
-    if(show_layer_0)
-        do_primitives(scrollbuf, 0, this_screen, 0, playing_field_offset);
+    do_primitives(scrollbuf, 0, this_screen, 0, playing_field_offset);
         
     for(pcounter=0; pcounter<particles.Count(); pcounter++)
     {
@@ -2945,10 +2736,6 @@ void draw_screen(mapscr* this_screen, bool showlink)
     }
     
     do_layer(scrollbuf,-2, this_screen, 0, 0, 2); // push blocks!
-    
-    //Show walkflags cheat
-    do_walkflags(temp_buf,this_screen,0,0,2);
-    do_walkflags(scrollbuf,this_screen,0,0,2);
     
     putscrdoors(scrollbuf,0,playing_field_offset,this_screen);
     
@@ -4216,7 +4003,7 @@ void loadscr2(int tmp,int scr,int)
 
 void putscr(BITMAP* dest,int x,int y, mapscr* scrn)
 {
-    if(scrn->valid==0||!show_layer_0)
+    if(scrn->valid==0)
     {
         rectfill(dest,x,y,x+255,y+175,0);
         return;
@@ -4237,7 +4024,7 @@ void putscr(BITMAP* dest,int x,int y, mapscr* scrn)
 
 void putscrdoors(BITMAP *dest,int x,int y, mapscr* scrn)
 {
-    if(scrn->valid==0||!show_layer_0)
+    if(scrn->valid==0)
     {
         return;
     }
@@ -4732,18 +4519,15 @@ void ViewMap()
     resume_all_sfx();
 }
 
-int onViewMap()
+void onViewMap()
 {
     if(Playing && currscr<128 && DMaps[currdmap].flags&dmfVIEWMAP)
     {
         clear_to_color(framebuf,BLACK);
-        //      text_mode(BLACK);
         textout_centre_ex(framebuf,font,"Drawing map...",128,108,WHITE,BLACK);
         advanceframe(true);
         ViewMap();
     }
-    
-    return D_O_K;
 }
 
 bool isGrassType(int type)

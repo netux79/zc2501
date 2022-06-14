@@ -9,18 +9,12 @@
 //
 //--------------------------------------------------------
 
-#include "precompiled.h" //always first
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <map>
 #include <ctype.h>
-#include "zc_alleg.h"
-#include "gamedata.h"
-#include "zc_init.h"
-#include "init.h"
 #include "zdefs.h"
 #include "zelda.h"
 #include "tiles.h"
@@ -43,9 +37,6 @@ extern FONT *lfont;
 extern LinkClass Link;
 extern sprite_list  guys, items, Ewpns, Lwpns, Sitems, chainlinks, decorations, particles;
 byte use_save_indicator;
-bool midi_paused=false;
-//extern movingblock mblock2; //mblock[4]?
-//extern int db;
 
 bool rF12();
 bool rF5();
@@ -67,7 +58,7 @@ void load_game_configs()
         joystick_index = 0; // 4 is the max number supported by allegro
         
     Akey = get_config_int(cfg_sect,"key_a",KEY_ALT);
-    Bkey = get_config_int(cfg_sect,"key_b",KEY_ZC_LCONTROL);
+    Bkey = get_config_int(cfg_sect,"key_b",KEY_LCONTROL);
     Skey = get_config_int(cfg_sect,"key_s",KEY_ENTER);
     Lkey = get_config_int(cfg_sect,"key_l",KEY_Z);
     Rkey = get_config_int(cfg_sect,"key_r",KEY_X);
@@ -101,7 +92,6 @@ void load_game_configs()
     pan_style = get_config_int(cfg_sect,"pan",1);
     // 1 <= zcmusic_bufsz <= 128
     zcmusic_bufsz = vbound(get_config_int(cfg_sect,"zcmusic_bufsz",64),1,128);
-    zc_vsync = get_config_int(cfg_sect,"vsync",0);
     Throttlefps = get_config_int(cfg_sect,"throttlefps",1)!=0;
     TransLayers = get_config_int(cfg_sect,"translayers",1)!=0;
     ShowFPS = get_config_int(cfg_sect,"showfps",0)!=0;
@@ -117,10 +107,6 @@ void load_game_configs()
     fullscreen = get_config_int(cfg_sect,"fullscreen",1);    
     zc_color_depth = (byte) get_config_int(cfg_sect,"color_depth",8);
     
-    frame_rest_suggest = (byte) get_config_int(cfg_sect,"frame_rest_suggest",1);
-    frame_rest_suggest = zc_min(2, frame_rest_suggest);
-    
-    forceExit = (byte) get_config_int(cfg_sect,"force_exit",0);
     heart_beep = get_config_int(cfg_sect,"heart_beep",1)!=0;
     sfxdat = get_config_int(cfg_sect,"use_sfx_dat",1);
     use_save_indicator = get_config_int(cfg_sect,"save_indicator",0);
@@ -163,7 +149,6 @@ void save_game_configs()
     set_config_int(cfg_sect,"emusic",emusic_volume);
     set_config_int(cfg_sect,"pan",pan_style);
     set_config_int(cfg_sect,"zcmusic_bufsz",zcmusic_bufsz);
-    set_config_int(cfg_sect,"vsync",zc_vsync);
     set_config_int(cfg_sect,"throttlefps", (int)Throttlefps);
     set_config_int(cfg_sect,"translayers",(int)TransLayers);
     set_config_int(cfg_sect,"showfps",(int)ShowFPS);
@@ -182,8 +167,6 @@ void save_game_configs()
     set_config_int(cfg_sect,"use_sfx_dat",sfxdat);
     set_config_int(cfg_sect,"fullscreen",fullscreen);
     set_config_int(cfg_sect,"color_depth",zc_color_depth);
-    set_config_int(cfg_sect,"frame_rest_suggest",frame_rest_suggest);
-    set_config_int(cfg_sect,"force_exit",forceExit);
     
     set_config_int(cfg_sect,"save_indicator",use_save_indicator);
     
@@ -197,11 +180,6 @@ void save_game_configs()
 void fps_callback()
 {
     lastfps=framecnt;
-    dword tempsecs = fps_secs;
-    ++tempsecs;
-    //avgfps=((long double)avgfps*fps_secs+lastfps)/(++fps_secs); // DJGPP doesn't like this
-    avgfps=((long double)avgfps*fps_secs+lastfps)/(tempsecs);
-    ++fps_secs;
     framecnt=0;
 }
 
@@ -235,12 +213,6 @@ void Z_remove_timers()
 
 //----------------------------------------------------------------
 
-void dump_pal(BITMAP *dest)
-{
-    for(int i=0; i<256; i++)
-        rectfill(dest,(i&63)<<2,(i&0xFC0)>>4,((i&63)<<2)+3,((i&0xFC0)>>4)+3,i);
-}
-
 void show_paused(BITMAP *target)
 {
     //  return;
@@ -267,7 +239,6 @@ void show_fps(BITMAP *target)
     //  text_mode(-1);
     sprintf(buf,"%2d/60",lastfps);
     
-    //  sprintf(buf,"%d/%u/%f/%u",lastfps,int(avgfps),avgfps,fps_secs);
     for(int i=0; buf[i]!=0; i++)
         if(buf[i]!=' ')
             buf[i]+=0x60;
@@ -307,7 +278,7 @@ void show_saving(BITMAP *target)
 
 //----------------------------------------------------------------
 
-// sets the video mode and initializes the palette and mouse sprite
+// sets the video mode and initializes the palette
 bool game_vid_mode(int mode,int wait)
 {
     if(set_gfx_mode(mode,resx,resy,0,0)!=0)
@@ -317,8 +288,6 @@ bool game_vid_mode(int mode,int wait)
     
     scrx = (resx-320)>>1;
     scry = (resy-240)>>1;
-    
-    set_mouse_sprite((BITMAP*)data[BMP_MOUSE].dat);
     
     for(int i=240; i<256; i++)
         RAMpal[i]=((RGB*)data[PAL_GUI].dat)[i];
@@ -3032,15 +3001,7 @@ void updatescr(bool allowwavy)
 {
     static BITMAP *wavybuf = create_bitmap_ex(8,256,224);
     static BITMAP *panorama = create_bitmap_ex(8,256,224);
-        
-    if(toogam)
-    {
-        textout_ex(framebuf,font,"no walls",8,216,1,-1);
-    }
-    
-    if(Showpal)
-        dump_pal(framebuf);
-        
+     
     if(!Playing)
         black_opening_count=0;
         
@@ -3048,7 +3009,7 @@ void updatescr(bool allowwavy)
     {
         black_opening(framebuf,black_opening_x,black_opening_y,(66+black_opening_count),66);
         
-        if(Advance||(!Paused))
+        if(!Paused)
         {
             ++black_opening_count;
         }
@@ -3057,7 +3018,7 @@ void updatescr(bool allowwavy)
     {
         black_opening(framebuf,black_opening_x,black_opening_y,black_opening_count,66);
         
-        if(Advance||(!Paused))
+        if(!Paused)
         {
             --black_opening_count;
         }
@@ -3080,11 +3041,6 @@ void updatescr(bool allowwavy)
             trans_table2.data[q][q] = q;
         }
     }
-    
-    if(details)
-        show_details();
-    if(show_ff_scripts)
-        show_ffscript_names();
     
     bool clearwavy = (wavy <= 0);
     
@@ -3189,11 +3145,6 @@ void updatescr(bool allowwavy)
     if(Paused)
         show_paused(target);
         
-    if(details)
-    {
-        textprintf_ex(target,font,0,SCREEN_H-8,254,BLACK,"%-6d (%s)", idle_count, time_str_long(idle_count));
-    }
-    
     //if(panorama!=NULL) destroy_bitmap(panorama);
     
     ++framecnt;
@@ -3217,11 +3168,11 @@ void f_Quit(int type)
         break;
         
     case qRESET:
-        onReset();
+        Quit=qRESET;
         break;
         
     case qEXIT:
-        onExit();
+        Quit=qEXIT;
         break;
     }
     
@@ -3249,112 +3200,6 @@ void f_Quit(int type)
 
 //----------------------------------------------------------------
 
-int onNoWalls()
-{
-    toogam = !toogam;
-    
-    if(toogam)
-    {
-        cheat_superman=true;
-        setClock(true);
-    }
-    
-    return D_O_K;
-}
-
-int onGoFast()
-{
-    gofast=gofast?false:true;
-    return D_O_K;
-}
-
-int onKillCheat()
-{
-    for(int i=0; i<guys.Count(); i++)
-    {
-        if(!(((enemy*)guys.spr(i))->flags & guy_doesntcount))((enemy*)guys.spr(i))->kickbucket();
-    }
-    
-    return D_O_K;
-}
-
-int onShowLayer0()
-{
-    show_layer_0 = !show_layer_0;
-    return D_O_K;
-}
-int onShowLayer1()
-{
-    show_layer_1 = !show_layer_1;
-    return D_O_K;
-}
-int onShowLayer2()
-{
-    show_layer_2 = !show_layer_2;
-    return D_O_K;
-}
-int onShowLayer3()
-{
-    show_layer_3 = !show_layer_3;
-    return D_O_K;
-}
-int onShowLayer4()
-{
-    show_layer_4 = !show_layer_4;
-    return D_O_K;
-}
-int onShowLayer5()
-{
-    show_layer_5 = !show_layer_5;
-    return D_O_K;
-}
-int onShowLayer6()
-{
-    show_layer_6 = !show_layer_6;
-    return D_O_K;
-}
-int onShowLayerO()
-{
-    show_layer_over=!show_layer_over;
-    return D_O_K;
-}
-int onShowLayerP()
-{
-    show_layer_push=!show_layer_push;
-    return D_O_K;
-}
-int onShowLayerS()
-{
-    show_sprites=!show_sprites;
-    return D_O_K;
-}
-int onShowLayerF()
-{
-    show_ffcs=!show_ffcs;
-    return D_O_K;
-}
-int onShowLayerW()
-{
-    show_walkflags=!show_walkflags;
-    return D_O_K;
-}
-int onShowFFScripts()
-{
-    show_ff_scripts=!show_ff_scripts;
-    return D_O_K;
-}
-int onShowHitboxes()
-{
-    show_hitboxes=!show_hitboxes;
-    return D_O_K;
-}
-
-int onLightSwitch()
-{
-    do_cheat_light=true;
-    return D_O_K;
-}
-
 void syskeys()
 {
     if(close_button_quit)
@@ -3371,195 +3216,27 @@ void syskeys()
         logic_counter=0;
     }
     
-    if(ReadKey(KEY_OPENBRACE))    if(frame_rest_suggest > 0) frame_rest_suggest--;
-    
-    if(ReadKey(KEY_CLOSEBRACE))    if(frame_rest_suggest <= 2) frame_rest_suggest++;
-    
     if(ReadKey(KEY_F2))    ShowFPS=!ShowFPS;
     
     if(ReadKey(KEY_F3) && Playing)    Paused=!Paused;
     
-    if(ReadKey(KEY_F4) && Playing)
-    {
-        Paused=true;
-        Advance=true;
-    }
-    
-    if(ReadKey(KEY_F6))    if(!get_bit(quest_rules, qr_NOCONTINUE)) f_Quit(qQUIT);
+    //if(ReadKey(KEY_F6))    if(!get_bit(quest_rules, qr_NOCONTINUE)) f_Quit(qQUIT);
     
     if(ReadKey(KEY_F9))    f_Quit(qRESET);
     
     if(ReadKey(KEY_F10))   f_Quit(qEXIT);
     
-    if(cheat>=1)
+    if(ReadKey(KEY_H))  game->set_life(game->get_maxlife());
+    
+    if(ReadKey(KEY_M))  game->set_magic(game->get_maxmagic());
+    
+    if(ReadKey(KEY_R))  game->set_drupy(999);
+    
+    if(rI())
     {
-        if(ReadKey(KEY_ASTERISK) || ReadKey(KEY_H))   game->set_life(game->get_maxlife());
-        
-        if(ReadKey(KEY_SLASH_PAD) || ReadKey(KEY_M))  game->set_magic(game->get_maxmagic());
-        
-        if(ReadKey(KEY_R))          game->set_drupy(999);
+        setClock(!getClock());
+        cheat_superman=getClock();
     }
-    
-    if(cheat>=2)
-    {
-        if(rI())
-        {
-            setClock(!getClock());
-            cheat_superman=getClock();
-        }
-    }
-    
-    if(cheat>=4)
-    {
-        if(rF11())
-        {
-            onNoWalls();
-        }
-        
-        if(rQ())
-        {
-            onGoFast();
-        }
-        
-        if(ReadKey(KEY_F))
-        {
-            if(Link.getAction()==freeze)
-            {
-                Link.unfreeze();
-            }
-            else
-            {
-                Link.Freeze();
-            }
-        }
-        
-        if(ReadKey(KEY_0))   onShowLayer0();
-        
-        if(ReadKey(KEY_1))   onShowLayer1();
-        
-        if(ReadKey(KEY_2))   onShowLayer2();
-        
-        if(ReadKey(KEY_3))   onShowLayer3();
-        
-        if(ReadKey(KEY_4))   onShowLayer4();
-        
-        if(ReadKey(KEY_5))   onShowLayer5();
-        
-        if(ReadKey(KEY_6))   onShowLayer6();
-        
-        //if(ReadKey(KEY_7))   onShowLayerO();
-        if(ReadKey(KEY_7))   onShowLayerF();
-        
-        if(ReadKey(KEY_8))   onShowLayerS();
-        
-        if(ReadKey(KEY_W))   onShowLayerW();
-        
-        if(ReadKey(KEY_L))   onLightSwitch();
-    }
-    
-    if(ReadKey(KEY_D))
-    {
-        details = !details;
-        rectfill(screen,0,0,319,7,BLACK);
-        rectfill(screen,0,8,31,239,BLACK);
-        rectfill(screen,288,8,319,239,BLACK);
-        rectfill(screen,32,232,287,239,BLACK);
-    }
-    
-    if(ReadKey(KEY_V))
-    {
-        Throttlefps=!Throttlefps;
-        /*
-          remove_int(fps_callback);
-        
-          install_int_ex(fps_callback,SECS_TO_TIMER(1));
-          */
-        avgfps=fps_secs=framecnt=0;
-        logic_counter = 0;
-    }
-    
-    if(ReadKey(KEY_P))   Paused=!Paused;
-    
-    //if(ReadKey(KEY_P))   centerLink();
-    if(ReadKey(KEY_A))
-    {
-        Paused=true;
-        Advance=true;
-    }
-    
-    if(ReadKey(KEY_G))   db=(db==999)?0:999;
-    if(ReadKey(KEY_F8))  Showpal=!Showpal;
-
-    if(ReadKey(KEY_PLUS_PAD) || ReadKey(KEY_EQUALS))
-    {
-        //change containers
-        if(key[KEY_ZC_LCONTROL] || key[KEY_ZC_RCONTROL])
-        {
-            //magic containers
-            if(key[KEY_LSHIFT] || key[KEY_RSHIFT])
-            {
-                game->set_maxmagic(zc_min(game->get_maxmagic()+MAGICPERBLOCK,MAGICPERBLOCK*8));
-            }
-            else
-            {
-                game->set_maxlife(zc_min(game->get_maxlife()+HP_PER_HEART,HP_PER_HEART*24));
-            }
-        }
-        else
-        {
-            if(key[KEY_LSHIFT] || key[KEY_RSHIFT])
-            {
-                game->set_magic(zc_min(game->get_magic()+1,game->get_maxmagic()));
-            }
-            else
-            {
-                game->set_life(zc_min(game->get_life()+1,game->get_maxlife()));
-            }
-        }
-    }
-    
-    if(ReadKey(KEY_MINUS_PAD) || ReadKey(KEY_MINUS))
-    {
-        //change containers
-        if(key[KEY_ZC_LCONTROL] || key[KEY_ZC_RCONTROL])
-        {
-            //magic containers
-            if(key[KEY_LSHIFT] || key[KEY_RSHIFT])
-            {
-                game->set_maxmagic(zc_max(game->get_maxmagic()-MAGICPERBLOCK,0));
-                game->set_magic(zc_min(game->get_maxmagic(), game->get_magic()));
-                //heart containers
-            }
-            else
-            {
-                game->set_maxlife(zc_max(game->get_maxlife()-HP_PER_HEART,HP_PER_HEART));
-                game->set_life(zc_min(game->get_maxlife(), game->get_life()));
-            }
-        }
-        else
-        {
-            if(key[KEY_LSHIFT] || key[KEY_RSHIFT])
-            {
-                game->set_magic(zc_max(game->get_magic()-1,0));
-            }
-            else
-            {
-                game->set_life(zc_max(game->get_life()-1,0));
-            }
-        }
-    }
-    
-    if(ReadKey(KEY_COMMA))  jukebox(currmidi-1);
-    
-    if(ReadKey(KEY_STOP))   jukebox(currmidi+1);
-    
-    /*
-      if(ReadKey(KEY_TILDE)) {
-      wavyout();
-      zinit.subscreen=(zinit.subscreen+1)%3;
-      wavyin();
-      }
-      */
     
     verifyBothWeapons();
     
@@ -3577,7 +3254,7 @@ void advanceframe(bool allowwavy, bool sfxcleanup)
         zcmusic_poll();
     }
     
-    while(Paused && !Advance && !Quit)
+    while(Paused && !Quit)
     {
         // have to call this, otherwise we'll get an infinite loop
         syskeys();
@@ -3598,7 +3275,6 @@ void advanceframe(bool allowwavy, bool sfxcleanup)
     if(Playing && game->get_time()<MAXTIME)
         game->change_time(1);
         
-    Advance=false;
     ++frame;
     
     syskeys();
@@ -3652,7 +3328,6 @@ void zapin()
         }
     }
 }
-
 
 void wavyout(bool showlink)
 {
@@ -3881,117 +3556,6 @@ int TriforceCount()
     return c;
 }
 
-int onContinue()
-{
-    return D_CLOSE;
-}
-
-int onVsync()
-{
-    Throttlefps = !Throttlefps;
-    return D_O_K;
-}
-
-int onFrameSkip()
-{
-    FrameSkip = !FrameSkip;
-    return D_O_K;
-}
-
-int onTransLayers()
-{
-    TransLayers = !TransLayers;
-    return D_O_K;
-}
-
-int onNESquit()
-{
-    NESquit = !NESquit;
-    return D_O_K;
-}
-
-int onShowFPS()
-{
-    ShowFPS = !ShowFPS;
-    scare_mouse();
-    
-    if(ShowFPS)
-        show_fps(screen);
-        
-    if(sbig)
-        stretch_blit(fps_undo,screen,0,0,64,16,scrx+40-120,scry+216+96,128,32);
-    else
-        blit(fps_undo,screen,0,0,scrx+40,scry+216,64,16);
-        
-    if(Paused)
-        show_paused(screen);
-        
-    unscare_mouse();
-    return D_O_K;
-}
-
-bool is_Fkey(int k)
-{
-    switch(k)
-    {
-    case KEY_F1:
-    case KEY_F2:
-    case KEY_F3:
-    case KEY_F4:
-    case KEY_F5:
-    case KEY_F6:
-    case KEY_F7:
-    case KEY_F8:
-    case KEY_F9:
-    case KEY_F10:
-    case KEY_F11:
-    case KEY_F12:
-        return true;
-    }
-    
-    return false;
-}
-
-//shnarf
-const char *key_str[] =
-{
-    "(none)",         "a",              "b",              "c",
-    "d",              "e",              "f",              "g",
-    "h",              "i",              "j",              "k",
-    "l",              "m",              "n",              "o",
-    "p",              "q",              "r",              "s",
-    "t",              "u",              "v",              "w",
-    "x",              "y",              "z",              "0",
-    "1",              "2",              "3",              "4",
-    "5",              "6",              "7",              "8",
-    "9",              "num 0",          "num 1",          "num 2",
-    "num 3",          "num 4",          "num 5",          "num 6",
-    "num 7",          "num 8",          "num 9",          "f1",
-    "f2",             "f3",             "f4",             "f5",
-    "f6",             "f7",             "f8",             "f9",
-    "f10",            "f11",            "f12",            "esc",
-    "~",              "-",              "=",              "backspace",
-    "tab",            "{",              "}",              "enter",
-    ":",              "quote",          "\\",             "\\ (2)",
-    ",",              ".",              "/",              "space",
-    "insert",         "delete",         "home",           "end",
-    "page up",        "page down",      "left",           "right",
-    "up",             "down",           "num /",          "num *",
-    "num -",          "num +",          "num delete",     "num enter",
-    "print screen",   "pause",          "abnt c1",        "yen",
-    "kana",           "convert",        "no convert",     "at",
-    "circumflex",     ": (2)",          "kanji",          "num =",
-    "back quote",     ";",              "command",        "unknown (0)",
-    "unknown (1)",    "unknown (2)",    "unknown (3)",    "unknown (4)",
-    "unknown (5)",    "unknown (6)",    "unknown (7)",    "left shift",
-    "right shift",    "left control",   "right control",  "alt",
-    "alt gr",         "left win",       "right win",      "menu",
-    "scroll lock",    "number lock",    "caps lock",      "MAX"
-};
-
-const char *pan_str[4] = { "MONO", " 1/2", " 3/4", "FULL" };
-//extern int zcmusic_bufsz;
-
 /*
 int midi_dp[3] = {0,147,104};
 int digi_dp[3] = {1,147,120};
@@ -4005,7 +3569,7 @@ int buf_dp[3]  = {0,0,0};
 int sfx_dp[3]  = {3,0,0};
 int pan_dp[3]  = {0,0,0};
 
-int onQuit()
+void onQuit()
 {
     if(Playing)
     {
@@ -4023,48 +3587,19 @@ int onQuit()
         }
 
     }
-    
-    return D_O_K;
 }
 
-int onReset()
-{
-    Quit=qRESET;
-    return D_O_K;
-}
-
-int onExit()
-{
-    Quit=qEXIT;
-    return D_O_K;
-}
-
-void color_layer(RGB *src,RGB *dest,char r,char g,char b,char pos,int from,int to)
-{
-    PALETTE tmp;
-    
-    for(int i=0; i<256; i++)
-    {
-        tmp[i].r=r;
-        tmp[i].g=g;
-        tmp[i].b=b;
-    }
-    
-    fade_interpolate(src,tmp,dest,pos,from,to);
-}
-
-void game_pal()
+/*void game_pal()
 {
     clear_to_color(screen,BLACK);
     set_palette_range(RAMpal,0,255,false);
-}
+}*/
 
 void music_pause()
 {
     //al_pause_duh(tmplayer);
     zcmusic_pause(zcmusic, ZCM_PAUSE);
     midi_pause();
-    midi_paused=true;
 }
 
 void music_resume()
@@ -4072,7 +3607,6 @@ void music_resume()
     //al_resume_duh(tmplayer);
     zcmusic_pause(zcmusic, ZCM_RESUME);
     midi_resume();
-    midi_paused=false;
 }
 
 void music_stop()
@@ -4084,7 +3618,6 @@ void music_stop()
     zcmusic_stop(zcmusic);
     zcmusic_unload_file(zcmusic);
     stop_midi();
-    midi_paused=false;
     currmidi=0;
 }
 
@@ -4168,7 +3701,6 @@ void jukebox(int index,int loop)
     
     currmidi=index;
     master_volume(digi_volume,midi_volume);
-    midi_paused=false;
 }
 
 void jukebox(int index)
@@ -4180,7 +3712,6 @@ void jukebox(int index)
     // do nothing if it's already playing
     if(index==currmidi && midi_pos>=0)
     {
-        midi_paused=false;
         return;
     }
     

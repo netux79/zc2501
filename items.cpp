@@ -16,8 +16,6 @@
 /**********  Item Class  **********/
 /**********************************/
 
-#include "precompiled.h" //always first
-
 #include "items.h"
 #include "maps.h"
 #include "zelda.h"

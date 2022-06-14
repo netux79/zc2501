@@ -85,19 +85,12 @@ void reset_scr(int scr);
 
 int get_qst_buffers();
 void del_qst_buffers();
-int count_dmaps();
-int count_shops(miscQdata *Misc);
-int count_infos(miscQdata *Misc);
-int count_warprings(miscQdata *Misc);
-int count_palcycles(miscQdata *Misc);
 int loadquest(const char *filename, zquestheader *Header,
               miscQdata *Misc, zctune *tunes, bool show_progress, bool compressed, bool encrypted, bool keepall, byte *skip_flags);
 
-char *byte_conversion(int number, int format);
 char *byte_conversion2(int number1, int number2, int format1, int format2);
 
 bool valid_zqt(PACKFILE *f);
-bool valid_zqt(const char *filename);
 bool reset_mapstyles(bool validate, miscQdata *Misc);
 bool reset_items(bool validate, zquestheader *Header);
 bool reset_guys();

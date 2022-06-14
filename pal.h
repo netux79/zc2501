@@ -11,7 +11,6 @@
 #ifndef _ZC_PAL_H_
 #define _ZC_PAL_H_
 
-#include "zc_alleg.h"
 #include "zdefs.h"
 #include "colors.h"
 

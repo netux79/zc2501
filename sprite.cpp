@@ -12,15 +12,9 @@
 //
 //--------------------------------------------------------
 
-#include "precompiled.h" //always first
-
 #include "zdefs.h"
 #include "sprite.h"
 #include "tiles.h"
-
-extern bool show_sprites;
-extern bool show_hitboxes;
-extern void debugging_box(int x1, int y1, int x2, int y2);
 
 /**********************************/
 /******* Sprite Base Class ********/
@@ -350,11 +344,6 @@ void sprite::move(fix s)
 
 void sprite::draw(BITMAP* dest)
 {
-    if(!show_sprites)
-    {
-        return;
-    }
-    
     int sx = real_x(x+xofs);
     int sy = real_y(y+yofs)-real_z(z+zofs);
     
@@ -598,9 +587,6 @@ void sprite::draw(BITMAP* dest)
             w.draw(dest);
         }
     }
-    
-    if(show_hitboxes)
-        rect(dest,x+hxofs,y+playing_field_offset+hyofs-(z+zofs),x+hxofs+hxsz-1,(y+playing_field_offset+hyofs+hysz-(z+zofs))-1,vc((id+16)%255));
 }
 
 void sprite::draw8(BITMAP* dest)

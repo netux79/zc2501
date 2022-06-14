@@ -1,5 +1,3 @@
-#include "precompiled.h" //always first
-
 #include <deque>
 #include <string>
 #include <sstream>
@@ -11,8 +9,6 @@
 #include "zelda.h"
 #include "link.h"
 #include "guys.h"
-#include "gamedata.h"
-#include "zc_init.h"
 #include "zsys.h"
 #include "title.h"
 #include "zscriptversion.h"
@@ -2994,8 +2990,6 @@ void set_register(const long32 arg, const long32 value)
                 stopCaneOfByrna();
             
             game->set_item(itemID,(value != 0));
-                    
-            //resetItems(game); - Is this really necessary? ~Joe123
             if((get_bit(quest_rules,qr_OVERWORLDTUNIC) != 0) || (currscr<128 || dlevel)) ringcolor(false);
         }
         break;
@@ -4303,7 +4297,6 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
         
     case GAMECHEAT:
         game->set_cheat(value/10000);
-        cheat=(value/10000);
         break;
         
     case GAMETIME:

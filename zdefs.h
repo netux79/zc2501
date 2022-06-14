@@ -87,8 +87,9 @@
 #include <vector>
 #include <set>
 #include <assert.h>
-#include "zc_alleg.h"
-#include "gamedata.h"
+#include <allegro.h>
+#include <allegro/internal/aintern.h>
+
 #include "zc_array.h"
 
 #define ZELDA_VERSION       0x0250                          //version of the program
@@ -2280,7 +2281,6 @@ struct gamedata
     
     byte get_quest();
     void set_quest(byte q);
-    void change_quest(short q);
     
     word get_counter(byte c);
     void set_counter(word change, byte c);
@@ -2549,7 +2549,21 @@ static INLINE bool is_between(T a, T b, T c, bool inclusive)
     return false;
 }
 
-#define NEWALLEGRO
+INLINE fix abs(fix f)
+{
+    fix t;
+    
+    if(f < 0)
+    {
+        t.v = -f.v;
+    }
+    else
+    {
+        t.v = f.v;
+    }
+    
+    return t;
+}
 
 INLINE bool pfwrite(void *p,long n,PACKFILE *f)
 {
@@ -2601,17 +2615,8 @@ INLINE bool p_getc(void *p,PACKFILE *f,bool keepdata)
     unsigned char *cp = (unsigned char *)p;
     int c;
     
-    if(!f) return false;
-    
-#ifdef NEWALLEGRO
-    
+    if(!f) return false;    
     if(f->normal.flags&PACKFILE_FLAG_WRITE) return false;     //must not be writing to file
-    
-#else
-    
-    if(f->flags&PACKFILE_FLAG_WRITE) return false;            //must not be writing to file
-    
-#endif
     
     if(pack_feof(f))
     {
@@ -2640,18 +2645,8 @@ INLINE bool p_putc(int c,PACKFILE *f)
     
     if(!fake_pack_writing)
     {
-        if(!f) return false;
-        
-#ifdef NEWALLEGRO
-        
+        if(!f) return false;        
         if(!(f->normal.flags&PACKFILE_FLAG_WRITE)) return false;  //must be writing to file
-        
-#else
-        
-        if(!(f->flags&PACKFILE_FLAG_WRITE)) return false;         //must be writing to file
-        
-#endif
-        
         pack_putc(c,f);
         success=(pack_ferror(f)==0);
     }
@@ -2670,16 +2665,7 @@ INLINE bool p_igetw(void *p,PACKFILE *f,bool keepdata)
     int c;
     
     if(!f) return false;
-    
-#ifdef NEWALLEGRO
-    
     if(f->normal.flags&PACKFILE_FLAG_WRITE) return false;     //must not be writing to file
-    
-#else
-    
-    if(f->flags&PACKFILE_FLAG_WRITE) return false;            //must not be writing to file
-    
-#endif
     
     if(pack_feof(f))
     {
@@ -2709,16 +2695,7 @@ INLINE bool p_iputw(int c,PACKFILE *f)
     if(!fake_pack_writing)
     {
         if(!f) return false;
-        
-#ifdef NEWALLEGRO
-        
         if(!(f->normal.flags&PACKFILE_FLAG_WRITE)) return false;  //must be writing to file
-        
-#else
-        
-        if(!(f->flags&PACKFILE_FLAG_WRITE)) return false;         //must be writing to file
-        
-#endif
         
         pack_iputw(c,f);
         success=(pack_ferror(f)==0);
@@ -2738,16 +2715,7 @@ INLINE bool p_igetl(void *p,PACKFILE *f,bool keepdata)
     long32 c;
     
     if(!f) return false;
-    
-#ifdef NEWALLEGRO
-    
     if(f->normal.flags&PACKFILE_FLAG_WRITE) return false;     //must not be writing to file
-    
-#else
-    
-    if(f->flags&PACKFILE_FLAG_WRITE) return false;            //must not be writing to file
-    
-#endif
     
     if(pack_feof(f))
     {
@@ -2781,16 +2749,7 @@ INLINE bool p_igetd(void *p, PACKFILE *f, bool keepdata)
 INLINE bool p_igetf(void *p,PACKFILE *f,bool keepdata)
 {
     if(!f) return false;
-    
-#ifdef NEWALLEGRO
-    
     if(f->normal.flags&PACKFILE_FLAG_WRITE) return false;     //must not be writing to file
-    
-#else
-    
-    if(f->flags&PACKFILE_FLAG_WRITE) return false;            //must not be writing to file
-    
-#endif
     
     if(pack_feof(f))
     {
@@ -2822,17 +2781,7 @@ INLINE bool p_iputl(long c,PACKFILE *f)
     if(!fake_pack_writing)
     {
         if(!f) return false;
-        
-#ifdef NEWALLEGRO
-        
         if(!(f->normal.flags&PACKFILE_FLAG_WRITE)) return false;  //must be writing to file
-        
-#else
-        
-        if(!(f->flags&PACKFILE_FLAG_WRITE)) return false;         //must be writing to file
-        
-#endif
-        
         pack_iputl(c,f);
         success=(pack_ferror(f)==0);
     }
@@ -2851,16 +2800,7 @@ INLINE bool p_mgetw(void *p,PACKFILE *f,bool keepdata)
     int c;
     
     if(!f) return false;
-    
-#ifdef NEWALLEGRO
-    
     if(f->normal.flags&PACKFILE_FLAG_WRITE) return false;     //must not be writing to file
-    
-#else
-    
-    if(f->flags&PACKFILE_FLAG_WRITE) return false;            //must not be writing to file
-    
-#endif
     
     if(pack_feof(f))
     {
@@ -2890,17 +2830,7 @@ INLINE bool p_mputw(int c,PACKFILE *f)
     if(!fake_pack_writing)
     {
         if(!f) return false;
-        
-#ifdef NEWALLEGRO
-        
         if(!(f->normal.flags&PACKFILE_FLAG_WRITE)) return false;  //must be writing to file
-        
-#else
-        
-        if(!(f->flags&PACKFILE_FLAG_WRITE)) return false;         //must be writing to file
-        
-#endif
-        
         pack_mputw(c,f);
         success=(pack_ferror(f)==0);
     }
@@ -2919,16 +2849,7 @@ INLINE bool p_mgetl(void *p,PACKFILE *f,bool keepdata)
     long32 c;
     
     if(!f) return false;
-    
-#ifdef NEWALLEGRO
-    
     if(f->normal.flags&PACKFILE_FLAG_WRITE) return false;     //must not be writing to file
-    
-#else
-    
-    if(f->flags&PACKFILE_FLAG_WRITE) return false;            //must not be writing to file
-    
-#endif
     
     if(pack_feof(f))
     {
@@ -2958,16 +2879,7 @@ INLINE bool p_mputl(long c,PACKFILE *f)
     if(!fake_pack_writing)
     {
         if(!f) return false;
-        
-#ifdef NEWALLEGRO
-        
         if(!(f->normal.flags&PACKFILE_FLAG_WRITE)) return false;  //must be writing to file
-        
-#else
-        
-        if(!(f->flags&PACKFILE_FLAG_WRITE)) return false;         //must be writing to file
-        
-#endif
         
         pack_mputl(c,f);
         success=(pack_ferror(f)==0);

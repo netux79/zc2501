@@ -11,7 +11,6 @@
 #ifndef _ENDING_H_
 #define _ENDING_H_
 
-void inc_quest();
 void noproc();
 void put_triforce();
 void putendmsg(const char *s,int x,int y,int speed,void(proc)());
