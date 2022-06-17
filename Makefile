@@ -11,13 +11,11 @@ ALLEG_LIB = `allegro-config --libs --static`
 SFLAG = -s
 ZC_PLATFORM = Linux
 CC = g++ 
-CFLAG = -DALLEGRO_LINUX
+CFLAG =
 
 ZELDA_PREFIX = zelda
 
 ZELDA_EXE = $(ZELDA_PREFIX)$(EXEEXT)
-ZQUEST_EXE = $(ZQUEST_PREFIX)$(EXEEXT)
-ROMVIEW_EXE = $(ROMVIEW_PREFIX)$(EXEEXT)
 
 ZELDA_OBJECTS = colors.o decorations.o defdata.o ending.o ffscript.o gamedata.o guys.o items.o link.o maps.o md5.o pal.o particles.o qst.o script_drawing.o sprite.o subscr.o tiles.o title.o weapons.o zc_custom.o zc_items.o zc_sprite.o zc_subscr.o zc_sys.o zcmusic.o zelda.o zscriptversion.o zsys.o
 

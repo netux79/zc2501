@@ -26,7 +26,6 @@
 #include "zc_custom.h"
 #include "sfx.h"
 #include "md5.h"
-#include "gc.h"
 
 #ifndef _AL_MALLOC
 #define _AL_MALLOC(a) _al_malloc(a)
@@ -47,7 +46,6 @@ extern newcombo            *combobuf;
 extern byte                *colordata;
 //extern byte              *tilebuf;
 extern tiledata            *newtilebuf;
-extern byte                *trashbuf;
 extern itemdata            *itemsbuf;
 extern wpndata             *wpnsbuf;
 extern comboclass          *combo_class_buf;
@@ -929,14 +927,6 @@ int get_qst_buffers()
     clear_tiles(newtilebuf);
     Z_message("OK\n");                                        // Allocating tile buffer...
     
-    memrequested+=(100000);
-    Z_message("Allocating trash buffer (%s)... ", byte_conversion2(100000,memrequested,-1,-1));
-    
-    if((trashbuf=(byte*)malloc(100000))==NULL)
-        return 0;
-        
-    Z_message("OK\n");                                        // Allocating trash buffer...
-    
     // Big, ugly band-aid here. Perhaps the most common cause of random crashes
     // has been inadvertently accessing itemsbuf[-1]. All such crashes should be
     // fixed by ensuring there's actually itemdata there.
@@ -1014,8 +1004,6 @@ void del_qst_buffers()
     free_newtilebuf();
     
     al_trace("Cleaning misc. \n");
-    
-    if(trashbuf) free(trashbuf);
     
     // See get_qst_buffers
     if(itemsbuf)
@@ -6219,26 +6207,34 @@ int readsubscreens(PACKFILE *f, zquestheader *Header, bool keepdata)
     return 0;
 }
 
+#define RETURN(r)   \
+{                   \
+    ret = r;        \
+    goto finalize;  \
+}
+
 int read_one_subscreen(PACKFILE *f, zquestheader *, bool keepdata, int i, word s_version, word)
 {
-    GarbageCollector gc;
-    
+    int ret = 0;
     int numsub=0;
     byte temp_ss=0;
-    subscreen_object *temp_sub = gc(new subscreen_object);
+    subscreen_object temp_sub;
     
     char tempname[64];
     
+    /* Init the temp_sub buffer to NULL */
+    temp_sub.dp1 = NULL;
+
     if(!pfread(tempname,64,f,true))
     {
-        return qe_invalid;
+        RETURN(qe_invalid);
     }
     
     if(s_version > 1)
     {
         if(!p_getc(&temp_ss,f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
     }
     
@@ -6248,7 +6244,7 @@ int read_one_subscreen(PACKFILE *f, zquestheader *, bool keepdata, int i, word s
         
         if(!p_getc(&tmp,f,true))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
         numsub = (int)tmp;
@@ -6259,7 +6255,7 @@ int read_one_subscreen(PACKFILE *f, zquestheader *, bool keepdata, int i, word s
         
         if(!p_igetw(&tmp, f, true))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
         numsub = (int)tmp;
@@ -6271,7 +6267,7 @@ int read_one_subscreen(PACKFILE *f, zquestheader *, bool keepdata, int i, word s
     {
         if(keepdata)
         {
-            memset(temp_sub,0,sizeof(subscreen_object));
+            memset(&temp_sub,0,sizeof(subscreen_object));
             
             switch(custom_subscreen[i].objects[j].type)
             {
@@ -6288,135 +6284,135 @@ int read_one_subscreen(PACKFILE *f, zquestheader *, bool keepdata, int i, word s
             }
         }
         
-        if(!p_getc(&(temp_sub->type),f,true))
+        if(!p_getc(&(temp_sub.type),f,true))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_getc(&(temp_sub->pos),f,keepdata))
+        if(!p_getc(&(temp_sub.pos),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
         if(s_version < 5)
         {
-            switch(temp_sub->pos)
+            switch(temp_sub.pos)
             {
             case 0:
-                temp_sub->pos = sspUP | sspDOWN | sspSCROLLING;
+                temp_sub.pos = sspUP | sspDOWN | sspSCROLLING;
                 break;
                 
             case 1:
-                temp_sub->pos = sspUP;
+                temp_sub.pos = sspUP;
                 break;
                 
             case 2:
-                temp_sub->pos = sspDOWN;
+                temp_sub.pos = sspDOWN;
                 break;
                 
             default:
-                temp_sub->pos = 0;
+                temp_sub.pos = 0;
             }
         }
         
-        if(!p_igetw(&(temp_sub->x),f,keepdata))
+        if(!p_igetw(&(temp_sub.x),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetw(&(temp_sub->y),f,keepdata))
+        if(!p_igetw(&(temp_sub.y),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetw(&(temp_sub->w),f,keepdata))
+        if(!p_igetw(&(temp_sub.w),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetw(&(temp_sub->h),f,keepdata))
+        if(!p_igetw(&(temp_sub.h),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_getc(&(temp_sub->colortype1),f,keepdata))
+        if(!p_getc(&(temp_sub.colortype1),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetw(&(temp_sub->color1),f,keepdata))
+        if(!p_igetw(&(temp_sub.color1),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_getc(&(temp_sub->colortype2),f,keepdata))
+        if(!p_getc(&(temp_sub.colortype2),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetw(&(temp_sub->color2),f,keepdata))
+        if(!p_igetw(&(temp_sub.color2),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_getc(&(temp_sub->colortype3),f,keepdata))
+        if(!p_getc(&(temp_sub.colortype3),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetw(&(temp_sub->color3),f,keepdata))
+        if(!p_igetw(&(temp_sub.color3),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetl(&(temp_sub->d1),f,keepdata))
+        if(!p_igetl(&(temp_sub.d1),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetl(&(temp_sub->d2),f,keepdata))
+        if(!p_igetl(&(temp_sub.d2),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetl(&(temp_sub->d3),f,keepdata))
+        if(!p_igetl(&(temp_sub.d3),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetl(&(temp_sub->d4),f,keepdata))
+        if(!p_igetl(&(temp_sub.d4),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetl(&(temp_sub->d5),f,keepdata))
+        if(!p_igetl(&(temp_sub.d5),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetl(&(temp_sub->d6),f,keepdata))
+        if(!p_igetl(&(temp_sub.d6),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetl(&(temp_sub->d7),f,keepdata))
+        if(!p_igetl(&(temp_sub.d7),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetl(&(temp_sub->d8),f,keepdata))
+        if(!p_igetl(&(temp_sub.d8),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetl(&(temp_sub->d9),f,keepdata))
+        if(!p_igetl(&(temp_sub.d9),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
-        if(!p_igetl(&(temp_sub->d10),f,keepdata))
+        if(!p_igetl(&(temp_sub.d10),f,keepdata))
         {
-            return qe_invalid;
+            RETURN(qe_invalid);
         }
         
         if(s_version < 2)
@@ -6424,91 +6420,87 @@ int read_one_subscreen(PACKFILE *f, zquestheader *, bool keepdata, int i, word s
             dword temp=0;
             if(!p_igetl(&temp,f,keepdata))
             {
-                return qe_invalid;
+                RETURN(qe_invalid);
             }
             
-            temp_sub->speed = (byte)temp;
+            temp_sub.speed = (byte)temp;
             
             if(!p_igetl(&temp,f,keepdata))
             {
-                return qe_invalid;
+                RETURN(qe_invalid);
             }
             
-            temp_sub->delay = (byte)temp;
+            temp_sub.delay = (byte)temp;
             
             if(!p_igetl(&temp,f,keepdata))
             {
-                return qe_invalid;
+                RETURN(qe_invalid);
             }
             
-            temp_sub->frame = (byte)temp;
+            temp_sub.frame = (byte)temp;
         }
         else
         {
-            if(!p_getc(&(temp_sub->speed),f,keepdata))
+            if(!p_getc(&(temp_sub.speed),f,keepdata))
             {
-                return qe_invalid;
+                RETURN(qe_invalid);
             }
             
-            if(!p_getc(&(temp_sub->delay),f,keepdata))
+            if(!p_getc(&(temp_sub.delay),f,keepdata))
             {
-                return qe_invalid;
+                RETURN(qe_invalid);
             }
             
-            if(!p_igetw(&(temp_sub->frame),f,keepdata))
+            if(!p_igetw(&(temp_sub.frame),f,keepdata))
             {
-                return qe_invalid;
+                RETURN(qe_invalid);
             }
         }
         
-        int temp_size=0;
-        
-        // bool deletets = false;
-        switch(temp_sub->type)
+        switch(temp_sub.type)
         {
         case ssoTEXT:
         case ssoTEXTBOX:
         case ssoCURRENTITEMTEXT:
         case ssoCURRENTITEMCLASSTEXT:
-            word temptempsize;
+            word temp_size;
             /*unsigned char temp1;
             unsigned char temp2;
             temp2 = 0;
             if(!p_getc(&temp1,f,true))
                 {
-                  return qe_invalid;
+                  RETURN(qe_invalid;
                 }
             if(temp1)
             {
             
             if(!p_getc(&temp2,f,true))
                 {
-                  return qe_invalid;
+                  RETURN(qe_invalid;
                 }
             }*/
             
-            if(!p_igetw(&temptempsize,f,true))
+            if(!p_igetw(&temp_size,f,true))
             {
-                return qe_invalid;
+                RETURN(qe_invalid);
             }
             
-            //temptempsize = temp1 + (temp2 << 8);
-            temp_size = (int)temptempsize;
-            
-            //if(temp_sub->dp1!=NULL) delete[] temp_sub->dp1;
+            if(temp_sub.dp1!=NULL)
+            {
+                delete[] (char *)temp_sub.dp1;
+                temp_sub.dp1 = NULL;
+            }
+
             if(keepdata)
             {
-                unsigned int char_length = temp_size+1;
-                temp_sub->dp1 = new char[char_length]; //memory not freed
-                
-                //deletets = true; //obsolete
+                temp_sub.dp1 = new char[temp_size+1];
             }
             
             if(temp_size)
             {
-                if(!pfread(temp_sub->dp1,temp_size+1,f,keepdata))
+                if(!pfread(temp_sub.dp1,temp_size+1,f,keepdata))
                 {
-                    return qe_invalid;
+                    RETURN(qe_invalid);
                 }
             }
             
@@ -6516,11 +6508,11 @@ int read_one_subscreen(PACKFILE *f, zquestheader *, bool keepdata, int i, word s
             
         case ssoLIFEMETER:
             if(get_bit(deprecated_rules, 12) != 0) // qr_24HC
-                temp_sub->d3 = 1;
+                temp_sub.d3 = 1;
                 
-            if(!p_getc(&(temp_sub->dp1),f,keepdata))
+            if(!p_getc(&(temp_sub.dp1),f,keepdata))
             {
-                return qe_invalid;
+                RETURN(qe_invalid);
             }
             
             break;
@@ -6530,238 +6522,238 @@ int read_one_subscreen(PACKFILE *f, zquestheader *, bool keepdata, int i, word s
         
             if(s_version < 6)
             {
-                switch(temp_sub->d1)
+                switch(temp_sub.d1)
                 {
                 case ssiBOMB:
-                    temp_sub->d1 = itype_bomb;
+                    temp_sub.d1 = itype_bomb;
                     break;
                     
                 case ssiSWORD:
-                    temp_sub->d1 = itype_sword;
+                    temp_sub.d1 = itype_sword;
                     break;
                     
                 case ssiSHIELD:
-                    temp_sub->d1 = itype_shield;
+                    temp_sub.d1 = itype_shield;
                     break;
                     
                 case ssiCANDLE:
-                    temp_sub->d1 = itype_candle;
+                    temp_sub.d1 = itype_candle;
                     break;
                     
                 case ssiLETTER:
-                    temp_sub->d1 = itype_letter;
+                    temp_sub.d1 = itype_letter;
                     break;
                     
                 case ssiPOTION:
-                    temp_sub->d1 = itype_potion;
+                    temp_sub.d1 = itype_potion;
                     break;
                     
                 case ssiLETTERPOTION:
-                    temp_sub->d1 = itype_letterpotion;
+                    temp_sub.d1 = itype_letterpotion;
                     break;
                     
                 case ssiBOW:
-                    temp_sub->d1 = itype_bow;
+                    temp_sub.d1 = itype_bow;
                     break;
                     
                 case ssiARROW:
-                    temp_sub->d1 = itype_arrow;
+                    temp_sub.d1 = itype_arrow;
                     break;
                     
                 case ssiBOWANDARROW:
-                    temp_sub->d1 = itype_bowandarrow;
+                    temp_sub.d1 = itype_bowandarrow;
                     break;
                     
                 case ssiBAIT:
-                    temp_sub->d1 = itype_bait;
+                    temp_sub.d1 = itype_bait;
                     break;
                     
                 case ssiRING:
-                    temp_sub->d1 = itype_ring;
+                    temp_sub.d1 = itype_ring;
                     break;
                     
                 case ssiBRACELET:
-                    temp_sub->d1 = itype_bracelet;
+                    temp_sub.d1 = itype_bracelet;
                     break;
                     
                 case ssiMAP:
-                    temp_sub->d1 = itype_map;
+                    temp_sub.d1 = itype_map;
                     break;
                     
                 case ssiCOMPASS:
-                    temp_sub->d1 = itype_compass;
+                    temp_sub.d1 = itype_compass;
                     break;
                     
                 case ssiBOSSKEY:
-                    temp_sub->d1 = itype_bosskey;
+                    temp_sub.d1 = itype_bosskey;
                     break;
                     
                 case ssiMAGICKEY:
-                    temp_sub->d1 = itype_magickey;
+                    temp_sub.d1 = itype_magickey;
                     break;
                     
                 case ssiBRANG:
-                    temp_sub->d1 = itype_brang;
+                    temp_sub.d1 = itype_brang;
                     break;
                     
                 case ssiWAND:
-                    temp_sub->d1 = itype_wand;
+                    temp_sub.d1 = itype_wand;
                     break;
                     
                 case ssiRAFT:
-                    temp_sub->d1 = itype_raft;
+                    temp_sub.d1 = itype_raft;
                     break;
                     
                 case ssiLADDER:
-                    temp_sub->d1 = itype_ladder;
+                    temp_sub.d1 = itype_ladder;
                     break;
                     
                 case ssiWHISTLE:
-                    temp_sub->d1 = itype_whistle;
+                    temp_sub.d1 = itype_whistle;
                     break;
                     
                 case ssiBOOK:
-                    temp_sub->d1 = itype_book;
+                    temp_sub.d1 = itype_book;
                     break;
                     
                 case ssiWALLET:
-                    temp_sub->d1 = itype_wallet;
+                    temp_sub.d1 = itype_wallet;
                     break;
                     
                 case ssiSBOMB:
-                    temp_sub->d1 = itype_sbomb;
+                    temp_sub.d1 = itype_sbomb;
                     break;
                     
                 case ssiHCPIECE:
-                    temp_sub->d1 = itype_heartpiece;
+                    temp_sub.d1 = itype_heartpiece;
                     break;
                     
                 case ssiAMULET:
-                    temp_sub->d1 = itype_amulet;
+                    temp_sub.d1 = itype_amulet;
                     break;
                     
                 case ssiFLIPPERS:
-                    temp_sub->d1 = itype_flippers;
+                    temp_sub.d1 = itype_flippers;
                     break;
                     
                 case ssiHOOKSHOT:
-                    temp_sub->d1 = itype_hookshot;
+                    temp_sub.d1 = itype_hookshot;
                     break;
                     
                 case ssiLENS:
-                    temp_sub->d1 = itype_lens;
+                    temp_sub.d1 = itype_lens;
                     break;
                     
                 case ssiHAMMER:
-                    temp_sub->d1 = itype_hammer;
+                    temp_sub.d1 = itype_hammer;
                     break;
                     
                 case ssiBOOTS:
-                    temp_sub->d1 = itype_boots;
+                    temp_sub.d1 = itype_boots;
                     break;
                     
                 case ssiDINSFIRE:
-                    temp_sub->d1 = itype_dinsfire;
+                    temp_sub.d1 = itype_dinsfire;
                     break;
                     
                 case ssiFARORESWIND:
-                    temp_sub->d1 = itype_faroreswind;
+                    temp_sub.d1 = itype_faroreswind;
                     break;
                     
                 case ssiNAYRUSLOVE:
-                    temp_sub->d1 = itype_nayruslove;
+                    temp_sub.d1 = itype_nayruslove;
                     break;
                     
                 case ssiQUIVER:
-                    temp_sub->d1 = itype_quiver;
+                    temp_sub.d1 = itype_quiver;
                     break;
                     
                 case ssiBOMBBAG:
-                    temp_sub->d1 = itype_bombbag;
+                    temp_sub.d1 = itype_bombbag;
                     break;
                     
                 case ssiCBYRNA:
-                    temp_sub->d1 = itype_cbyrna;
+                    temp_sub.d1 = itype_cbyrna;
                     break;
                     
                 case ssiROCS:
-                    temp_sub->d1 = itype_rocs;
+                    temp_sub.d1 = itype_rocs;
                     break;
                     
                 case ssiHOVERBOOTS:
-                    temp_sub->d1 = itype_hoverboots;
+                    temp_sub.d1 = itype_hoverboots;
                     break;
                     
                 case ssiSPINSCROLL:
-                    temp_sub->d1 = itype_spinscroll;
+                    temp_sub.d1 = itype_spinscroll;
                     break;
                     
                 case ssiCROSSSCROLL:
-                    temp_sub->d1 = itype_crossscroll;
+                    temp_sub.d1 = itype_crossscroll;
                     break;
                     
                 case ssiQUAKESCROLL:
-                    temp_sub->d1 = itype_quakescroll;
+                    temp_sub.d1 = itype_quakescroll;
                     break;
                     
                 case ssiWHISPRING:
-                    temp_sub->d1 = itype_whispring;
+                    temp_sub.d1 = itype_whispring;
                     break;
                     
                 case ssiCHARGERING:
-                    temp_sub->d1 = itype_chargering;
+                    temp_sub.d1 = itype_chargering;
                     break;
                     
                 case ssiPERILSCROLL:
-                    temp_sub->d1 = itype_perilscroll;
+                    temp_sub.d1 = itype_perilscroll;
                     break;
                     
                 case ssiWEALTHMEDAL:
-                    temp_sub->d1 = itype_wealthmedal;
+                    temp_sub.d1 = itype_wealthmedal;
                     break;
                     
                 case ssiHEARTRING:
-                    temp_sub->d1 = itype_heartring;
+                    temp_sub.d1 = itype_heartring;
                     break;
                     
                 case ssiMAGICRING:
-                    temp_sub->d1 = itype_magicring;
+                    temp_sub.d1 = itype_magicring;
                     break;
                     
                 case ssiSPINSCROLL2:
-                    temp_sub->d1 = itype_spinscroll2;
+                    temp_sub.d1 = itype_spinscroll2;
                     break;
                     
                 case ssiQUAKESCROLL2:
-                    temp_sub->d1 = itype_quakescroll2;
+                    temp_sub.d1 = itype_quakescroll2;
                     break;
                     
                 case ssiAGONY:
-                    temp_sub->d1 = itype_agony;
+                    temp_sub.d1 = itype_agony;
                     break;
                     
                 case ssiSTOMPBOOTS:
-                    temp_sub->d1 = itype_stompboots;
+                    temp_sub.d1 = itype_stompboots;
                     break;
                     
                 case ssiWHIMSICALRING:
-                    temp_sub->d1 = itype_whimsicalring;
+                    temp_sub.d1 = itype_whimsicalring;
                     break;
                     
                 case ssiPERILRING:
-                    temp_sub->d1 = itype_perilring;
+                    temp_sub.d1 = itype_perilring;
                     break;
                     
                 default:
-                    temp_sub->d1 += itype_custom1 - ssiMAX;
+                    temp_sub.d1 += itype_custom1 - ssiMAX;
                 }
             }
             
             //fall-through
         default:
-            if(!p_getc(&(temp_sub->dp1),f,keepdata))
+            if(!p_getc(&(temp_sub.dp1),f,keepdata))
             {
-                return qe_invalid;
+                RETURN(qe_invalid);
             }
             
             break;
@@ -6769,7 +6761,7 @@ int read_one_subscreen(PACKFILE *f, zquestheader *, bool keepdata, int i, word s
         
         if(keepdata)
         {
-            switch(temp_sub->type)
+            switch(temp_sub.type)
             {
             case ssoTEXT:
             case ssoTEXTBOX:
@@ -6777,21 +6769,20 @@ int read_one_subscreen(PACKFILE *f, zquestheader *, bool keepdata, int i, word s
             case ssoCURRENTITEMCLASSTEXT:
                 if(custom_subscreen[i].objects[j].dp1 != NULL) delete[](char *)custom_subscreen[i].objects[j].dp1;
                 
-                memcpy(&custom_subscreen[i].objects[j],temp_sub,sizeof(subscreen_object));
-                custom_subscreen[i].objects[j].dp1 = NULL;
-                custom_subscreen[i].objects[j].dp1 = new char[temp_size+1];
-                strcpy((char*)custom_subscreen[i].objects[j].dp1,(char*)temp_sub->dp1);
+                memcpy(&custom_subscreen[i].objects[j],&temp_sub,sizeof(subscreen_object));
+                custom_subscreen[i].objects[j].dp1 = temp_sub.dp1;
+                temp_sub.dp1 = NULL;
                 break;
                 
             case ssoCOUNTER:
                 if(s_version<3)
                 {
-                    temp_sub->d6=(temp_sub->d6?1:0)+(temp_sub->d8?2:0);
-                    temp_sub->d8=0;
+                    temp_sub.d6=(temp_sub.d6?1:0)+(temp_sub.d8?2:0);
+                    temp_sub.d8=0;
                 }
                 
             default:
-                memcpy(&custom_subscreen[i].objects[j],temp_sub,sizeof(subscreen_object));
+                memcpy(&custom_subscreen[i].objects[j],&temp_sub,sizeof(subscreen_object));
                 break;
             }
             
@@ -6821,9 +6812,13 @@ int read_one_subscreen(PACKFILE *f, zquestheader *, bool keepdata, int i, word s
         }
     }
     
-    //delete temp_sub; //wtf
-    return 0;
+finalize:
+    if (temp_sub.dp1!=NULL) delete[] (char *)temp_sub.dp1;
+
+    return ret;
 }
+
+#undef RETURN
 
 void reset_subscreen(subscreen_group *tempss)
 {

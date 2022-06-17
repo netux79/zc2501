@@ -4493,8 +4493,6 @@ void ViewMap()
             line(framebuf,x+7,y-7,x-7,y+7,(frame&3)+252);
         }
         
-        //    text_mode(BLACK);
-        
         if(show&2 || r)
             textprintf_ex(framebuf,font,224,216,WHITE,BLACK,"%1.2f",scale);
             

@@ -105,7 +105,6 @@ void load_game_configs()
     
     scanlines = get_config_int(cfg_sect,"scanlines",0)!=0;
     fullscreen = get_config_int(cfg_sect,"fullscreen",1);    
-    zc_color_depth = (byte) get_config_int(cfg_sect,"color_depth",8);
     
     heart_beep = get_config_int(cfg_sect,"heart_beep",1)!=0;
     sfxdat = get_config_int(cfg_sect,"use_sfx_dat",1);
@@ -166,7 +165,6 @@ void save_game_configs()
     set_config_int(cfg_sect,"heart_beep",heart_beep);
     set_config_int(cfg_sect,"use_sfx_dat",sfxdat);
     set_config_int(cfg_sect,"fullscreen",fullscreen);
-    set_config_int(cfg_sect,"color_depth",zc_color_depth);
     
     set_config_int(cfg_sect,"save_indicator",use_save_indicator);
     
@@ -221,7 +219,6 @@ void show_paused(BITMAP *target)
     for(int i=0; buf[i]!=0; i++)
         buf[i]+=0x60;
         
-    //  text_mode(-1);
     if(sbig)
     {
         int x = scrx+40-((screen_scale-1)*120);
@@ -236,7 +233,6 @@ void show_fps(BITMAP *target)
 {
     char buf[50];
     
-    //  text_mode(-1);
     sprintf(buf,"%2d/60",lastfps);
     
     for(int i=0; buf[i]!=0; i++)

@@ -35,7 +35,7 @@ struct savedicon
     byte icon[4][128];
 };
 
-savedicon iconbuffer[15];
+savedicon iconbuffer[MAXSAVES];
 
 /********************************/
 /*****   NES title screen   *****/
@@ -576,14 +576,12 @@ static void DX_mainscreen(int f)
         bmp = (BITMAP*)dat[pic<4 ? pic : 6-pic].dat;
         pic = (pic+1)%6;
         blit(bmp,framebuf, 0,0, 0,0, 256,224);
-        //    text_mode(-1);
         sprintf(tbuf, "%c1986 Nintendo",0xBB);
         //tbuf[0]=0xBB;
         textout_ex(framebuf,font,tbuf,46,138,255,-1);
         sprintf(tbuf, "%c2014 Armageddon Games",0xBC);
         //tbuf[0]=0xBC;
         textout_ex(framebuf,font,tbuf,46,146,255,-1);
-        //    text_mode(0);
     }
     
     if(f>=680 && f<680+256 && (f%3)==0)
@@ -687,14 +685,12 @@ static void v25_mainscreen(int f)
         bmp = (BITMAP*)dat[pic<5 ? pic : 8-pic].dat;
         pic = (pic+1)%8;
         blit(bmp,framebuf, 0,0, 0,0, 256,224);
-        //    text_mode(-1);
         sprintf(tbuf, "%c1986 Nintendo",0xBB);
         //tbuf[0]=0xBB;
         textout_ex(framebuf,font,tbuf,80,134,255,-1);
         sprintf(tbuf, "%c2014 Armageddon Games",0xBC);
         //tbuf[0]=0xBC;
         textout_ex(framebuf,font,tbuf,80,142,255,-1);
-        //    text_mode(0);
     }
     
     if(f>=680 && f<680+256 && (f%3)==0)
@@ -1862,7 +1858,6 @@ static void delete_mode()
 
 static void selectscreen()
 {
-    //  text_mode(0);
     init_NES_mode();
     //  loadfullpal();
     loadlvlpal(1);
@@ -2367,7 +2362,6 @@ static void select_game()
     
     //kill_sfx();
     
-    //  text_mode(0);
     selectscreen();
     
     savecnt=0;
@@ -2593,7 +2587,6 @@ void game_over(int type)
     Quit=0;
     
     clear_bitmap(framebuf);
-    //  text_mode(-1);
     textout_ex(framebuf,zfont,"CONTINUE",88,72,QMisc.colors.msgtext,-1);
     
     if(!type)
@@ -2766,7 +2759,6 @@ bool save_game(bool savepoint, int type)
         bool done2=false;
         clear_bitmap(framebuf);
         
-        //  text_mode(-1);
         if(type)
         {
             textout_ex(framebuf,zfont,"SAVE AND QUIT",88,72,QMisc.colors.msgtext,-1);
@@ -2883,7 +2875,6 @@ bool save_game(bool savepoint, int type)
             if(pos==2)
             {
                 clear_bitmap(framebuf);
-                //  text_mode(-1);
                 textout_ex(framebuf,zfont,"ARE YOU SURE?",88,72,QMisc.colors.msgtext,-1);
                 textout_ex(framebuf,zfont,"YES",88,96,QMisc.colors.msgtext,-1);
                 textout_ex(framebuf,zfont,"NO",88,120,QMisc.colors.msgtext,-1);

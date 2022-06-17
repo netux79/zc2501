@@ -60,7 +60,6 @@ int favorite_comboaliases[MAXFAVORITECOMBOALIASES];
 void playLevelMusic();
 
 volatile int logic_counter=0;
-bool trip=false;
 void update_logic_counter()
 {
     ++logic_counter;
@@ -102,12 +101,12 @@ bool dmap_list_zero=true;
 RGB_MAP rgb_table;
 COLOR_MAP trans_table, trans_table2;
 
-BITMAP     *framebuf, *scrollbuf, *tmp_bmp, *tmp_scr, *screen2, *fps_undo, *msgdisplaybuf, *pricesdisplaybuf, *real_screen, *temp_buf, *prim_bmp;
+BITMAP     *framebuf, *scrollbuf, *tmp_bmp, *tmp_scr, *msgdisplaybuf, *pricesdisplaybuf, *real_screen, *temp_buf, *prim_bmp;
 DATAFILE   *data, *sfxdata, *fontsdata, *mididata;
 FONT       *nfont, *zfont, *z3font, *z3smallfont, *deffont, *lfont, *lfont_l, *pfont, *mfont, *ztfont, *sfont, *sfont2, *sfont3, *spfont, *ssfont1, *ssfont2, *ssfont3, *ssfont4, *gblafont,
            *goronfont, *zoranfont, *hylian1font, *hylian2font, *hylian3font, *hylian4font, *gboraclefont, *gboraclepfont, *dsphantomfont, *dsphantompfont;
 PALETTE    RAMpal;
-byte       *colordata, *trashbuf;
+byte       *colordata;
 //byte       *tilebuf;
 itemdata   *itemsbuf;
 wpndata    *wpnsbuf;
@@ -168,7 +167,6 @@ BITMAP *hw_screen;
 int zqwin_scale;
 
 int fullscreen;
-byte zc_color_depth=8;
 int homescr,currscr,frame=0,currmap=0,dlevel,warpscr,worldscr;
 int newscr_clk=0,opendoors=0,currdmap=0,fadeclk=-1,currgame=0,listpos=0;
 int lastentrance=0,lastentrance_dmap=0,prices[3],loadside, Bwpn, Awpn;
@@ -2436,38 +2434,8 @@ int main(int argc, char* argv[])
     
     Z_message("OK\n");
     
-    //command-line switches takes priority
-    switch(zc_color_depth)
-    {
-    case 0:
-        set_color_depth(desktop_color_depth());
-        break;
-        
-    case 8:
-        set_color_depth(8);
-        break;
-        
-    case 15:
-        set_color_depth(15);
-        break;
-        
-    case 16:
-        set_color_depth(16);
-        break;
-        
-    case 24:
-        set_color_depth(24);
-        break;
-        
-    case 32:
-        set_color_depth(32);
-        break;
-        
-    default:
-        zc_color_depth = 8; //invalid configuration, set to default in config file.
-        set_color_depth(8);
-        break;
-    }
+ 
+    set_color_depth(8);
     
     // allocate bitmap buffers
     Z_message("Allocating bitmap buffers... ");
@@ -2475,17 +2443,14 @@ int main(int argc, char* argv[])
     framebuf  = create_bitmap_ex(8,256,224);
     temp_buf  = create_bitmap_ex(8,256,224);
     scrollbuf = create_bitmap_ex(8,512,406);
-    screen2   = create_bitmap_ex(8,320,240);
     tmp_scr   = create_bitmap_ex(8,320,240);
     tmp_bmp   = create_bitmap_ex(8,32,32);
-    fps_undo  = create_bitmap_ex(8,64,16);
     prim_bmp  = create_bitmap_ex(8,512,512);
     msgdisplaybuf = create_bitmap_ex(8,256, 176);
     msgbmpbuf = create_bitmap_ex(8, 512+16, 512+16);
     pricesdisplaybuf = create_bitmap_ex(8,256, 176);
     
-    if(!framebuf || !scrollbuf || !tmp_bmp || !fps_undo || !tmp_scr
-            || !screen2 || !msgdisplaybuf || !pricesdisplaybuf)
+    if(!framebuf || !scrollbuf || !tmp_bmp || !tmp_scr || !msgdisplaybuf || !pricesdisplaybuf)
     {
         Z_error("Error");
         quit_game();
@@ -2936,9 +2901,7 @@ void quit_game()
     destroy_bitmap(framebuf);
     destroy_bitmap(scrollbuf);
     destroy_bitmap(tmp_scr);
-    destroy_bitmap(screen2);
     destroy_bitmap(tmp_bmp);
-    destroy_bitmap(fps_undo);
     destroy_bitmap(prim_bmp);
     set_clip_state(msgdisplaybuf, 1);
     destroy_bitmap(msgdisplaybuf);
