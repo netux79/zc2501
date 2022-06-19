@@ -176,7 +176,7 @@ int DUkey, DDkey, DLkey, DRkey;
 int hs_startx, hs_starty, hs_xdist, hs_ydist, clockclk, clock_zoras[eMAXGUYS];
 int cheat_goto_dmap=0, cheat_goto_screen=0, currcset;
 int gfc, gfc2, pitx, pity, refill_what, refill_why, heart_beep_timer=0, new_enemy_tile_start=1580;
-int nets=1580, magicitem=-1,nayruitem=-1, title_version, magiccastclk, quakeclk=0, wavy=0, castx, casty, df_x, df_y, nl1_x, nl1_y, nl2_x, nl2_y;
+int nets=1580, magicitem=-1,nayruitem=-1, magiccastclk, quakeclk=0, wavy=0, castx, casty, df_x, df_y, nl1_x, nl1_y, nl2_x, nl2_y;
 int magicdrainclk=0, conveyclk=3, memrequested=0;
 int checkx, checky;
 int skipcont=0;
@@ -852,14 +852,7 @@ void CatchBrang()
 int load_quest(gamedata *g)
 {
     //setPackfilePassword(datapwd);
-    byte skip_flags[4];
-    
-    for(int i=0; i<4; ++i)
-    {
-        skip_flags[i]=0;
-    }
-    
-    int ret = loadquest(quest_path,&QHeader,&QMisc,tunes+ZC_MIDI_COUNT,false,true,true,true,skip_flags);
+    int ret = loadquest(quest_path,&QHeader,&QMisc,tunes+ZC_MIDI_COUNT);
     //setPackfilePassword(NULL);
     
     if(!g->title[0] || g->get_hasplayed() == 0)
@@ -1051,33 +1044,6 @@ int init_game()
     }
     
     //setPackfilePassword(NULL);
-    
-    char keyfilename[2048];
-    replace_extension(keyfilename, quest_path, "key", 2047);
-    
-    if(exists(keyfilename))
-    {
-        char password[32], pwd[32];
-        PACKFILE *fp = pack_fopen_password(keyfilename, F_READ,"");
-        char msg[80];
-        memset(msg,0,80);
-        pfread(msg, 80, fp,true);
-        
-        if(strcmp(msg,"ZQuest Auto-Generated Quest Password Key File.  DO NOT EDIT!")==0)
-        {
-            short ver;
-            byte  bld;
-            p_igetw(&ver,fp,true);
-            p_getc(&bld,fp,true);
-            memset(password,0,32);
-            pfread(password, 30, fp,true);
-            //check_questpwd(&QHeader, password);
-            memset(password,0,32);
-            memset(pwd,0,32);
-        }
-        
-        pack_fclose(fp);
-    }
     
     bool firstplay = (game->get_hasplayed() == 0);
     
@@ -2666,8 +2632,6 @@ int main(int argc, char* argv[])
     Z_init_sound();
     
     const int wait_ms_on_set_graphics = 20; //formerly 250. -Gleeok
-    
-    //request_refresh_rate(60);
     
     if(used_switch(argc,argv,"-fullscreen") ||
             (!used_switch(argc, argv, "-windowed") && get_config_int("zeldadx","fullscreen",1)==1))

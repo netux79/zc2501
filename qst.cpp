@@ -273,11 +273,9 @@ bool find_section(PACKFILE *f, long section_id_requested)
     }
     
     int section_id_read;
-    bool catchup=false;
+    dword section_size;
     word dummy;
-    byte tempbyte;
     char tempbuf[65536];
-    
     
     switch(section_id_requested)
     {
@@ -306,8 +304,6 @@ bool find_section(PACKFILE *f, long section_id_requested)
         break;
     }
     
-    dword section_size;
-    
     //section id
     if(!p_mgetl(&section_id_read,f,true))
     {
@@ -316,46 +312,6 @@ bool find_section(PACKFILE *f, long section_id_requested)
     
     while(!pack_feof(f))
     {
-        switch(section_id_read)
-        {
-        case ID_RULES:
-        case ID_STRINGS:
-        case ID_MISC:
-        case ID_TILES:
-        case ID_COMBOS:
-        case ID_CSETS:
-        case ID_MAPS:
-        case ID_DMAPS:
-        case ID_DOORS:
-        case ID_ITEMS:
-        case ID_WEAPONS:
-        case ID_COLORS:
-        case ID_ICONS:
-        case ID_INITDATA:
-        case ID_GUYS:
-        case ID_MIDIS:
-        case ID_CHEATS:
-            catchup=false;
-            break;
-            
-        default:
-            break;
-        }
-        
-        
-        while(catchup)
-        {
-            //section id
-            section_id_read=(section_id_read<<8);
-            
-            if(!p_getc(&tempbyte,f,true))
-            {
-                return false;
-            }
-            
-            section_id_read+=tempbyte;
-        }
-        
         if(section_id_read==section_id_requested)
         {
             return true;
@@ -380,17 +336,15 @@ bool find_section(PACKFILE *f, long section_id_requested)
             }
             
             //pack_fseek(f, section_size);
-            while(section_size>65535)
+            while(section_size>=65536)
             {
-                pfread(tempbuf,65535,f,true);
-                tempbuf[65535]=0;
-                section_size-=65535;
+                pfread(tempbuf,65536,f,true);
+                section_size-=65536;
             }
             
             if(section_size>0)
             {
                 pfread(tempbuf,section_size,f,true);
-                tempbuf[section_size]=0;
             }
         }
         
@@ -417,7 +371,7 @@ bool valid_zqt(PACKFILE *f)
     return true;
 }
 
-PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefilename, bool compressed,bool encrypted, bool show_progress)
+PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefilename, bool compressed,bool encrypted)
 {
     char tmpfilename[32];
     temp_name(tmpfilename);
@@ -532,7 +486,7 @@ PACKFILE *open_quest_template(zquestheader *Header, char *deletefilename, bool v
         filename=Header->templatepath;
     }
     
-    f=open_quest_file(&open_error, filename, deletefilename, true, true,false);
+    f=open_quest_file(&open_error, filename, deletefilename, true, true);
     
     if(Header->templatepath[0]==0)
     {
@@ -781,11 +735,6 @@ bool init_tiles(bool validate, zquestheader *Header)
     return init_section(Header, ID_TILES, NULL, NULL, validate);
 }
 
-bool init_combos(bool validate, zquestheader *Header)
-{
-    return init_section(Header, ID_COMBOS, NULL, NULL, validate);
-}
-
 bool init_colordata(bool validate, zquestheader *Header, miscQdata *Misc)
 {
     return init_section(Header, ID_CSETS, Misc, NULL, validate);
@@ -815,16 +764,6 @@ bool reset_guys()
     return true;
 }
 
-bool reset_wpns(bool validate, zquestheader *Header)
-{
-    bool ret = init_section(Header, ID_WEAPONS, NULL, NULL, validate);
-    
-    for(int i=0; i<WPNCNT; i++)
-        reset_weaponname(i);
-        
-    return ret;
-}
-
 bool reset_mapstyles(bool validate, miscQdata *Misc)
 {
     Misc->colors.blueframe_tile = 20044;
@@ -840,11 +779,6 @@ bool reset_mapstyles(bool validate, miscQdata *Misc)
     Misc->colors.dungeon_map_tile = 19651;
     Misc->colors.dungeon_map_cset = 8;
     return true;
-}
-
-bool reset_doorcombosets(bool validate, zquestheader *Header)
-{
-    return init_section(Header, ID_DOORS, NULL, NULL, validate);
 }
 
 int get_qst_buffers()
@@ -1586,20 +1520,6 @@ void get_questpwd(char *encrypted_pwd, short pwdkey, char *pwd)
     
     memcpy(pwd,temp_pwd,30);
 }
-
-bool check_questpwd(zquestheader *Header, char *pwd)
-{
-    cvs_MD5Context ctx;
-    unsigned char md5sum[16];
-    
-    cvs_MD5Init(&ctx);
-    cvs_MD5Update(&ctx, (const unsigned char*)pwd, (unsigned)strlen(pwd));
-    cvs_MD5Final(md5sum, &ctx);
-    
-    return (memcmp(Header->pwd_hash,md5sum,16)==0);
-    
-}
-
 
 int readheader(PACKFILE *f, zquestheader *Header, bool keepdata)
 {
@@ -12997,7 +12917,7 @@ const char *skip_text[skip_max]=
     "skip_favorites"
 };
 
-int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctune *tunes, bool show_progress, bool compressed, bool encrypted, bool keepall, byte *skip_flags)
+int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctune *tunes)
 {
     combosread=false;
     mapsread=false;
@@ -13007,46 +12927,28 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
     temp_name(tmpfilename);
     bool catchup=false;
     byte tempbyte;
-    word old_map_count=map_count;
     
-    byte old_quest_rules[QUESTRULES_SIZE];
-    byte old_midi_flags[MIDIFLAGS_SIZE];
+    zScript.clear();
     
-    if(keepall==false||get_bit(skip_flags, skip_rules))
+    for(int i=0; i<NUMSCRIPTFFC-1; i++)
     {
-        memcpy(old_quest_rules, quest_rules, QUESTRULES_SIZE);
+        ffcmap[i] = pair<string,string>("","");
     }
     
-    if(keepall==false||get_bit(skip_flags, skip_midis))
+    globalmap[0] = pair<string,string>("Slot 1: ~Init", "~Init");
+    
+    for(int i=1; i<NUMSCRIPTGLOBAL; i++)
     {
-        memcpy(old_midi_flags, midi_flags, MIDIFLAGS_SIZE);
+        globalmap[i] = pair<string,string>("","");
     }
     
-    
-    if(keepall&&!get_bit(skip_flags, skip_ffscript))
+    //globalmap[3] = pair<string,string>("Slot 4: ~Continue", "~Continue");
+    for(int i=0; i<NUMSCRIPTITEM-1; i++)
     {
-        zScript.clear();
-        
-        for(int i=0; i<NUMSCRIPTFFC-1; i++)
-        {
-            ffcmap[i] = pair<string,string>("","");
-        }
-        
-        globalmap[0] = pair<string,string>("Slot 1: ~Init", "~Init");
-        
-        for(int i=1; i<NUMSCRIPTGLOBAL; i++)
-        {
-            globalmap[i] = pair<string,string>("","");
-        }
-        
-        //globalmap[3] = pair<string,string>("Slot 4: ~Continue", "~Continue");
-        for(int i=0; i<NUMSCRIPTITEM-1; i++)
-        {
-            itemmap[i] = pair<string,string>("","");
-        }
-        
-        reset_scripts();
+        itemmap[i] = pair<string,string>("","");
     }
+    
+    reset_scripts();
     
     zquestheader tempheader;
     memset(&tempheader, 0, sizeof(zquestheader));
@@ -13055,7 +12957,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
     bool oldquest = false;
     int open_error=0;
     char deletefilename[1024];
-    PACKFILE *f=open_quest_file(&open_error, filename, deletefilename, compressed, encrypted, show_progress);
+    PACKFILE *f=open_quest_file(&open_error, filename, deletefilename, true, true);
     
     if(!f)
         return open_error;
@@ -13090,7 +12992,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Rules...*/
-                ret=readrules(f, &tempheader, keepall&&!get_bit(skip_flags, skip_rules));
+                ret=readrules(f, &tempheader, true);
                 checkstatus(ret);
                 break;
                 
@@ -13103,7 +13005,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Strings...*/
-                ret=readstrings(f, &tempheader, keepall&&!get_bit(skip_flags, skip_strings));
+                ret=readstrings(f, &tempheader, true);
                 checkstatus(ret);
                 break;
                 
@@ -13116,7 +13018,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Misc. Data...*/
-                ret=readmisc(f, &tempheader, Misc, keepall&&!get_bit(skip_flags, skip_misc));
+                ret=readmisc(f, &tempheader, Misc, true);
                 checkstatus(ret);
                 break;
                 
@@ -13129,7 +13031,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Tiles...*/
-                ret=readtiles(f, newtilebuf, &tempheader, tempheader.zelda_version, tempheader.build, 0, NEWMAXTILES, false, keepall&&!get_bit(skip_flags, skip_tiles));
+                ret=readtiles(f, newtilebuf, &tempheader, tempheader.zelda_version, tempheader.build, 0, NEWMAXTILES, false, true);
                 checkstatus(ret);
                 break;
                 
@@ -13142,7 +13044,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Combos...*/
-                ret=readcombos(f, &tempheader, tempheader.zelda_version, tempheader.build, 0, MAXCOMBOS, keepall&&!get_bit(skip_flags, skip_combos));
+                ret=readcombos(f, &tempheader, tempheader.zelda_version, tempheader.build, 0, MAXCOMBOS, true);
                 combosread=true;
                 checkstatus(ret);
                 break;
@@ -13156,7 +13058,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Combo Aliases...*/
-                ret=readcomboaliases(f, &tempheader, tempheader.zelda_version, tempheader.build, keepall&&!get_bit(skip_flags, skip_comboaliases));
+                ret=readcomboaliases(f, &tempheader, tempheader.zelda_version, tempheader.build, true);
                 checkstatus(ret);
                 break;
                 
@@ -13169,7 +13071,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Color Data...*/
-                ret=readcolordata(f, Misc, tempheader.zelda_version, tempheader.build, 0, newerpdTOTAL, keepall&&!get_bit(skip_flags, skip_csets));
+                ret=readcolordata(f, Misc, tempheader.zelda_version, tempheader.build, 0, newerpdTOTAL, true);
                 checkstatus(ret);
                 break;
                 
@@ -13182,7 +13084,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Maps...*/
-                ret=readmaps(f, &tempheader, keepall&&!get_bit(skip_flags, skip_maps));
+                ret=readmaps(f, &tempheader, true);
                 mapsread=true;
                 checkstatus(ret);
                 break;
@@ -13196,7 +13098,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading DMaps...*/
-                ret=readdmaps(f, &tempheader, tempheader.zelda_version, tempheader.build, 0, MAXDMAPS, keepall&&!get_bit(skip_flags, skip_dmaps));
+                ret=readdmaps(f, &tempheader, tempheader.zelda_version, tempheader.build, 0, MAXDMAPS, true);
                 checkstatus(ret);
                 break;
                 
@@ -13209,7 +13111,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Doors...*/
-                ret=readdoorcombosets(f, &tempheader, keepall&&!get_bit(skip_flags, skip_doors));
+                ret=readdoorcombosets(f, &tempheader, true);
                 checkstatus(ret);
                 break;
                 
@@ -13222,7 +13124,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Items...*/
-                ret=readitems(f, tempheader.zelda_version, tempheader.build, keepall&&!get_bit(skip_flags, skip_items));
+                ret=readitems(f, tempheader.zelda_version, tempheader.build, true);
                 checkstatus(ret);
                 break;
                 
@@ -13235,7 +13137,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Weapons...*/
-                ret=readweapons(f, &tempheader, keepall&&!get_bit(skip_flags, skip_weapons));
+                ret=readweapons(f, &tempheader, true);
                 checkstatus(ret);
                 break;
                 
@@ -13248,7 +13150,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Misc. Colors...*/
-                ret=readmisccolors(f, &tempheader, Misc, keepall&&!get_bit(skip_flags, skip_colors));
+                ret=readmisccolors(f, &tempheader, Misc, true);
                 checkstatus(ret);
                 break;
                 
@@ -13261,7 +13163,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Game Icons...*/
-                ret=readgameicons(f, &tempheader, Misc, keepall&&!get_bit(skip_flags, skip_icons));
+                ret=readgameicons(f, &tempheader, Misc, true);
                 checkstatus(ret);
                 break;
                 
@@ -13274,38 +13176,24 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Init. Data...*/
-                ret=readinitdata(f, &tempheader, keepall&&!get_bit(skip_flags, skip_initdata));
+                ret=readinitdata(f, &tempheader, true);
                 checkstatus(ret);
                 
-                if(keepall&&!get_bit(skip_flags, skip_subscreens))
+                if(zinit.subscreen!=ssdtMAX)  //not using custom subscreens
                 {
-                    if(zinit.subscreen!=ssdtMAX)  //not using custom subscreens
+                    setupsubscreens();
+                    
+                    for(int i=0; i<MAXDMAPS; ++i)
                     {
-                        setupsubscreens();
-                        
-                        for(int i=0; i<MAXDMAPS; ++i)
-                        {
-                            int type=DMaps[i].type&dmfTYPE;
-                            DMaps[i].active_subscreen=(type == dmOVERW || type == dmBSOVERW)?0:1;
-                            DMaps[i].passive_subscreen=(get_bit(quest_rules,qr_ENABLEMAGIC))?0:1;
-                        }
+                        int type=DMaps[i].type&dmfTYPE;
+                        DMaps[i].active_subscreen=(type == dmOVERW || type == dmBSOVERW)?0:1;
+                        DMaps[i].passive_subscreen=(get_bit(quest_rules,qr_ENABLEMAGIC))?0:1;
                     }
                 }
                 
-                if(keepall&&!get_bit(skip_flags, skip_sfx))
-                {
-                    setupsfx();
-                }
-                
-                if(keepall&&!get_bit(skip_flags, skip_itemdropsets))
-                {
-                    init_item_drop_sets();
-                }
-                
-                if(keepall&&!get_bit(skip_flags, skip_favorites))
-                {
-                    init_favorites();
-                }
+                setupsfx();
+                init_item_drop_sets();
+                init_favorites();
                 
                 break;
                 
@@ -13318,7 +13206,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Custom Guy Data...*/
-                ret=readguys(f, &tempheader, keepall&&!get_bit(skip_flags, skip_guys));
+                ret=readguys(f, &tempheader, true);
                 checkstatus(ret);
                 break;
                 
@@ -13331,7 +13219,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Custom Link Sprite Data...*/
-                ret=readlinksprites(f, &tempheader, keepall&&!get_bit(skip_flags, skip_linksprites));
+                ret=readlinksprites(f, &tempheader, true);
                 checkstatus(ret);
                 break;
                 
@@ -13344,7 +13232,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Custom Subscreen Data...*/
-                ret=readsubscreens(f, &tempheader, keepall&&!get_bit(skip_flags, skip_subscreens));
+                ret=readsubscreens(f, &tempheader, true);
                 checkstatus(ret);
                 break;
                 
@@ -13357,7 +13245,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading FF Script Data...*/
-                ret=readffscript(f, &tempheader, keepall&&!get_bit(skip_flags, skip_ffscript));
+                ret=readffscript(f, &tempheader, true);
                 checkstatus(ret);
                 break;
                 
@@ -13370,7 +13258,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading SFX Data...*/
-                ret=readsfx(f, &tempheader, keepall&&!get_bit(skip_flags, skip_sfx));
+                ret=readsfx(f, &tempheader, true);
                 checkstatus(ret);
                 break;
                 
@@ -13383,7 +13271,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Tunes...*/
-                ret=readtunes(f, &tempheader, tunes, keepall&&!get_bit(skip_flags, skip_midis));
+                ret=readtunes(f, &tempheader, tunes, true);
                 checkstatus(ret);
                 break;
                 
@@ -13396,7 +13284,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Cheat Codes...*/
-                ret=readcheatcodes(f, &tempheader, keepall&&!get_bit(skip_flags, skip_cheats));
+                ret=readcheatcodes(f, &tempheader, true);
                 checkstatus(ret);
                 break;
                 
@@ -13409,7 +13297,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Item Drop Sets...*/
-                ret=readitemdropsets(f, tempheader.zelda_version, tempheader.build, keepall&&!get_bit(skip_flags, skip_itemdropsets));
+                ret=readitemdropsets(f, tempheader.zelda_version, tempheader.build, true);
                 checkstatus(ret);
                 break;
                 
@@ -13422,7 +13310,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Favorite Combos...*/
-                ret=readfavorites(f, tempheader.zelda_version, tempheader.build, keepall&&!get_bit(skip_flags, skip_favorites));
+                ret=readfavorites(f, tempheader.zelda_version, tempheader.build, true);
                 checkstatus(ret);
                 break;
                 
@@ -13465,91 +13353,86 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
     else
     {
         /*Reading Rules...*/
-        ret=readrules(f, &tempheader, keepall&&!get_bit(skip_flags, skip_rules));
+        ret=readrules(f, &tempheader, true);
         checkstatus(ret);
         
         /*Reading Strings...*/
-        ret=readstrings(f, &tempheader, keepall&&!get_bit(skip_flags, skip_strings));
+        ret=readstrings(f, &tempheader, true);
         checkstatus(ret);
         
         /*Reading Doors...*/
-        ret=readdoorcombosets(f, &tempheader, keepall&&!get_bit(skip_flags, skip_doors));
+        ret=readdoorcombosets(f, &tempheader, true);
         checkstatus(ret);
         
         /*Reading DMaps...*/
-        ret=readdmaps(f, &tempheader, tempheader.zelda_version, tempheader.build, 0, MAXDMAPS, keepall&&!get_bit(skip_flags, skip_dmaps));
+        ret=readdmaps(f, &tempheader, tempheader.zelda_version, tempheader.build, 0, MAXDMAPS, true);
         checkstatus(ret);
         
         /*Reading Misc. Data...*/
-        ret=readmisc(f, &tempheader, Misc, keepall&&!get_bit(skip_flags, skip_misc));
+        ret=readmisc(f, &tempheader, Misc, true);
         checkstatus(ret);
         
         /*Reading Items...*/
-        ret=readitems(f, tempheader.zelda_version, tempheader.build, keepall&&!get_bit(skip_flags, skip_items));
+        ret=readitems(f, tempheader.zelda_version, tempheader.build, true);
         checkstatus(ret);
         
         /*Reading Weapons...*/
-        ret=readweapons(f, &tempheader, keepall&&!get_bit(skip_flags, skip_weapons));
+        ret=readweapons(f, &tempheader, true);
         checkstatus(ret);
         
         /*Reading Custom Guy Data...*/
-        ret=readguys(f, &tempheader, keepall&&!get_bit(skip_flags, skip_guys));
+        ret=readguys(f, &tempheader, true);
         checkstatus(ret);
         
         /*Reading Maps...*/
-        ret=readmaps(f, &tempheader, keepall&&!get_bit(skip_flags, skip_maps));
+        ret=readmaps(f, &tempheader, true);
         mapsread=true;
         checkstatus(ret);
         
         /*Reading Combos...*/
-        ret=readcombos(f, &tempheader, tempheader.zelda_version, tempheader.build, 0, MAXCOMBOS, keepall&&!get_bit(skip_flags, skip_combos));
+        ret=readcombos(f, &tempheader, tempheader.zelda_version, tempheader.build, 0, MAXCOMBOS, true);
         combosread=true;
         checkstatus(ret);
         
         /*Reading Color Data...*/
-        ret=readcolordata(f, Misc, tempheader.zelda_version, tempheader.build, 0, newerpdTOTAL, keepall&&!get_bit(skip_flags, skip_csets));
+        ret=readcolordata(f, Misc, tempheader.zelda_version, tempheader.build, 0, newerpdTOTAL, true);
         checkstatus(ret);
         
         /*Reading Tiles...*/
-        ret=readtiles(f, newtilebuf, &tempheader, tempheader.zelda_version, tempheader.build, 0, NEWMAXTILES, false, keepall&&!get_bit(skip_flags, skip_tiles));
+        ret=readtiles(f, newtilebuf, &tempheader, tempheader.zelda_version, tempheader.build, 0, NEWMAXTILES, false, true);
         checkstatus(ret);
         
         /*Reading Tunes...*/
-        ret=readtunes(f, &tempheader, tunes, keepall&&!get_bit(skip_flags, skip_midis));
+        ret=readtunes(f, &tempheader, tunes, true);
         checkstatus(ret);
         
         /*Reading Cheat Codes...*/
-        ret=readcheatcodes(f, &tempheader, keepall&&!get_bit(skip_flags, skip_cheats));
+        ret=readcheatcodes(f, &tempheader, true);
         checkstatus(ret);
         
         /*Reading Init. Data...*/
-        ret=readinitdata(f, &tempheader, keepall&&!get_bit(skip_flags, skip_initdata));
+        ret=readinitdata(f, &tempheader, true);
         checkstatus(ret);
         
-        if(keepall&&!get_bit(skip_flags, skip_subscreens))
+        setupsubscreens();
+        
+        for(int i=0; i<MAXDMAPS; ++i)
         {
-            setupsubscreens();
-            
-            for(int i=0; i<MAXDMAPS; ++i)
-            {
-                int type=DMaps[i].type&dmfTYPE;
-                DMaps[i].active_subscreen=(type == dmOVERW || type == dmBSOVERW)?0:1;
-                DMaps[i].passive_subscreen=(get_bit(quest_rules,qr_ENABLEMAGIC))?0:1;
-            }
+            int type=DMaps[i].type&dmfTYPE;
+            DMaps[i].active_subscreen=(type == dmOVERW || type == dmBSOVERW)?0:1;
+            DMaps[i].passive_subscreen=(get_bit(quest_rules,qr_ENABLEMAGIC))?0:1;
         }
         
         /*Setting Up Default Sound Effects...*/
-        
-        if(keepall&&!get_bit(skip_flags, skip_sfx))
-            setupsfx();
-        
+        setupsfx();
+
         //link sprites
         /*Reading Custom Link Sprite Data...*/
-        ret=readlinksprites2(f, -1, 0, keepall&&!get_bit(skip_flags, skip_linksprites));
+        ret=readlinksprites2(f, -1, 0, true);
         checkstatus(ret);
         
         /*Setting Up Default Item Drop Sets...*/
-        ret=readitemdropsets(f, -1, 0, keepall&&!get_bit(skip_flags, skip_itemdropsets));
+        ret=readitemdropsets(f, -1, 0, true);
     }
     
     // check data
@@ -13588,26 +13471,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
         zinit.cont_heart=100;
     }
     
-//  if (keepall==true||!get_bit(skip_flags, skip_header))
-    if(keepall&&!get_bit(skip_flags, skip_header))
-    {
-        memcpy(Header, &tempheader, sizeof(tempheader));
-    }
-    
-    if(!keepall||get_bit(skip_flags, skip_maps))
-    {
-        map_count=old_map_count;
-    }
-    
-    if(!keepall||get_bit(skip_flags, skip_rules))
-    {
-        memcpy(quest_rules, old_quest_rules, QUESTRULES_SIZE);
-    }
-    
-    if(!keepall||get_bit(skip_flags, skip_midis))
-    {
-        memcpy(midi_flags, old_midi_flags, MIDIFLAGS_SIZE);
-    }
+    memcpy(Header, &tempheader, sizeof(tempheader));
     
     if(deletefilename[0] && exists(deletefilename))
     {

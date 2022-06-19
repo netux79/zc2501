@@ -537,9 +537,6 @@ void ending()
         zcmusic = NULL;
     }
     
-//  setPackfilePassword(datapwd);
-    load_quest(game);
-//  setPackfilePassword(NULL);
     saves[currgame] = *game;
     load_game_icon_to_buffer(false,currgame);
     load_game_icon(game,false,currgame);

@@ -16,8 +16,6 @@
 #include "zscriptversion.h"
 
 // define these in main code
-//extern bool init_tiles(bool validate);
-//extern bool init_combos(bool validate);
 
 #define checkstatus(ret)\
           switch (ret)  \
@@ -70,7 +68,7 @@ extern int favorite_comboaliases[MAXFAVORITECOMBOALIASES];
 char *VerStr(int version);
 char *ordinal(int num);
 
-PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefilename, bool compressed, bool encrypted, bool show_progress);
+PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefilename, bool compressed, bool encrypted);
 PACKFILE *open_quest_template(zquestheader *Header, char *deletefilename, bool validate);
 
 void clear_combo(int i);
@@ -80,13 +78,10 @@ void fix_maps(mapscr *buf,int cnt);
 //void reset_midi(zcmidi_ *m);
 //void reset_midis(zcmidi_ *m);
 void reset_scr(int scr);
-//bool reset_items();
-//bool reset_wpns();
 
 int get_qst_buffers();
 void del_qst_buffers();
-int loadquest(const char *filename, zquestheader *Header,
-              miscQdata *Misc, zctune *tunes, bool show_progress, bool compressed, bool encrypted, bool keepall, byte *skip_flags);
+int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctune *tunes);
 
 char *byte_conversion2(int number1, int number2, int format1, int format2);
 
@@ -94,14 +89,10 @@ bool valid_zqt(PACKFILE *f);
 bool reset_mapstyles(bool validate, miscQdata *Misc);
 bool reset_items(bool validate, zquestheader *Header);
 bool reset_guys();
-bool reset_wpns(bool validate, zquestheader *Header);
-bool reset_doorcombosets(bool validate, zquestheader *Header);
 bool init_tiles(bool validate, zquestheader *Header);
 bool init_colordata(bool validate, zquestheader *Header, miscQdata *Misc);
-bool init_combos(bool validate, zquestheader *Header);
 
 void get_questpwd(char *encrypted_pwd, short pwdkey, char *pwd);
-bool check_questpwd(zquestheader *Header, char *pwd);
 
 void update_guy_1(guydata *tempguy);
 void initMsgStr(MsgStr *str);

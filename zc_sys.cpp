@@ -96,7 +96,6 @@ void load_game_configs()
     TransLayers = get_config_int(cfg_sect,"translayers",1)!=0;
     ShowFPS = get_config_int(cfg_sect,"showfps",0)!=0;
     NESquit = get_config_int(cfg_sect,"fastquit",0)!=0;
-    title_version = get_config_int(cfg_sect,"title",2);
     
     //default - scale x2, 640 x 480
     resx = get_config_int(cfg_sect,"resx",640);
@@ -152,7 +151,6 @@ void save_game_configs()
     set_config_int(cfg_sect,"translayers",(int)TransLayers);
     set_config_int(cfg_sect,"showfps",(int)ShowFPS);
     set_config_int(cfg_sect,"fastquit",(int)NESquit);
-    set_config_int(cfg_sect,"title",title_version);
     
     set_config_int(cfg_sect,"resx",resx);
     set_config_int(cfg_sect,"resy",resy);
