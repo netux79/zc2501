@@ -481,7 +481,7 @@ void ending()
         
         if(f==112)                                              // after subscreen has scrolled away
         {
-            init_NES_mode();
+            loadfullpal();
             loadpalset(9,pSprite(spPILE));
             endingpal();
         }

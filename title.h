@@ -16,7 +16,7 @@ int  load_savedgames();
 int  save_savedgames();
 void load_game_icon(gamedata *g, bool forceDefault, int index);
 void load_game_icon_to_buffer(bool forceDefault, int index);
-void titlescreen(int lsave);
+void titlescreen();
 void game_over(int type);
 void save_game(bool savepoint);
 bool save_game(bool savepoint, int type);

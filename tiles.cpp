@@ -190,36 +190,6 @@ void setup_combo_animations2()
     animated_combos2=y;
 }
 
-void reset_combo_animation(int c)
-{
-    for(word x=0; x<animated_combos; ++x)
-    {
-        int y=animated_combo_table4[x][0];                      //combo number
-        
-        if(y==c)
-        {
-            combobuf[y].tile=animated_combo_table[y][1];        //reset tile
-            animated_combo_table4[x][1]=0;                        //reset clock
-            return;
-        }
-    }
-}
-
-void reset_combo_animation2(int c)
-{
-    for(word x=0; x<animated_combos2; ++x)
-    {
-        int y=animated_combo_table24[x][0];                      //combo number
-        
-        if(y==c)
-        {
-            combobuf[y].tile=animated_combo_table2[y][1];        //reset tile
-            animated_combo_table24[x][1]=0;                        //reset clock
-            return;
-        }
-    }
-}
-
 void reset_combo_animations()
 {
     for(word x=0; x<animated_combos; ++x)

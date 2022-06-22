@@ -849,38 +849,23 @@ void CatchBrang()
 /***** Main Game Code *****/
 /**************************/
 
-int load_quest(gamedata *g)
+void load_game(gamedata *g)
 {
-    //setPackfilePassword(datapwd);
-    int ret = loadquest(quest_path,&QHeader,&QMisc,tunes+ZC_MIDI_COUNT);
-    //setPackfilePassword(NULL);
-    
-    if(!g->title[0] || g->get_hasplayed() == 0)
-    {
-        strcpy(g->version,QHeader.version);
-        strcpy(g->title,QHeader.title);
-    }
-    else
-    {
-        if(!ret && strcmp(g->title,QHeader.title))
-        {
-            ret = qe_match;
-        }
-    }
-    
-    if(QHeader.minver[0])
-    {
-        if(strcmp(g->version,QHeader.minver) < 0)
-            ret = qe_minver;
-    }
-    
-    if(ret)
-    {
-        char buf1[80];
-        Z_error(buf1,"Error loading %s:, %s",get_filename(quest_path), qst_error[ret]);
-    }
-    
-    return ret;
+   int ret = 0;
+
+   if (!g->title[0] || g->get_hasplayed() == 0)
+   {
+      strcpy(g->version, QHeader.version);
+      strcpy(g->title, QHeader.title);
+   }
+   else if (strcmp(g->title, QHeader.title))
+      ret = qe_match;
+
+   if (!ret && QHeader.minver[0] && (strcmp(g->version, QHeader.minver) < 0))
+      ret = qe_minver;
+
+   if (ret)
+      Z_error("Error loading %s: %s\n", get_filename(quest_path), qst_error[ret]);
 }
 
 void init_dmap()
@@ -1032,18 +1017,8 @@ int init_game()
     game->Copy(saves[currgame]);
     flushItemCache();
     
-//Load the quest
-    //setPackfilePassword(datapwd);
-    int ret = load_quest(game);
-    
-    if(ret != qe_OK)
-    {
-        Quit = qERROR;
-        //setPackfilePassword(NULL);
-        return 1;
-    }
-    
-    //setPackfilePassword(NULL);
+    //Load the quest
+    load_game(game);
     
     bool firstplay = (game->get_hasplayed() == 0);
     
@@ -2301,6 +2276,8 @@ int main(int argc, char* argv[])
     // Before anything else, let's register our custom trace handler:
     register_trace_handler(zc_trace_handler);
 
+    set_uformat(U_ASCII);
+
     Z_message("Initializing Allegro...");
     if(allegro_init() != 0)
     {
@@ -2349,19 +2326,14 @@ int main(int argc, char* argv[])
         Z_error("Error");
         quit_game();
     }
-    
+
+    resolve_password(datapwd);
+    //packfile_password(datapwd);
+
     // set and load game configurations
     set_config_file("ag.cfg");
-    if(exists("ag.cfg") != 0)
-    {
-        load_game_configs();
-    }
-    else
-    {
-        load_game_configs();
-        save_game_configs();
-    }
-    
+    load_game_configs();
+
     if(install_timer() < 0)
     {
         Z_error(allegro_error);
@@ -2400,9 +2372,6 @@ int main(int argc, char* argv[])
     
     Z_message("OK\n");
     
- 
-    set_color_depth(8);
-    
     // allocate bitmap buffers
     Z_message("Allocating bitmap buffers... ");
     
@@ -2430,19 +2399,12 @@ int main(int argc, char* argv[])
     set_clip_state(pricesdisplaybuf, 1);
     Z_message("OK\n");
     
-    
     zcmusic_init();
     
-    //  int mode = VidMode;                                       // from config file
-    int tempmode=GFX_AUTODETECT;
+//  setPackfilePassword(datapwd);
     
     // load the data files
-    resolve_password(datapwd);
-//  setPackfilePassword(datapwd);
-    packfile_password(datapwd);
-    
     Z_message("Loading data files:\n");
-    set_color_conversion(COLORCONV_NONE);
     
     sprintf(zeldadat_sig,"Zelda.Dat %s Build %d",VerStr(ZELDADAT_VERSION), ZELDADAT_BUILD);
     sprintf(sfxdat_sig,"SFX.Dat %s Build %d",VerStr(SFXDAT_VERSION), SFXDAT_BUILD);
@@ -2503,7 +2465,6 @@ int main(int argc, char* argv[])
     
     mididata = (DATAFILE*)data[ZC_MIDI].dat;
     
-    set_uformat(U_ASCII);
     deffont = font;
     nfont = (FONT*)fontsdata[FONT_GUI_PROP].dat;
     font = nfont;
@@ -2631,90 +2592,39 @@ int main(int argc, char* argv[])
     
     Z_init_sound();
     
-    const int wait_ms_on_set_graphics = 20; //formerly 250. -Gleeok
-    
-    if(used_switch(argc,argv,"-fullscreen") ||
-            (!used_switch(argc, argv, "-windowed") && get_config_int("zeldadx","fullscreen",1)==1))
-    {
-        al_trace("Used switch: -fullscreen\n");
-        tempmode = GFX_AUTODETECT_FULLSCREEN;
-    }
-    else if(used_switch(argc,argv,"-windowed") || get_config_int("zeldadx","fullscreen",1)==0)
-    {
-        al_trace("Used switch: -windowed\n");
-        tempmode=GFX_AUTODETECT_WINDOWED;
-    }
+    int tempmode=GFX_AUTODETECT;
+    set_color_conversion(COLORCONV_NONE);
+    set_color_depth(8);
+    tempmode = fullscreen ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
     
     //set scale
     if(resx < 320) resx = 320;
-    
     if(resy < 240) resy = 240;
-    
     screen_scale = zc_max(zc_min(resx / 320, resy / 240), 1);
     
-    if(!game_vid_mode(tempmode, wait_ms_on_set_graphics))
+    if(!game_vid_mode(tempmode, 20))
     {
-        //what we need here is not rightousness but madness!!!
-        
-#define TRY_SET_VID_MODE(scale) \
-	Z_message("Unable to set gfx mode at -%d %dbpp %d x %d \n", tempmode, get_color_depth(), resx, resy); \
-	screen_scale=scale; \
-	resx=320*scale; \
-	resy=240*scale
-        
-        TRY_SET_VID_MODE(2);
-        
-        if(!game_vid_mode(tempmode, wait_ms_on_set_graphics))
-        {
-            TRY_SET_VID_MODE(1);
-            
-            if(!game_vid_mode(tempmode, wait_ms_on_set_graphics))
-            {
-                if(tempmode != GFX_AUTODETECT_WINDOWED)
-                {
-                    tempmode=GFX_AUTODETECT_WINDOWED;
-                    al_trace("-fullscreen not supported by your video driver! setting -windowed switch\n");
-                    TRY_SET_VID_MODE(2);
-                    
-                    if(!game_vid_mode(tempmode, wait_ms_on_set_graphics))
-                    {
-                        TRY_SET_VID_MODE(1);
-                        
-                        if(!game_vid_mode(tempmode, wait_ms_on_set_graphics))
-                        {
-                            Z_message("Unable to set gfx mode at -%d %dbpp %d x %d \n", tempmode, get_color_depth(), resx, resy);
-                            al_trace("Fatal Error...Zelda Classic could not be initialized. Have a nice day :) \n");
-                            Z_error(allegro_error);
-                            quit_game();
-                        }
-                        else Z_message("set gfx mode succsessful at -%d %dbpp %d x %d \n", tempmode, get_color_depth(), resx, resy);
-                    }
-                    else Z_message("set gfx mode succsessful at -%d %dbpp %d x %d \n", tempmode, get_color_depth(), resx, resy);
-                }
-                else
-                {
-                    al_trace("Fatal Error: could not create a window for Zelda Classic.\n");
-                    Z_error(allegro_error);
-                    quit_game();
-                }
-            }
-            else Z_message("set gfx mode succsessful at -%d %dbpp %d x %d \n", tempmode, get_color_depth(), resx, resy);
-        }
-        else Z_message("set gfx mode succsessful at -%d %dbpp %d x %d \n", tempmode, get_color_depth(), resx, resy);
-    }
-    else
-    {
-        Z_message("set gfx mode succsessful at -%d %dbpp %d x %d \n", tempmode, get_color_depth(), resx, resy);
+        Z_error(allegro_error);
     }
     
+    Z_message("set gfx mode succsessful at -%d %dbpp %d x %d \n", tempmode, get_color_depth(), resx, resy);
     sbig = (screen_scale > 1);
-    set_display_switch_mode(is_windowed_mode()?SWITCH_BACKGROUND:SWITCH_BACKAMNESIA);
-    
     real_screen = screen;
     
     set_close_button_callback((void (*)()) hit_close_button);
     set_window_title("Zelda Classic");
-    
+
+    //setPackfilePassword(datapwd);
+    int ret = loadquest(quest_path,&QHeader,&QMisc,tunes+ZC_MIDI_COUNT);
+    //setPackfilePassword(NULL);
+    if (ret)
+    {
+        Z_message("FAIL (Error loading:  %s: %s)\n", get_filename(quest_path),
+                qst_error[ret]);
+        printf("Error loading: %s, %s\n", get_filename(quest_path), qst_error[ret]);
+        exit(-1);
+    }
+
 // load saved games
     Z_message("Loading saved games... ");
     
@@ -2725,9 +2635,6 @@ int main(int argc, char* argv[])
     }
     
     Z_message("OK\n");
-    
-    // play the game
-    reset_items(true, &QHeader);
     
     clear_to_color(screen,BLACK);
     Quit = qRESET;
@@ -2742,7 +2649,7 @@ int main(int argc, char* argv[])
     {
         // this is here to continually fix the keyboard repeat
         set_keyboard_rate(250,33);
-        titlescreen(0);
+        titlescreen();
         
         setup_combo_animations();
         setup_combo_animations2();
@@ -2774,6 +2681,8 @@ int main(int argc, char* argv[])
             if(!skipcont&&!get_bit(quest_rules,qr_NOCONTINUE)) game_over(get_bit(quest_rules,qr_NOSAVE));
             
             skipcont = 0;
+            reset_combo_animations();
+            reset_combo_animations2();
         }
         break;
         

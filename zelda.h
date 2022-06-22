@@ -126,7 +126,7 @@ void init_dmap();
 int  init_game();
 int  cont_game();
 void restart_level();
-int  load_quest(gamedata *g);
+void load_game(gamedata *g);
 void show_ffscript_names();
 
 int get_currdmap();

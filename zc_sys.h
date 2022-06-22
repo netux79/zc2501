@@ -110,7 +110,6 @@ void show_paused(BITMAP *target);
 void show_fps(BITMAP *target);
 void show_saving(BITMAP *target);
 bool game_vid_mode(int mode,int wait);
-void init_NES_mode();
 
 extern int black_opening_count;
 extern int black_opening_x,black_opening_y;

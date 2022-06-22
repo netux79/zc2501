@@ -19,6 +19,7 @@ extern int CSET_SHFT;                                       // log2 of CSET_SIZE
 
 #define CSET(x)         ((x)<<CSET_SHFT)
 #define csBOSS          14
+#define csICON          12  /* Colors used for link icons in main menu 12 13 14 */
 
 extern RGB _RGB(byte *si);
 extern RGB _RGB(int r,int g,int b);

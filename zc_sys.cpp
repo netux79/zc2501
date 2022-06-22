@@ -103,7 +103,7 @@ void load_game_configs()
     //screen_scale = get_config_int(cfg_sect,"screen_scale",2);
     
     scanlines = get_config_int(cfg_sect,"scanlines",0)!=0;
-    fullscreen = get_config_int(cfg_sect,"fullscreen",1);    
+    fullscreen = get_config_int(cfg_sect,"fullscreen",1);
     
     heart_beep = get_config_int(cfg_sect,"heart_beep",1)!=0;
     sfxdat = get_config_int(cfg_sect,"use_sfx_dat",1);
@@ -291,20 +291,6 @@ bool game_vid_mode(int mode,int wait)
     
     rest(wait);
     return true;
-}
-
-void init_NES_mode()
-{
-    // qst.dat may not load correctly without this...
-    QHeader.templatepath[0]='\0';
-    
-    if(!init_colordata(true, &QHeader, &QMisc))
-    {
-        return;
-    }
-    
-    loadfullpal();
-    init_tiles(false, &QHeader);
 }
 
 //----------------------------------------------------------------

@@ -672,12 +672,7 @@ int load_savedgames()
         {
             if(!iconbuffer[i].loaded)
             {
-                int ret2 = load_quest(saves+i);
-                
-                if(ret2 == qe_OK)
-                {
-                    load_game_icon_to_buffer(false,i);
-                }
+                load_game_icon_to_buffer(false,i);
             }
         }
     }
@@ -1107,44 +1102,39 @@ void load_game_icon_to_buffer(bool forceDefault, int index)
 
 static void select_mode()
 {
-    textout_ex(scrollbuf,zfont,"REGISTER YOUR NAME",48,152,1,0);
-    textout_ex(scrollbuf,zfont,"COPY FILE",48,168,1,0);
-    textout_ex(scrollbuf,zfont,"DELETE FILE",48,184,1,0);
+    textout_ex(scrollbuf,zfont,"REGISTER YOUR NAME",48,152,1,-1);
+    textout_ex(scrollbuf,zfont,"COPY FILE",48,168,1,-1);
+    textout_ex(scrollbuf,zfont,"DELETE FILE",48,184,1,-1);
 }
 
 static void register_mode()
 {
-    textout_ex(scrollbuf,zfont,"REGISTER YOUR NAME",48,152,CSET(2)+3,0);
+    textout_ex(scrollbuf,zfont,"REGISTER YOUR NAME",48,152,2,-1);
 }
 
 static void copy_mode()
 {
-    textout_ex(scrollbuf,zfont,"COPY FILE",48,168,CSET(2)+3,0);
+    textout_ex(scrollbuf,zfont,"COPY FILE",48,168,2,-1);
 }
 
 static void delete_mode()
 {
-    textout_ex(scrollbuf,zfont,"DELETE FILE",48,184,CSET(2)+3,0);
+    textout_ex(scrollbuf,zfont,"DELETE FILE",48,184,2,-1);
 }
 
 static void selectscreen()
 {
-    init_NES_mode();
-    //  loadfullpal();
-    loadlvlpal(1);
+    loadfullpal();
     clear_bitmap(scrollbuf);
-    QMisc.colors.blueframe_tile = 237;
-    QMisc.colors.blueframe_cset = 0;
-//  blueframe(scrollbuf,&QMisc,24,48,26,20);
     frame2x2(scrollbuf,&QMisc,24,48,QMisc.colors.blueframe_tile,QMisc.colors.blueframe_cset,26,20,0,1,0);
     textout_ex(scrollbuf,zfont,"- S E L E C T -",64,24,1,0);
     textout_ex(scrollbuf,zfont," NAME ",80,48,1,0);
     textout_ex(scrollbuf,zfont," LIFE ",152,48,1,0);
     select_mode();
-    RAMpal[CSET(9)+1]=NESpal(0x15);
-    RAMpal[CSET(9)+2]=NESpal(0x27);
-    RAMpal[CSET(9)+3]=NESpal(0x30);
-    RAMpal[CSET(13)+1]=NESpal(0x30);
+    /* Setup the font color for the selection screen */
+    /*RAMpal[0] = _RGB(0,0,0);     Screen background */
+    RAMpal[1] = _RGB(63,63,63); /* Regular text */
+    RAMpal[2] = _RGB(57,0,22);  /* Selected text */
 }
 
 static byte left_arrow_str[] = {132,0};
@@ -1163,35 +1153,34 @@ static void list_save(int save_num, int ypos)
         wpnsbuf[iwQuarterHearts].tile = 4;
         //boogie!
         lifemeter(framebuf,144,ypos+((game->get_maxlife()>16*(HP_PER_HEART))?8:0),0,0);
-        textout_ex(framebuf,zfont,saves[save_num].get_name(),72,ypos+16,1,0);
+        textout_ex(framebuf,zfont,saves[save_num].get_name(),72,ypos+16,1,-1);
         
         if(saves[save_num].get_quest())
-            textprintf_ex(framebuf,zfont,72,ypos+24,1,0,"%3d",saves[save_num].get_deaths());
+            textprintf_ex(framebuf,zfont,72,ypos+24,1,-1,"%3d",saves[save_num].get_deaths());
         
-        textprintf_ex(framebuf,zfont,72,ypos+16,1,0,"%s",saves[save_num].get_name());
+        textprintf_ex(framebuf,zfont,72,ypos+16,1,-1,"%s",saves[save_num].get_name());
     }
     
     byte *hold = newtilebuf[0].data;
     byte holdformat=newtilebuf[0].format;
     newtilebuf[0].format=tf4Bit;
     newtilebuf[0].data = saves[save_num].icon;
-    overtile16(framebuf,0,48,ypos+17,(save_num%3)+10,0);               //link
+    overtile16(framebuf,0,48,ypos+17,(save_num%3)+csICON,0);               //link
     newtilebuf[0].format=holdformat;
     newtilebuf[0].data = hold;
     
     hold = colordata;
     colordata = saves[save_num].pal;
-    loadpalset((save_num%3)+10,0);
+    loadpalset((save_num%3)+csICON,0);
     colordata = hold;
     
-    textout_ex(framebuf,zfont,"-",136,ypos+16,1,0);
+    textout_ex(framebuf,zfont,"-",136,ypos+16,1,-1);
     
     refreshpal = r;
 }
 
 static void list_saves()
 {
-    loadpalset(0, 0);
     
     for(int i=0; i<3; i++)
     {
@@ -1202,23 +1191,21 @@ static void list_saves()
     if(savecnt>3)
     {
         if(listpos>=3)
-            textout_ex(framebuf,zfont,(char *)left_arrow_str,96,60,3,0);
+            textout_ex(framebuf,zfont,(char *)left_arrow_str,96,60,2,-1);
             
         if(listpos+3<savecnt)
-            textout_ex(framebuf,zfont,(char *)right_arrow_str,176,60,3,0);
+            textout_ex(framebuf,zfont,(char *)right_arrow_str,176,60,2,-1);
             
-        textprintf_ex(framebuf,zfont,112,60,3,0,"%2d - %-2d",listpos+1,listpos+3);
+        textprintf_ex(framebuf,zfont,112,60,2,-1,"%2d - %-2d",listpos+1,listpos+3);
     }
 }
 
-static void draw_cursor(int pos,int mode)
+static void draw_cursor(int pos)
 {
-    int cs = (mode==3)?13:9;
-    
     if(pos<3)
-        overtile8(framebuf,0,40,pos*24+77,cs,0);
+        overtile8(framebuf,0,40,pos*24+77,1,0);
     else
-        overtile8(framebuf,0,40,(pos-3)*16+153,cs,0);
+        overtile8(framebuf,0,40,(pos-3)*16+153,1,0);
 }
 
 static bool register_name()
@@ -1234,12 +1221,7 @@ static bool register_name()
     int s=savecnt;
     ++savecnt;
     listpos=(s/3)*3;
-//  clear_bitmap(framebuf);
-    rectfill(framebuf,32,56,223,151,0);
-    list_saves();
-    blit(framebuf,scrollbuf,0,0,0,0,256,224);
     
-    int pos=s%3;
     int y=72;
     int x=0;
     int spos=0;
@@ -1258,36 +1240,12 @@ static bool register_name()
     int letter_grid_width=16;
     int letter_grid_height=6;
     int letter_grid_spacing=12;
-    
     const char *complete_grid=" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-    
-    //int pos=file%3;
-    BITMAP *info = create_bitmap_ex(8,168,32);
-    clear_bitmap(info);
-    blit(framebuf,info,40,pos*24+70,0,0,168,26);
-    rectfill(info,40,0,168,1,0);
-    rectfill(info,0,24,39,25,0);
-    rectfill(info,0,0,7,15,0);
-    rectfill(framebuf,40,64,216,192,0);
-    rectfill(framebuf,96,60,183,67,0);
-    
-    int i=pos*24+70;
-    
-    do
-    {
-        blit(info,framebuf,0,0,40,i,168,32);
-        advanceframe(true);
-        i-=pos+pos;
-    }
-    while(pos && i>=70);
     
     clear_bitmap(framebuf);
     frame2x2(framebuf,&QMisc,24,48,QMisc.colors.blueframe_tile,QMisc.colors.blueframe_cset,26,8,0,1,0);
     textout_ex(framebuf,zfont," NAME ",80,48,1,0);
     textout_ex(framebuf,zfont," LIFE ",152,48,1,0);
-    
-    blit(info,framebuf,0,0,40,70,168,32);
-    destroy_bitmap(info);
     
     frame2x2(framebuf,&QMisc,letter_grid_x-letter_grid_offset,letter_grid_y-letter_grid_offset,QMisc.colors.blueframe_tile,QMisc.colors.blueframe_cset,26,11,0,1,0);
     
@@ -1427,20 +1385,20 @@ static bool register_name()
             {
                 for(int dx=0; dx<8; dx++)
                 {
-                    if(framebuf->line[y+dy][tx+dx]==0)
+                    if(framebuf->line[y+dy][tx+dx]!=1)
                     {
-                        framebuf->line[y+dy][tx+dx]=CSET(9)+1;
+                        framebuf->line[y+dy][tx+dx]=2;
                     }
                     
-                    if(framebuf->line[y2+dy][x2+dx]==0)
+                    if(framebuf->line[y2+dy][x2+dx]!=1)
                     {
-                        framebuf->line[y2+dy][x2+dx]=CSET(9)+1;
+                        framebuf->line[y2+dy][x2+dx]=2;
                     }
                 }
             }
         }
         
-        draw_cursor(0,0);
+        draw_cursor(0);
         advanceframe(true);
     }
     while(!done && !Quit);
@@ -1454,39 +1412,25 @@ static bool register_name()
     {
         saves[s].set_quest(0xFF); // Always a custom quest, no longer matters.
         sprintf(saves[s].qstpath, "%s", quest_path);
+        load_game(saves+s);
+        flushItemCache();
+        //messy hack to get this to work, since game is not yet initialized -DD
+        gamedata *oldgame = game;
+        game = saves+s;
+        saves[s].set_maxlife(zinit.hc*HP_PER_HEART);
+        //saves[s].items[itype_ring]=0;
+        //removeItemsOfFamily(&saves[s], itemsbuf, itype_ring);
+        int maxringid = getHighestLevelOfFamily(&zinit, itemsbuf, itype_ring);
 
-//	setPackfilePassword(datapwd);
-        //0 is success
-        int ret = load_quest(saves+s);
-        
-        if(ret==qe_OK)
-        {
-            flushItemCache();
-            //messy hack to get this to work, since game is not yet initialized -DD
-            gamedata *oldgame = game;
-            game = saves+s;
-            saves[s].set_maxlife(zinit.hc*HP_PER_HEART);
-            //saves[s].items[itype_ring]=0;
-            //removeItemsOfFamily(&saves[s], itemsbuf, itype_ring);
-            int maxringid = getHighestLevelOfFamily(&zinit, itemsbuf, itype_ring);
+        if(maxringid != -1)
+            getitem(maxringid, true);
             
-            if(maxringid != -1)
-                getitem(maxringid, true);
-                
-            //      game->set_maxbombs(&saves[s], zinit.max_bombs);
-            ringcolor(false);
-            load_game_icon_to_buffer(false, s);
-            load_game_icon(saves+s, false, s);
-            game = oldgame;
-            //selectscreen();                                       // refresh palette
-        }
-        else
-        {
-            ringcolor(true);
-            load_game_icon(saves+s, true, s);
-        }
-        
-//    setPackfilePassword(NULL);
+        //      game->set_maxbombs(&saves[s], zinit.max_bombs);
+        ringcolor(false);
+        load_game_icon_to_buffer(false, s);
+        load_game_icon(saves+s, false, s);
+        game = oldgame;
+        //selectscreen();                                       // refresh palette
         saves[s].set_timevalid(1);
     }
     
@@ -1558,20 +1502,18 @@ static int game_details(int file)
     if(saves[file].get_quest()==0)
         return 0;
         
-    BITMAP *info = create_bitmap_ex(8,168,32);
-    clear_bitmap(info);
-    blit(framebuf,info,40,pos*24+70,0,0,168,26);
-    rectfill(info,40,0,168,1,0);
-    rectfill(info,0,24,39,25,0);
-    rectfill(info,0,0,7,15,0);
-    rectfill(framebuf,40,64,216,192,0);
-    rectfill(framebuf,96,60,183,67,0);
+   BITMAP *info = create_bitmap_ex(8, 160, 26);
+   blit(framebuf, info, 48, pos * 24 + 70, 0, 0, 160, 26);
+   rectfill(framebuf, 40, 60, 216, 192, 0);
+   frame2x2(framebuf,&QMisc,24,48,QMisc.colors.blueframe_tile,QMisc.colors.blueframe_cset,26,20,0,1,0);
+   textout_ex(framebuf, zfont, " NAME ", 80, 48, 1, 0);
+   textout_ex(framebuf, zfont, " LIFE ", 152, 48, 1, 0);
     
     int i=pos*24+70;
     
     do
     {
-        blit(info,framebuf,0,0,40,i,168,32);
+        blit(info,framebuf,0,0,48,i,160,26);
         advanceframe(true);
         i-=pos+pos;
     }
@@ -1579,29 +1521,26 @@ static int game_details(int file)
     
     destroy_bitmap(info);
     
-    textout_ex(framebuf,zfont,"GAME TYPE",40,104,3,0);
-    textout_ex(framebuf,zfont,"QUEST",40,112,3,0);
-    textout_ex(framebuf,zfont,"STATUS",40,120,3,0);
+    textout_ex(framebuf,zfont,"GAME TYPE",40,104,2,-1);
+    textout_ex(framebuf,zfont,"QUEST",40,112,2,-1);
+    textout_ex(framebuf,zfont,"STATUS",40,120,2,-1);
     
-    textout_ex(framebuf,zfont,"Custom Quest",120,104,1,0);
-    textprintf_ex(framebuf,zfont,120,112,1,0,"%s", get_filename(saves[file].qstpath));
+    textout_ex(framebuf,zfont,"Custom Quest",120,104,1,-1);
+    textprintf_ex(framebuf,zfont,120,112,1,-1,"%s", get_filename(saves[file].qstpath));
     
     if(!saves[file].get_hasplayed())
-        textout_ex(framebuf,zfont,"Empty Game",120,120,1,0);
+        textout_ex(framebuf,zfont,"Empty Game",120,120,1,-1);
     else if(!saves[file].get_timevalid())
-        textout_ex(framebuf,zfont,"Time Unknown",120,120,1,0);
+        textout_ex(framebuf,zfont,"Time Unknown",120,120,1,-1);
     else
-        textout_ex(framebuf,zfont,time_str_med(saves[file].get_time()),120,120,1,0);
+        textout_ex(framebuf,zfont,time_str_med(saves[file].get_time()),120,120,1,-1);
         
     if(saves[file].get_cheat())
-        textout_ex(framebuf,zfont,"Used Cheats",120,128,1,0);
+        textout_ex(framebuf,zfont,"Uses Cheats",120,128,1,-1);
         
-    textout_ex(framebuf,zfont,"START: PLAY GAME",56,152,1,0);
-    textout_ex(framebuf,zfont,"    B: CANCEL",56,168,1,0);
+    textout_ex(framebuf,zfont,"START: PLAY GAME",56,152,1,-1);
+    textout_ex(framebuf,zfont,"    B: CANCEL",56,168,1,-1);
     
-    if(!saves[file].get_hasplayed())
-        textout_ex(framebuf,zfont,"    A: CUSTOM QUEST",56,184,1,0);
-        
     while(!Quit)
     {
         advanceframe(true);
@@ -1631,8 +1570,6 @@ static void select_game()
     int pos = zc_max(zc_min(currgame-listpos,3),0);
     int mode = 0;
     
-    //kill_sfx();
-    
     selectscreen();
     
     savecnt=0;
@@ -1652,7 +1589,7 @@ static void select_game()
         sfxdat=1;
         blit(scrollbuf,framebuf,0,0,0,0,256,224);
         list_saves();
-        draw_cursor(pos,mode);
+        draw_cursor(pos);
         advanceframe(true);
         saveslot = pos + listpos;
         
@@ -1785,7 +1722,7 @@ static void select_game()
 /****  Main title screen routine  *****/
 /**************************************/
 
-void titlescreen(int lsave)
+void titlescreen()
 {
     int q=Quit;
     
@@ -1804,23 +1741,13 @@ void titlescreen(int lsave)
         show_subscreen_numbers=true;
         show_subscreen_items=true;
         show_subscreen_life=true;
+        reset_combo_animations();
+        reset_combo_animations2();
     }
     
     if(!Quit)
     {
-        if(lsave<1)
-        {
-            select_game();
-        }
-        else
-        {
-            currgame = lsave-1;
-            
-            if(!saves[currgame].get_quest())
-            {
-                select_game();
-            }
-        }
+        select_game();
     }
     
     if(!Quit)
@@ -1928,8 +1855,6 @@ void game_over(int type)
     }
     while(!Quit && !done);
     
-    reset_combo_animations();
-    reset_combo_animations2();
     clear_bitmap(framebuf);
     advanceframe(true);
     

@@ -263,105 +263,6 @@ int get_version_and_build(PACKFILE *f, word *version, word *build)
     return 0;
 }
 
-
-bool find_section(PACKFILE *f, long section_id_requested)
-{
-
-    if(!f)
-    {
-        return false;
-    }
-    
-    int section_id_read;
-    dword section_size;
-    word dummy;
-    char tempbuf[65536];
-    
-    switch(section_id_requested)
-    {
-    case ID_RULES:
-    case ID_STRINGS:
-    case ID_MISC:
-    case ID_TILES:
-    case ID_COMBOS:
-    case ID_CSETS:
-    case ID_MAPS:
-    case ID_DMAPS:
-    case ID_DOORS:
-    case ID_ITEMS:
-    case ID_WEAPONS:
-    case ID_COLORS:
-    case ID_ICONS:
-    case ID_INITDATA:
-    case ID_GUYS:
-    case ID_MIDIS:
-    case ID_CHEATS:
-        break;
-        
-    default:
-        al_trace("Bad section requested!\n");
-        return false;
-        break;
-    }
-    
-    //section id
-    if(!p_mgetl(&section_id_read,f,true))
-    {
-        return false;
-    }
-    
-    while(!pack_feof(f))
-    {
-        if(section_id_read==section_id_requested)
-        {
-            return true;
-        }
-        else
-        {
-            //section version info
-            if(!p_igetw(&dummy,f,true))
-            {
-                return false;
-            }
-            
-            if(!p_igetw(&dummy,f,true))
-            {
-                return false;
-            }
-            
-            //section size
-            if(!p_igetl(&section_size,f,true))
-            {
-                return false;
-            }
-            
-            //pack_fseek(f, section_size);
-            while(section_size>=65536)
-            {
-                pfread(tempbuf,65536,f,true);
-                section_size-=65536;
-            }
-            
-            if(section_size>0)
-            {
-                pfread(tempbuf,section_size,f,true);
-            }
-        }
-        
-        //section id
-        if(!p_mgetl(&section_id_read,f,true))
-        {
-            return false;
-        }
-    }
-    
-    return false;
-}
-
-
-
-
-
 bool valid_zqt(PACKFILE *f)
 {
     if(!f)
@@ -516,269 +417,6 @@ PACKFILE *open_quest_template(zquestheader *Header, char *deletefilename, bool v
     }
     
     return f;
-}
-
-bool init_section(zquestheader *Header, long section_id, miscQdata *Misc, zctune *tunes, bool validate)
-{
-    combosread=false;
-    mapsread=false;
-    fixffcs=false;
-    
-    switch(section_id)
-    {
-    case ID_RULES:
-    case ID_STRINGS:
-    case ID_MISC:
-    case ID_TILES:
-    case ID_COMBOS:
-    case ID_CSETS:
-    case ID_MAPS:
-    case ID_DMAPS:
-    case ID_DOORS:
-    case ID_ITEMS:
-    case ID_WEAPONS:
-    case ID_COLORS:
-    case ID_ICONS:
-    case ID_INITDATA:
-    case ID_GUYS:
-    case ID_MIDIS:
-    case ID_CHEATS:
-    case ID_ITEMDROPSETS:
-    case ID_FAVORITES:
-        break;
-        
-    default:
-        return false;
-        break;
-    }
-    
-    int ret;
-    word version, build;
-    PACKFILE *f=NULL;
-    
-    char deletefilename[1024];
-    deletefilename[0]=0;
-    
-    //why is this here?
-    /*
-      if(colordata==NULL)
-      return false;
-      */
-    
-    //setPackfilePassword(datapwd);
-    f=open_quest_template(Header, deletefilename, validate);
-    
-    if(!f)  //no file, nothing to delete
-    {
-//	  setPackfilePassword(NULL);
-        return false;
-    }
-    
-    ret=get_version_and_build(f, &version, &build);
-    
-    if(ret||(version==0))
-    {
-        pack_fclose(f);
-        
-        if(deletefilename[0])
-        {
-            delete_file(deletefilename);
-        }
-        
-//	setPackfilePassword(NULL);
-        return false;
-    }
-    
-    if(!find_section(f, section_id))
-    {
-        al_trace("Can't find section!\n");
-        pack_fclose(f);
-        
-        if(deletefilename[0])
-        {
-            delete_file(deletefilename);
-        }
-        
-        //setPackfilePassword(NULL);
-        return false;
-    }
-    
-    switch(section_id)
-    {
-    case ID_RULES:
-        //rules
-        ret=readrules(f, Header, true);
-        break;
-        
-    case ID_STRINGS:
-        //strings
-        ret=readstrings(f, Header, true);
-        break;
-        
-    case ID_MISC:
-        //misc data
-        ret=readmisc(f, Header, Misc, true);
-        break;
-        
-    case ID_TILES:
-        //tiles
-        ret=readtiles(f, newtilebuf, Header, version, build, 0, NEWMAXTILES, true, true);
-        break;
-        
-    case ID_COMBOS:
-        //combos
-        clear_combos();
-        ret=readcombos(f, Header, version, build, 0, MAXCOMBOS, true);
-        combosread=true;
-        break;
-        
-    case ID_COMBOALIASES:
-        //combos
-        ret=readcomboaliases(f, Header, version, build, true);
-        break;
-        
-    case ID_CSETS:
-        //color data
-        ret=readcolordata(f, Misc, version, build, 0, newerpdTOTAL, true);
-        break;
-        
-    case ID_MAPS:
-        //maps
-        ret=readmaps(f, Header, true);
-        mapsread=true;
-        break;
-        
-    case ID_DMAPS:
-        //dmaps
-        ret=readdmaps(f, Header, version, build, 0, MAXDMAPS, true);
-        break;
-        
-    case ID_DOORS:
-        //door combo sets
-        ret=readdoorcombosets(f, Header, true);
-        break;
-        
-    case ID_ITEMS:
-        //items
-        ret=readitems(f, version, build, true);
-        break;
-        
-    case ID_WEAPONS:
-        //weapons
-        ret=readweapons(f, Header, true);
-        break;
-        
-    case ID_COLORS:
-        //misc. colors
-        ret=readmisccolors(f, Header, Misc, true);
-        break;
-        
-    case ID_ICONS:
-        //game icons
-        ret=readgameicons(f, Header, Misc, true);
-        break;
-        
-    case ID_INITDATA:
-        //initialization data
-        ret=readinitdata(f, Header, true);
-        break;
-        
-    case ID_GUYS:
-        //guys
-        ret=readguys(f, Header, true);
-        break;
-        
-    case ID_MIDIS:
-        //midis
-        ret=readtunes(f, Header, tunes, true);
-        break;
-        
-    case ID_CHEATS:
-        //cheat codes
-        ret=readcheatcodes(f, Header, true);
-        break;
-        
-    case ID_ITEMDROPSETS:
-        //item drop sets
-        // Why is this one commented out?
-        //ret=readitemdropsets(f, (int)version, (word)build, true);
-        break;
-        
-    case ID_FAVORITES:
-        // favorite combos and aliases
-        ret=readfavorites(f, version, build, true);
-        break;
-        
-    default:
-        ret=-1;
-        break;
-    }
-    
-    pack_fclose(f);
-    
-    if(deletefilename[0])
-    {
-        delete_file(deletefilename);
-    }
-    
-    //setPackfilePassword(NULL);
-    if(!ret)
-    {
-        return true;
-    }
-    
-    return false;
-}
-
-bool init_tiles(bool validate, zquestheader *Header)
-{
-    return init_section(Header, ID_TILES, NULL, NULL, validate);
-}
-
-bool init_colordata(bool validate, zquestheader *Header, miscQdata *Misc)
-{
-    return init_section(Header, ID_CSETS, Misc, NULL, validate);
-}
-
-bool reset_items(bool validate, zquestheader *Header)
-{
-    bool ret = init_section(Header, ID_ITEMS, NULL, NULL, validate);
-    
-    //Ignore this, but don't remove it
-    /*
-    if (ret)
-      for(int i=0; i<MAXITEMS; i++)
-      {
-        reset_itembuf(&itemsbuf[i], i);
-      }
-    */
-    for(int i=0; i<MAXITEMS; i++) reset_itemname(i);
-    
-    return ret;
-}
-
-bool reset_guys()
-{
-    // The .dat file's guys definitions are always synchronised with defdata.cpp's - even the tile settings.
-    init_guys(V_GUYS);
-    return true;
-}
-
-bool reset_mapstyles(bool validate, miscQdata *Misc)
-{
-    Misc->colors.blueframe_tile = 20044;
-    Misc->colors.blueframe_cset = 0;
-    Misc->colors.triforce_tile = 23461;
-    Misc->colors.triforce_cset = 1;
-    Misc->colors.triframe_tile = 18752;
-    Misc->colors.triframe_cset = 1;
-    Misc->colors.overworld_map_tile = 16990;
-    Misc->colors.overworld_map_cset = 2;
-    Misc->colors.HCpieces_tile = 21160;
-    Misc->colors.HCpieces_cset = 8;
-    Misc->colors.dungeon_map_tile = 19651;
-    Misc->colors.dungeon_map_cset = 8;
-    return true;
 }
 
 int get_qst_buffers()
@@ -11095,22 +10733,15 @@ int readcolordata(PACKFILE *f, miscQdata *Misc, word version, word build, word s
     return 0;
 }
 
-int readtiles(PACKFILE *f, tiledata *buf, zquestheader *Header, word version, word build, word start_tile, word max_tiles, bool from_init, bool keepdata)
+int readtiles(PACKFILE *f, tiledata *buf, zquestheader *Header, word version, word build, word start_tile, word max_tiles, bool keepdata)
 {
     int dummy;
     word tiles_used=0;
     byte *temp_tile = new byte[tilesize(tf32Bit)];
     
-    if(Header!=NULL&&(!Header->data_flags[ZQ_TILES]&&!from_init))         //keep for old quests
+    if(Header!=NULL&&!Header->data_flags[ZQ_TILES])         //keep for old quests
     {
-        if(keepdata==true)
-        {
-            if(!init_tiles(true, Header))
-            {
-                al_trace("Unable to initialize tiles\n");
-            }
-        }
-        
+        al_trace("Quest does not use tiles.\n");
         delete[] temp_tile;
         temp_tile=NULL;
         return 0;
@@ -13031,7 +12662,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
                 }
                 
                 /*Reading Tiles...*/
-                ret=readtiles(f, newtilebuf, &tempheader, tempheader.zelda_version, tempheader.build, 0, NEWMAXTILES, false, true);
+                ret=readtiles(f, newtilebuf, &tempheader, tempheader.zelda_version, tempheader.build, 0, NEWMAXTILES, true);
                 checkstatus(ret);
                 break;
                 
@@ -13399,7 +13030,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
         checkstatus(ret);
         
         /*Reading Tiles...*/
-        ret=readtiles(f, newtilebuf, &tempheader, tempheader.zelda_version, tempheader.build, 0, NEWMAXTILES, false, true);
+        ret=readtiles(f, newtilebuf, &tempheader, tempheader.zelda_version, tempheader.build, 0, NEWMAXTILES, true);
         checkstatus(ret);
         
         /*Reading Tunes...*/
