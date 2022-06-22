@@ -54,7 +54,7 @@ extern ZCHEATS             zcheats;
 extern zinitdata           zinit;
 //extern char                palnames[MAXLEVELS][17];
 extern int                 memrequested;
-extern char                *byte_conversion2(int number1, int number2, int format1, int format2);
+extern char                *byte_conversion(int number1, int number2, int format1, int format2);
 string				             zScript;
 std::map<int, pair<string,string> > ffcmap;
 std::map<int, pair<string,string> > globalmap;
@@ -119,7 +119,7 @@ char *VerStr(int version)
     return ver_str;
 }
 
-char *byte_conversion2(int number1, int number2, int format1, int format2)
+char *byte_conversion(int number1, int number2, int format1, int format2)
 {
     static char num_str1[40];
     static char num_str2[40];
@@ -370,59 +370,10 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
     return f;
 }
 
-PACKFILE *open_quest_template(zquestheader *Header, char *deletefilename, bool validate)
-{
-    char *filename;
-    PACKFILE *f=NULL;
-    int open_error=0;
-    deletefilename[0]=0;
-    
-    if(Header->templatepath[0]==0)
-    {
-        filename=(char *)malloc(23);
-        sprintf(filename, "qst.dat#NESQST_NEW_QST");
-    }
-    else
-    {
-        filename=Header->templatepath;
-    }
-    
-    f=open_quest_file(&open_error, filename, deletefilename, true, true);
-    
-    if(Header->templatepath[0]==0)
-    {
-        free(filename);
-    }
-    
-    if(!f)
-    {
-        return NULL;
-    }
-    
-    if(validate)
-    {
-        if(!valid_zqt(f))
-        {
-            Z_message("Error - Invalid Quest Template: %s", filename);
-            pack_fclose(f);
-            
-            //setPackfilePassword(NULL);
-            if(deletefilename[0])
-            {
-                delete_file(deletefilename);
-            }
-            
-            return NULL;
-        }
-    }
-    
-    return f;
-}
-
 int get_qst_buffers()
 {
     memrequested+=(sizeof(mapscr)*MAPSCRS);
-    Z_message("Allocating map buffer (%s)... ", byte_conversion2(sizeof(mapscr)*MAPSCRS,memrequested,-1, -1));
+    Z_message("Allocating map buffer (%s)... ", byte_conversion(sizeof(mapscr)*MAPSCRS,memrequested,-1, -1));
     TheMaps.resize(MAPSCRS);
     
     for(int i(0); i<MAPSCRS; i++)
@@ -432,7 +383,7 @@ int get_qst_buffers()
     Z_message("OK\n"); // Allocating map buffer...
     
     memrequested+=(sizeof(zcmap)*MAXMAPS2);
-    Z_message("Allocating combo buffer (%s)... ", byte_conversion2(sizeof(zcmap)*MAXMAPS2,memrequested,-1,-1));
+    Z_message("Allocating combo buffer (%s)... ", byte_conversion(sizeof(zcmap)*MAXMAPS2,memrequested,-1,-1));
     
     if((ZCMaps=(zcmap*)malloc(sizeof(zcmap)*MAXMAPS2))==NULL)
         return 0;
@@ -447,7 +398,7 @@ int get_qst_buffers()
     // I tested it and it worked without flaw on 6/6/11. - L.
     msg_strings_size = 4096;
     memrequested+=(sizeof(MsgStr)*msg_strings_size);
-    Z_message("Allocating string buffer (%s)... ", byte_conversion2(sizeof(MsgStr)*msg_strings_size,memrequested,-1,-1));
+    Z_message("Allocating string buffer (%s)... ", byte_conversion(sizeof(MsgStr)*msg_strings_size,memrequested,-1,-1));
     
     if((MsgStrings=(MsgStr*)malloc(sizeof(MsgStr)*msg_strings_size))==NULL)
         return 0;
@@ -456,7 +407,7 @@ int get_qst_buffers()
     Z_message("OK\n");                                        // Allocating string buffer...
     
     memrequested+=(sizeof(DoorComboSet)*MAXDOORCOMBOSETS);
-    Z_message("Allocating door combo buffer (%s)... ", byte_conversion2(sizeof(DoorComboSet)*MAXDOORCOMBOSETS,memrequested,-1,-1));
+    Z_message("Allocating door combo buffer (%s)... ", byte_conversion(sizeof(DoorComboSet)*MAXDOORCOMBOSETS,memrequested,-1,-1));
     
     if((DoorComboSets=(DoorComboSet*)malloc(sizeof(DoorComboSet)*MAXDOORCOMBOSETS))==NULL)
         return 0;
@@ -464,7 +415,7 @@ int get_qst_buffers()
     Z_message("OK\n");                                        // Allocating door combo buffer...
     
     memrequested+=(sizeof(dmap)*MAXDMAPS);
-    Z_message("Allocating dmap buffer (%s)... ", byte_conversion2(sizeof(dmap)*MAXDMAPS,memrequested,-1,-1));
+    Z_message("Allocating dmap buffer (%s)... ", byte_conversion(sizeof(dmap)*MAXDMAPS,memrequested,-1,-1));
     
     if((DMaps=(dmap*)malloc(sizeof(dmap)*MAXDMAPS))==NULL)
         return 0;
@@ -473,7 +424,7 @@ int get_qst_buffers()
     Z_message("OK\n");                                        // Allocating dmap buffer...
     
     memrequested+=(sizeof(newcombo)*MAXCOMBOS);
-    Z_message("Allocating combo buffer (%s)... ", byte_conversion2(sizeof(newcombo)*MAXCOMBOS,memrequested,-1,-1));
+    Z_message("Allocating combo buffer (%s)... ", byte_conversion(sizeof(newcombo)*MAXCOMBOS,memrequested,-1,-1));
     
     if((combobuf=(newcombo*)malloc(sizeof(newcombo)*MAXCOMBOS))==NULL)
         return 0;
@@ -482,7 +433,7 @@ int get_qst_buffers()
     Z_message("OK\n");                                        // Allocating combo buffer...
     
     memrequested+=(newerpsTOTAL);
-    Z_message("Allocating color data buffer (%s)... ", byte_conversion2(newerpsTOTAL,memrequested,-1,-1));
+    Z_message("Allocating color data buffer (%s)... ", byte_conversion(newerpsTOTAL,memrequested,-1,-1));
     
     if((colordata=(byte*)malloc(newerpsTOTAL))==NULL)
         return 0;
@@ -490,7 +441,7 @@ int get_qst_buffers()
     Z_message("OK\n");                                        // Allocating color data buffer...
     
     memrequested+=(NEWMAXTILES*(sizeof(tiledata)+tilesize(tf4Bit)));
-    Z_message("Allocating tile buffer (%s)... ", byte_conversion2(NEWMAXTILES*(sizeof(tiledata)+tilesize(tf4Bit)),memrequested,-1,-1));
+    Z_message("Allocating tile buffer (%s)... ", byte_conversion(NEWMAXTILES*(sizeof(tiledata)+tilesize(tf4Bit)),memrequested,-1,-1));
     
     if((newtilebuf=(tiledata*)malloc(NEWMAXTILES*sizeof(tiledata)))==NULL)
         return 0;
@@ -505,7 +456,7 @@ int get_qst_buffers()
     // If you change this, be sure to update del_qst_buffers, too.
     
     memrequested+=(sizeof(itemdata)*(MAXITEMS+1));
-    Z_message("Allocating item buffer (%s)... ", byte_conversion2(sizeof(itemdata)*(MAXITEMS+1),memrequested,-1,-1));
+    Z_message("Allocating item buffer (%s)... ", byte_conversion(sizeof(itemdata)*(MAXITEMS+1),memrequested,-1,-1));
     
     if((itemsbuf=(itemdata*)malloc(sizeof(itemdata)*(MAXITEMS+1)))==NULL)
         return 0;
@@ -515,7 +466,7 @@ int get_qst_buffers()
     Z_message("OK\n");                                        // Allocating item buffer...
     
     memrequested+=(sizeof(wpndata)*MAXWPNS);
-    Z_message("Allocating weapon buffer (%s)... ", byte_conversion2(sizeof(wpndata)*MAXWPNS,memrequested,-1,-1));
+    Z_message("Allocating weapon buffer (%s)... ", byte_conversion(sizeof(wpndata)*MAXWPNS,memrequested,-1,-1));
     
     if((wpnsbuf=(wpndata*)malloc(sizeof(wpndata)*MAXWPNS))==NULL)
         return 0;
@@ -524,7 +475,7 @@ int get_qst_buffers()
     Z_message("OK\n");                                        // Allocating weapon buffer...
     
     memrequested+=(sizeof(guydata)*MAXGUYS);
-    Z_message("Allocating guy buffer (%s)... ", byte_conversion2(sizeof(guydata)*MAXGUYS,memrequested,-1,-1));
+    Z_message("Allocating guy buffer (%s)... ", byte_conversion(sizeof(guydata)*MAXGUYS,memrequested,-1,-1));
     
     if((guysbuf=(guydata*)malloc(sizeof(guydata)*MAXGUYS))==NULL)
         return 0;
@@ -533,7 +484,7 @@ int get_qst_buffers()
     Z_message("OK\n");                                        // Allocating guy buffer...
     
     memrequested+=(sizeof(comboclass)*cMAX);
-    Z_message("Allocating combo class buffer (%s)... ", byte_conversion2(sizeof(comboclass)*cMAX,memrequested,-1,-1));
+    Z_message("Allocating combo class buffer (%s)... ", byte_conversion(sizeof(comboclass)*cMAX,memrequested,-1,-1));
     
     if((combo_class_buf=(comboclass*)malloc(sizeof(comboclass)*cMAX))==NULL)
         return 0;
@@ -590,38 +541,6 @@ void del_qst_buffers()
     
     if(combo_class_buf) free(combo_class_buf);
 }
-
-/*
-bool init_palnames()
-{
-    if(palnames==NULL)
-        return false;
-        
-    for(int x=0; x<MAXLEVELS; x++)
-    {
-        switch(x)
-        {
-        case 0:
-            sprintf(palnames[x],"Overworld");
-            break;
-            
-        case 10:
-            sprintf(palnames[x],"Caves");
-            break;
-            
-        case 11:
-            sprintf(palnames[x],"Passageways");
-            break;
-            
-        default:
-            sprintf(palnames[x],"%c",0);
-            break;
-        }
-    }
-    
-    return true;
-}
-*/
 
 static void *read_block(PACKFILE *f, int size, int alloc_size, bool keepdata)
 {
@@ -735,56 +654,6 @@ void reset_tunes(zctune *tune)
     {
         tune[i].reset();
     }
-}
-
-
-/*void reset_midi(zcmidi_ *m)
-{
-  m->title[0]=0;
-  m->loop=1;
-  m->volume=144;
-  m->start=0;
-  m->loop_start=-1;
-  m->loop_end=-1;
-  if(m->midi)
-  {
-    destroy_midi(m->midi);
-  }
-  m->midi=NULL;
-}
-
-
-void reset_midis(zcmidi_ *m)
-{
-  for(int i=0; i<MAXCUSTOMMIDIS; i++)
-  {
-      reset_midi(m+i);
-  }
-}
-*/
-
-void reset_scr(int scr)
-{
-    /*
-      byte *di=((byte*)TheMaps)+(scr*sizeof(mapscr));
-      for(unsigned i=0; i<sizeof(mapscr); i++)
-      *(di++) = 0;
-      TheMaps[scr].valid=mVERSION;
-      */
-    
-    TheMaps[scr].zero_memory();
-    //byte *di=((byte*)TheMaps)+(scr*sizeof(mapscr));
-    
-    for(int i=0; i<6; i++)
-    {
-        //these will be uncommented later
-        //TheMaps[scr].layerxsize[i]=16;
-        //TheMaps[scr].layerysize[i]=11;
-        TheMaps[scr].layeropacity[i]=255;
-    }
-    
-    TheMaps[scr].valid=mVERSION;
-    
 }
 
 /*  For reference:
@@ -2128,11 +1997,6 @@ int readstrings(PACKFILE *f, zquestheader *Header, bool keepdata)
                 memcpy(&MsgStrings[i], &tempMsgString, sizeof(tempMsgString));
             }
         }
-    }
-    
-    if(keepdata==true)
-    {
-        msg_count=temp_msg_count;
     }
     
     return 0;
@@ -10898,7 +10762,6 @@ int readtunes(PACKFILE *f, zquestheader *Header, zctune *tunes /*zcmidi_ *midis*
     byte *mf=midi_flags;
     int dummy;
     word dummy2;
-    // zcmidi_ temp_midi;
     int tunes_to_read;
     int tune_count=0;
     word section_version=0;
@@ -10960,11 +10823,11 @@ int readtunes(PACKFILE *f, zquestheader *Header, zctune *tunes /*zcmidi_ *midis*
     
     for(int i=0; i<tunes_to_read; i++)
     {
-        temp.clear(); //memset(&temp_midi,0,sizeof(zcmidi_));
+        temp.clear();
         
         if(keepdata==true)
         {
-            tunes[i].reset(); // reset_midi(midis+i);
+            tunes[i].reset();
         }
         
         if(get_bit(mf,i))
@@ -11027,7 +10890,7 @@ int readtunes(PACKFILE *f, zquestheader *Header, zctune *tunes /*zcmidi_ *midis*
             
             if(keepdata==true)
             {
-                tunes[i].copyfrom(temp); // memcpy(&midis[i], &temp_midi, sizeof(zcmidi_));
+                tunes[i].copyfrom(temp);
             }
             
             if(section_version < 2) //= 1 || (Header->zelda_version < 0x211) || (Header->zelda_version == 0x211 && Header->build < 18))

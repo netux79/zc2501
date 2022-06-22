@@ -66,20 +66,14 @@ RGB mixRGB(int r1,int g1,int b1,int r2,int g2,int b2,int ratio)
     return x;
 }
 
-void copy_pal(RGB *src,RGB *dest)
-{
-    for(int i=0; i<256; i++)
-        dest[i]=src[i];
-}
-
 void loadfullpal()
 {
-    for(int i=0; i<240; i++)
+    for(int i=0; i<253; i++)
         RAMpal[i]=_RGB(colordata+i*3);
-        
-    for(int i=240; i<255; i++)
-        RAMpal[i]=((RGB*)data[PAL_GUI].dat)[i];
-        
+    
+    RAMpal[BLACK] = _RGB(0,0,0);
+    RAMpal[WHITE] = _RGB(63,63,63);
+    
     refreshpal=true;
 }
 

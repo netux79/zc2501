@@ -26,7 +26,6 @@ extern RGB _RGB(int r,int g,int b);
 extern RGB invRGB(RGB s);
 extern RGB mixRGB(int r1,int g1,int b1,int r2,int g2,int b2,int ratio);
 
-extern void copy_pal(RGB *src,RGB *dest);
 extern void loadfullpal();
 extern void loadlvlpal(int level);
 extern void loadpalset(int cset,int dataset);

@@ -60,7 +60,6 @@ enum
 };
 
 extern const char *qst_error[];
-extern word msg_count;
 extern word door_combo_set_count;
 extern int favorite_combos[MAXFAVORITECOMBOS];
 extern int favorite_comboaliases[MAXFAVORITECOMBOALIASES];
@@ -69,24 +68,19 @@ char *VerStr(int version);
 char *ordinal(int num);
 
 PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefilename, bool compressed, bool encrypted);
-PACKFILE *open_quest_template(zquestheader *Header, char *deletefilename, bool validate);
 
 void clear_combo(int i);
 void clear_combos();
 void pack_combos();
 void fix_maps(mapscr *buf,int cnt);
-//void reset_midi(zcmidi_ *m);
-//void reset_midis(zcmidi_ *m);
-void reset_scr(int scr);
 
 int get_qst_buffers();
 void del_qst_buffers();
 int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctune *tunes);
 
-char *byte_conversion2(int number1, int number2, int format1, int format2);
+char *byte_conversion(int number1, int number2, int format1, int format2);
 
 bool valid_zqt(PACKFILE *f);
-bool init_tiles(bool validate, zquestheader *Header);
 
 void get_questpwd(char *encrypted_pwd, short pwdkey, char *pwd);
 

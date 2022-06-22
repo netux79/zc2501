@@ -28,7 +28,6 @@ void f_Quit(int type);
 void advanceframe(bool allowwavy, bool sfxcleaup = true);
 void updatescr(bool allowwavy);
 void syskeys();
-/*void game_pal();*/
 void  onQuit();
 
 bool joybtn(int b);
@@ -161,7 +160,6 @@ void stop_sfx(int index);
 void stop_item_sfx(int family);
 void kill_sfx();
 int  pan(int x);
-void zc_putpixel(int layer, int x, int y, int cset, int color, int timer);
 
 #endif                                                      // _ZC_SYS_H_
 

@@ -191,9 +191,8 @@ extern bool blank_tile_table[NEWMAXTILES];                  //keeps track of bla
 extern bool blank_tile_quarters_table[NEWMAXTILES*4];       //keeps track of blank tiles
 */
 extern bool ewind_restart;
-extern word     msgclk, msgstr, msgpos, msgptr, msg_count, msgcolour, msgspeed,msg_w,
+extern word     msgclk, msgstr, msgpos, msgptr, msgcolour, msgspeed,msg_w,
        msg_h,
-       msg_count,
        msgorig,
        msg_xpos,
        msg_ypos,
@@ -252,8 +251,6 @@ extern byte COOLSCROLL;
 extern int add_asparkle, add_bsparkle;
 
 extern int    cheat_goto_dmap, cheat_goto_screen;
-extern char   cheat_goto_dmap_str[4];
-extern char   cheat_goto_screen_str[3];
 extern short  visited[6];
 extern byte   guygrid[176];
 extern mapscr tmpscr[2];

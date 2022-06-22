@@ -283,9 +283,6 @@ bool game_vid_mode(int mode,int wait)
     scrx = (resx-320)>>1;
     scry = (resy-240)>>1;
     
-    for(int i=240; i<256; i++)
-        RAMpal[i]=((RGB*)data[PAL_GUI].dat)[i];
-        
     set_palette(RAMpal);
     clear_to_color(screen,BLACK);
     
@@ -3007,8 +3004,6 @@ void updatescr(bool allowwavy)
     if(refreshpal)
     {
         refreshpal=false;
-        RAMpal[253] = _RGB(0,0,0);
-        RAMpal[254] = _RGB(63,63,63);
         set_palette_range(RAMpal,0,255,false);
         
         create_rgb_table(&rgb_table, RAMpal, NULL);
@@ -3207,11 +3202,9 @@ void syskeys()
     if(ReadKey(KEY_F10))   f_Quit(qEXIT);
     
     if(ReadKey(KEY_H))  game->set_life(game->get_maxlife());
-    
     if(ReadKey(KEY_M))  game->set_magic(game->get_maxmagic());
-    
     if(ReadKey(KEY_R))  game->set_drupy(999);
-    
+    if(ReadKey(KEY_B))  game->set_bombs(game->get_maxbombs());
     if(rI())
     {
         setClock(!getClock());
@@ -3568,12 +3561,6 @@ void onQuit()
 
     }
 }
-
-/*void game_pal()
-{
-    clear_to_color(screen,BLACK);
-    set_palette_range(RAMpal,0,255,false);
-}*/
 
 void music_pause()
 {
@@ -4446,11 +4433,4 @@ bool ReadKey(int k)
     return false;
 }
 
-void zc_putpixel(int layer, int x, int y, int cset, int color, int timer)
-{
-    timer=timer;
-    particles.add(new particle(fix(x), fix(y), layer, cset, color));
-}
-
 /*** end of zc_sys.cc ***/
-

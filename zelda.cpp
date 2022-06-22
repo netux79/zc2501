@@ -1109,7 +1109,6 @@ int init_game()
     Link.resetflags(true);
     Link.setEntryPoints(LinkX(),LinkY());
     
-    copy_pal((RGB*)data[PAL_GUI].dat,RAMpal);
     loadfullpal();
     ringcolor(false);
     loadlvlpal(DMaps[currdmap].color);
@@ -2289,7 +2288,7 @@ int main(int argc, char* argv[])
 
     // Allocate quest path buffer
     memrequested += 2048;
-    Z_message("Allocating quest path buffers (%s)...", byte_conversion2(2048,memrequested,-1,-1));
+    Z_message("Allocating quest path buffers (%s)...", byte_conversion(2048,memrequested,-1,-1));
     quest_path = (char*)malloc(2048);
     memset(quest_path, 0, 2048);
 
