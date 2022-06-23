@@ -201,8 +201,6 @@ int  add_asparkle=0, add_bsparkle=0;
 char   zeldadat_sig[52];
 char   sfxdat_sig[52];
 char   fontsdat_sig[52];
-char   cheat_goto_dmap_str[4];
-char   cheat_goto_screen_str[3];
 short  visited[6];
 byte   guygrid[176];
 mapscr tmpscr[2];

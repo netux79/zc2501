@@ -538,8 +538,7 @@ void ending()
     }
     
     saves[currgame] = *game;
-    load_game_icon_to_buffer(false,currgame);
-    load_game_icon(game,false,currgame);
+    load_game_icon(game);
     
     game->set_continue_dmap(zinit.start_dmap);
     game->set_continue_scrn(0xFF);

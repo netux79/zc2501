@@ -27,16 +27,6 @@
 
 extern int skipcont;
 
-struct savedicon
-{
-    byte loaded;
-    byte ring;
-    byte pal[4][48];
-    byte icon[4][128];
-};
-
-savedicon iconbuffer[MAXSAVES];
-
 /***********************************/
 /****  Game Selection Screens  *****/
 /***********************************/
@@ -584,10 +574,8 @@ int readsaves(gamedata *savedata, PACKFILE *f)
 // call once at startup
 int load_savedgames()
 {
-    char *iname = (char *)malloc(2048);
     int ret;
     PACKFILE *f=NULL;
-    FILE *f2=NULL;
     char tmpfilename[32];
     temp_name(tmpfilename);
 //  const char *passwd = datapwd;
@@ -637,49 +625,9 @@ int load_savedgames()
         
     if(readsaves(saves,f)!=0)
         goto reset;
-        
-    strcpy(iname, SAVE_FILE);
-    
-    for(int i=0; iname[i]!='\0'; iname[i]=='.'?iname[i]='\0':i++)
-    {
-        /* do nothing */
-    }
-    
-    strcat(iname,".icn");
-    
-    if(!exists(iname))
-    {
-        byte *di2 = (byte *)iconbuffer;
-        
-        for(dword i=0; i<sizeof(savedicon)*MAXSAVES; i++)
-            *(di2++) = 0;
-    }
-    else
-    {
-        f2=fopen(iname,"rb");
-        byte *di2 = (byte *)iconbuffer;
-        
-        for(dword i=0; (i<sizeof(savedicon)*MAXSAVES)&&!feof(f2); i++)
-            *(di2++) = fgetc(f2);
-            
-        fclose(f2);
-    }
-    
-    //Load game icons
-    for(int i=0; i<MAXSAVES; i++)
-    {
-        if(strlen(saves[i].qstpath))
-        {
-            if(!iconbuffer[i].loaded)
-            {
-                load_game_icon_to_buffer(false,i);
-            }
-        }
-    }
-    
+     
     pack_fclose(f);
     delete_file(tmpfilename);
-    free(iname);
     return 0;
     
 newdata:
@@ -701,10 +649,7 @@ init:
 
     for(int i=0; i<MAXSAVES; i++)
         saves[i].Clear();
-        
-    memset(iconbuffer, 0, sizeof(savedicon)*MAXSAVES);
     
-    free(iname);
     return 0;
 }
 
@@ -973,131 +918,81 @@ int save_savedgames()
         
     delete_file(tmpfilename);
     
-    FILE *f2=NULL;
-    char *iname = (char *)malloc(2048);
-    strcpy(iname, SAVE_FILE);
-    
-    for(int i=0; iname[i]!='\0'; iname[i]=='.'?iname[i]='\0':i++)
-    {
-        /* do nothing */
-    }
-    
-    strcat(iname,".icn");
-    
-    f2=fopen(iname,"wb");
-    byte *di2 = (byte *)iconbuffer;
-    
-    for(dword i=0; (i<sizeof(savedicon)*MAXSAVES); i++)
-        fputc(*(di2++),f2);
-        
-    fclose(f2);
-    free(iname);
     return ret;
 }
 
-void load_game_icon(gamedata *g, bool, int index)
-{
-    int i=iconbuffer[index].ring;
-    
-    byte *si = iconbuffer[index].icon[i];
-    
-    for(int j=0; j<128; j++)
-    {
-        g->icon[j] = *(si++);
-    }
-    
-    si = iconbuffer[index].pal[i];
-    
-    for(int j=0; j<48; j++)
-    {
-        g->pal[j] = *(si++);
-    }
-}
-
-void load_game_icon_to_buffer(bool forceDefault, int index)
+void load_game_icon(gamedata *g)
 {
     int ring=0;
     
-    if(!forceDefault)
+    flushItemCache();
+    int maxringid = getHighestLevelOfFamily(&zinit, itemsbuf, itype_ring);
+    
+    if(maxringid != -1)
     {
-        flushItemCache();
-        int maxringid = getHighestLevelOfFamily(&zinit, itemsbuf, itype_ring);
-        
-        if(maxringid != -1)
-        {
-            ring = itemsbuf[maxringid].fam_type;
-        }
+        ring = itemsbuf[maxringid].fam_type;
     }
     
     //blue rings now start at level 2 for some reason, account for that -DD
     ring = ring ? ring-1 : 0;
-    iconbuffer[index].ring = zc_min(ring, 3);
+    ring = zc_min(ring, 3);
     
-    int t=0;
-    //if(!forceDefault)
-    //t = QMisc.icons[i];
+    int t = QMisc.icons[ring];
     
-    for(int i=0; i<4; i++)
+    if(t<0 || t>=NEWMAXTILES)
     {
-        t = QMisc.icons[i];
-        
-        if(t<0 || t>=NEWMAXTILES)
+        t=0;
+    }
+    
+    int tileind = t ? t : 28;
+    
+    byte *si = newtilebuf[tileind].data;
+    
+    if(newtilebuf[tileind].format==tf8Bit)
+    {
+        for(int j=0; j<128; j++)
         {
-            t=0;
+            g->icon[j] = 0;
         }
-        
-        int tileind = t ? t : 28;
-        
-        byte *si = newtilebuf[tileind].data;
-        
-        if(newtilebuf[tileind].format==tf8Bit)
+    }
+    else
+    {
+        for(int j=0; j<128; j++)
         {
-            for(int j=0; j<128; j++)
-            {
-                iconbuffer[index].icon[i][j] =0;
-            }
-        }
-        else
-        {
-            for(int j=0; j<128; j++)
-            {
-                iconbuffer[index].icon[i][j] = *(si++);
-            }
-        }
-        
-        if(t)
-        {
-            si = colordata + CSET(pSprite(i+spICON1))*3;
-        }
-        else
-        {
-            if(i)
-            {
-                si = colordata + CSET(pSprite(i-1+spBLUE))*3;
-            }
-            else
-            {
-                si = colordata + CSET(6)*3;
-            }
-        }
-        
-        if(newtilebuf[tileind].format==tf8Bit)
-        {
-            for(int j=0; j<48; j++)
-            {
-                iconbuffer[index].pal[i][j] = 0;
-            }
-        }
-        else
-        {
-            for(int j=0; j<48; j++)
-            {
-                iconbuffer[index].pal[i][j] = *(si++);
-            }
+            g->icon[j] = *(si++);
         }
     }
     
-    iconbuffer[index].loaded=1;
+    if(t)
+    {
+        si = colordata + CSET(pSprite(ring+spICON1))*3;
+    }
+    else
+    {
+        if(ring)
+        {
+            si = colordata + CSET(pSprite(ring-1+spBLUE))*3;
+        }
+        else
+        {
+            si = colordata + CSET(6)*3;
+        }
+    }
+    
+    if(newtilebuf[tileind].format==tf8Bit)
+    {
+        for(int j=0; j<48; j++)
+        {
+            g->pal[j] = 0;
+        }
+    }
+    else
+    {
+        for(int j=0; j<48; j++)
+        {
+            g->pal[j] = *(si++);
+        }
+    }
 }
 
 static void select_mode()
@@ -1427,8 +1322,7 @@ static bool register_name()
             
         //      game->set_maxbombs(&saves[s], zinit.max_bombs);
         ringcolor(false);
-        load_game_icon_to_buffer(false, s);
-        load_game_icon(saves+s, false, s);
+        load_game_icon(saves+s);
         game = oldgame;
         //selectscreen();                                       // refresh palette
         saves[s].set_timevalid(1);
@@ -1457,7 +1351,6 @@ static bool copy_file(int file)
     if(savecnt<MAXSAVES && file<savecnt)
     {
         saves[savecnt]=saves[file];
-        iconbuffer[savecnt]=iconbuffer[file];
         ++savecnt;
         listpos=((savecnt-1)/3)*3;
         sfx(WAV_SCALE);
@@ -1475,7 +1368,6 @@ static bool delete_save(int file)
         for(int i=file; i<MAXSAVES-1; i++)
         {
             saves[i]=saves[i+1];
-            iconbuffer[i]=iconbuffer[i+1];
         }
         
         saves[MAXSAVES-1].Clear();
@@ -1872,20 +1764,7 @@ void game_over(int type)
         if(pos==1&&(!type))
         {
             saves[currgame]=*game;
-            
-            int ring=0;
-            flushItemCache();
-            int maxringid = getHighestLevelOfFamily(game, itemsbuf, itype_ring);
-            
-            if(maxringid != -1)
-            {
-                ring = itemsbuf[maxringid].fam_type;
-            }
-            
-            ring = ring ? ring-1 : 0;
-            iconbuffer[currgame].ring = zc_min(ring, 3);
-            
-            load_game_icon(saves+currgame,false,currgame);
+            load_game_icon(saves+currgame);
             show_saving(screen);
             save_savedgames();
         }
@@ -1903,19 +1782,7 @@ void save_game(bool savepoint)
     }
     
     saves[currgame]=*game;
-    
-    int ring=0;
-    flushItemCache();
-    int maxringid = getHighestLevelOfFamily(game, itemsbuf, itype_ring);
-    
-    if(maxringid != -1)
-    {
-        ring = itemsbuf[maxringid].fam_type;
-    }
-    
-    ring = ring ? ring-1 : 0;
-    iconbuffer[currgame].ring = zc_min(ring, 3);
-    load_game_icon(saves+currgame,false,currgame);
+    load_game_icon(saves+currgame);
     show_saving(screen);
     save_savedgames();
 }
@@ -2027,19 +1894,7 @@ bool save_game(bool savepoint, int type)
                 }
                 
                 saves[currgame]=*game;
-                
-                int ring=0;
-                flushItemCache();
-                int maxringid = getHighestLevelOfFamily(game, itemsbuf, itype_ring);
-                
-                if(maxringid != -1)
-                {
-                    ring = itemsbuf[maxringid].fam_type;
-                }
-                
-                ring = ring ? ring-1 : 0;
-                iconbuffer[currgame].ring = zc_min(ring, 3);
-                load_game_icon(saves+currgame,false,currgame);
+                load_game_icon(saves+currgame);
                 show_saving(screen);
                 save_savedgames();
                 saved=true;
