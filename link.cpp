@@ -1376,7 +1376,6 @@ attack:
         
         int jumping2 = int(jumping*(zinit.gravity/16.0));
         
-        //if (jumping!=0) al_trace("%d %d %f %d\n",jumping,zinit.gravity,zinit.gravity/16.0,jumping2);
         switch(zinit.linkanimationstyle)
         {
         case las_original:                                               //normal
@@ -7272,7 +7271,6 @@ LEFTRIGHT:
 
 void LinkClass::move(int d2)
 {
-//al_trace("%s\n",d2==up?"up":d2==down?"down":d2==left?"left":d2==right?"right":"?");
     static bool totalskip = false;
     
     if(inlikelike)

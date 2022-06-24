@@ -4672,7 +4672,6 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
     }
     
     case GDD:
-        al_trace("GDD");
         game->global_d[ri->d[0]/10000]=value;
         break;
         
@@ -4883,7 +4882,7 @@ void do_allocatemem(const bool v, const bool local, const byte i)
         
         if(ptrval >= game->globalRAM.size())
         {
-            al_trace("Invalid pointer value of %d passed to global allocate\n", ptrval);
+            Z_message("Invalid pointer value of %d passed to global allocate\n", ptrval);
             //this shouldn't happen, unless people are putting ALLOCATEGMEM in their ZASM scripts where they shouldn't be
         }
         
@@ -6081,14 +6080,14 @@ void do_trace(bool v)
     sprintf(tmp, (temp < 0 ? "%06d" : "%05d"), temp);
     string s2(tmp);
     s2 = s2.substr(0, s2.size() - 4) + "." + s2.substr(s2.size() - 4, 4);
-    al_trace("%s\n", s2.c_str());
+    Z_message("%s\n", s2.c_str());
 }
 
 void do_tracebool(const bool v)
 {
     long32 temp = SH::get_arg(sarg1, v);
     
-    al_trace("%s\n", temp ? "true": "false");
+    Z_message("%s\n", temp ? "true": "false");
 }
 
 void do_tracestring()
@@ -6096,12 +6095,12 @@ void do_tracestring()
     long32 arrayptr = get_register(sarg1) / 10000;
     string str;
     ArrayH::getString(arrayptr, str, 512);
-    al_trace("%s", str.c_str());
+    Z_message("%s", str.c_str());
 }
 
 void do_tracenl()
 {
-    al_trace("\n");
+    Z_message("\n");
 }
 
 void do_cleartrace()
@@ -6163,7 +6162,7 @@ void do_tracetobase()
         break;
     }
     
-    al_trace("%s\n", s2.c_str());
+    Z_message("%s\n", s2.c_str());
 }
 
 ///----------------------------------------------------------------------------------------------------//
@@ -6406,20 +6405,6 @@ INLINE void check_quit()
 // Let's do this
 int run_script(const byte type, const word script, const byte i)
 {
-#ifdef _SCRIPT_COUNTER
-    dword script_timer[NUMCOMMANDS];
-    dword script_execount[NUMCOMMANDS];
-    
-    for(int j = 0; j < NUMCOMMANDS; j++)
-    {
-        script_timer[j]=0;
-        script_execount[j]=0;
-    }
-    
-    dword start_time, end_time;
-    
-    script_counter = 0;
-#endif
     
     switch(type)
     {
@@ -6467,7 +6452,7 @@ int run_script(const byte type, const word script, const byte i)
     break;
     
     default:
-        al_trace("No other scripts are currently supported\n");
+        Z_message("No other scripts are currently supported\n");
         return 1;
         break;
     }
@@ -6477,42 +6462,11 @@ int run_script(const byte type, const word script, const byte i)
     sarg1 = curscript[pc].arg1;
     sarg2 = curscript[pc].arg2;
     
-    
-#ifdef _FFDISSASSEMBLY
-    
-    if(scommand != 0xFFFF)
-    {
-#ifdef _FFONESCRIPTDISSASSEMBLY
-        zc_trace_clear();
-#endif
-        
-        switch(type)
-        {
-        case SCRIPT_FFC:
-            al_trace("\nStart of FFC script %i processing on FFC %i:\n", script, i);
-            break;
-            
-        case SCRIPT_ITEM:
-            al_trace("\nStart of item script %i processing:\n", script);
-            break;
-            
-        case SCRIPT_GLOBAL:
-            al_trace("\nStart of global script %I processing:\n", script);
-            break;
-        }
-    }
-    
-#endif
-    
     bool increment = true;
     
     while(scommand != 0xFFFF && scommand != WAITFRAME && scommand != WAITDRAW)
     {
         check_quit();
-        
-#ifdef _SCRIPT_COUNTER
-        start_time = script_counter;
-#endif
         
         switch(scommand)
         {
@@ -7384,12 +7338,6 @@ int run_script(const byte type, const word script, const byte i)
             break;
         }
         
-#ifdef _SCRIPT_COUNTER
-        end_time = script_counter;
-        script_timer[*command] += end_time - start_time;
-        ++script_execount[*command];
-#endif
-        
         if(increment)	pc++;
         else			increment = true;
         
@@ -7435,18 +7383,6 @@ int run_script(const byte type, const word script, const byte i)
         pc++;
         
     ri->pc = pc; //Put it back where we got it from
-    
-#ifdef _SCRIPT_COUNTER
-    
-    for(int j = 0; j < NUMCOMMANDS; j++)
-    {
-        if(script_execount[j] != 0)
-            al_trace("Command %s took %ld ticks in all to complete in %ld executions.\n",
-                     command_list[j].name, script_timer[j], script_execount[j]);
-    }
-    
-    remove_int(update_script_counter);
-#endif
     
     return 0;
 }

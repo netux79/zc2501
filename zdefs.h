@@ -14,11 +14,8 @@
 
 //Conditional Debugging Compilation
 //Script related
-//#define _SCRIPT_COUNTER
 
 //Other
-//#define _SKIPPASSWORDCHECK
-
 
 /*
   //DOS Graphics Modes

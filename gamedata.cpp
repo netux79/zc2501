@@ -21,13 +21,6 @@ extern zinitdata zinit;
 extern void Z_eventlog(char *format,...);
 extern void ringcolor(bool forceDefault);
 
-// Debug variables: these log certain operations on gamedata when active.
-// Should help me debug those item bugs.
-
-// #define DEBUG_GD_ITEMS
-// #define DEBUG_GD_COUNTERS
-//#define DEBUG_GD_HCP
-
 void gamedata::Clear()
 {
     isclearing=true;
@@ -174,10 +167,6 @@ word gamedata::get_counter(byte c)
 
 void gamedata::set_counter(word change, byte c)
 {
-#ifdef DEBUG_GD_COUNTERS
-    al_trace("Changing counter %i from %i to %i\n", c, _counter[c], change);
-#endif
-    
     if(c>=32)  // Sanity check
         return;
         
@@ -198,10 +187,6 @@ void gamedata::set_counter(word change, byte c)
 
 void gamedata::change_counter(short change, byte c)
 {
-#ifdef DEBUG_GD_COUNTERS
-    al_trace("Changing counter %i from %i by %i\n", c, _counter[c], change);
-#endif
-    
     if(c>=32)  // Sanity check
         return;
         
@@ -229,12 +214,6 @@ word gamedata::get_maxcounter(byte c)
 
 void gamedata::set_maxcounter(word change, byte c)
 {
-#ifdef DEBUG_GD_COUNTERS
-
-    if(c==0) al_trace("Changing max counter %i from %i to %i\n", c, _maxcounter[c], change);
-    
-#endif
-    
     if(c==2)
     {
         set_maxbombs(change);
@@ -250,10 +229,6 @@ void gamedata::set_maxcounter(word change, byte c)
 
 void gamedata::change_maxcounter(short change, byte c)
 {
-#ifdef DEBUG_GD_COUNTERS
-    al_trace("Changing max counter %i from %i by +%i\n", c, _maxcounter[c], change);
-#endif
-    
     if(c==2)
     {
         change_maxbombs(change);
@@ -277,13 +252,6 @@ short gamedata::get_dcounter(byte c)
 
 void gamedata::set_dcounter(short change, byte c)
 {
-#ifdef DEBUG_GD_COUNTERS
-
-    if(c==0)
-        al_trace("Changing D counter %i from %i to %i\n", c, _dcounter[c], change);
-        
-#endif
-        
     if(c>=32)  // Sanity check
         return;
         
@@ -303,12 +271,6 @@ void gamedata::set_dcounter(short change, byte c)
 
 void gamedata::change_dcounter(short change, byte c)
 {
-#ifdef DEBUG_GD_COUNTERS
-
-    if(c==0) al_trace("Changing D counter %i from %i by %i\n", c, _dcounter[c], change);
-    
-#endif
-    
     if(c>=32)  // Sanity check
         return;
         
@@ -609,18 +571,11 @@ byte gamedata::get_HCpieces()
 }
 void gamedata::set_HCpieces(byte p)
 {
-#ifdef DEBUG_GD_HCP
-    al_trace("Setting HCP to %i\n",p);
-#endif
-    
     set_generic(p, 0);
     return;
 }
 void gamedata::change_HCpieces(short p)
 {
-#ifdef DEBUG_GD_HCP
-    al_trace("Changing HCP by %d to %d\n",p, get_generic(0));
-#endif
     change_generic(p, 0);
     return;
 }

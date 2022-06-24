@@ -170,10 +170,6 @@ public:
     int idFirst(int id);
     // returns index of last sprite with matching id, -1 if none found
     int idLast(int id);
-    
-private:
-
-    void checkConsistency(); //for debugging
 };
 
 /**********************************/

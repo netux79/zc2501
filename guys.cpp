@@ -11474,8 +11474,7 @@ int addenemy(int x,int y,int z,int id,int clk)
             
             if(!guys.add(new esMoldorm((fix)x,(fix)y,id+0x1000,segclk)))
             {
-                al_trace("Moldorm segment %d could not be created!\n",i+1);
-                
+                Z_message("Moldorm segment %d could not be created!\n",i+1);
                 for(int j=0; j<i+1; j++)
                     guys.del(guys.Count()-1);
                     
@@ -11499,7 +11498,7 @@ int addenemy(int x,int y,int z,int id,int clk)
         
         if(!guys.add(new esLanmola((fix)x,(fix)y,id+0x1000,0)))
         {
-            al_trace("Lanmola segment 1 could not be created!\n");
+            Z_message("Lanmola segment 1 could not be created!\n");
             guys.del(guys.Count()-1);
             return 0;
         }
@@ -11510,8 +11509,7 @@ int addenemy(int x,int y,int z,int id,int clk)
         {
             if(!guys.add(new esLanmola((fix)x,(fix)y,id+0x2000,-(i<<shft))))
             {
-                al_trace("Lanmola segment %d could not be created!\n",i+1);
-                
+                Z_message("Lanmola segment %d could not be created!\n",i+1);
                 for(int j=0; j<i+1; j++)
                     guys.del(guys.Count()-1);
                     
@@ -11531,8 +11529,7 @@ int addenemy(int x,int y,int z,int id,int clk)
         {
             if(!guys.add(new esManhandla((fix)x,(fix)y,id+0x1000,i)))
             {
-                al_trace("Manhandla head %d could not be created!\n",i+1);
-                
+                Z_message("Manhandla head %d could not be created!\n",i+1);
                 for(int j=0; j<i+1; j++)
                 {
                     guys.del(guys.Count()-1);
@@ -11555,8 +11552,7 @@ int addenemy(int x,int y,int z,int id,int clk)
         {
             if(!guys.add(new esGleeok((fix)x,(fix)y,id+0x1000,c, e)))
             {
-                al_trace("Gleeok head %d could not be created!\n",i+1);
-                
+                Z_message("Gleeok head %d could not be created!\n",i+1);
                 for(int j=0; j<i+1; j++)
                 {
                     guys.del(guys.Count()-1);
@@ -11581,8 +11577,7 @@ int addenemy(int x,int y,int z,int id,int clk)
         {
             if(!(guysbuf[id].misc10?guys.add(new esPatraBS((fix)x,(fix)y,id+0x1000,i)):guys.add(new esPatra((fix)x,(fix)y,id+0x1000,i))))
             {
-                al_trace("Patra outer eye %d could not be created!\n",i+1);
-                
+                Z_message("Patra outer eye %d could not be created!\n",i+1);
                 for(int j=0; j<i+1; j++)
                     guys.del(guys.Count()-1);
                     
@@ -11598,8 +11593,7 @@ int addenemy(int x,int y,int z,int id,int clk)
         {
             if(!guys.add(new esPatra((fix)x,(fix)y,id+0x1000,i)))
             {
-                al_trace("Patra inner eye %d could not be created!\n",i+1);
-                
+                Z_message("Patra inner eye %d could not be created!\n",i+1);
                 for(int j=0; j<i+1+zc_min(254,outeyes); j++)
                     guys.del(guys.Count()-1);
                     

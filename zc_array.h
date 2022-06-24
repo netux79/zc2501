@@ -37,8 +37,7 @@ ArrayIterator<*>{
 #ifndef __zc_array_h_
 #define __zc_array_h_
 
-//#define _DEBUGZCARRAY
-
+extern void Z_message(const char *format,...);
 
 template <typename T> class ZCArrayIterator;
 template <typename T> class ZCArray;
@@ -421,18 +420,6 @@ public:
             return;
         }
         
-#ifdef _DEBUGZCARRAY
-        
-        // _size should always be 0 if _ptr is null...so this shouldn't ever happen
-        if((!_ptr && _size > 0) || (!_Array._ptr && _Array._size > 0))
-        {
-            al_trace("ZCArray copy op error!!!: -lhs p: %p -size: %u -rhs p: %p -size: %u\n",
-                     (void*)_ptr, _size, (void*)_Array._ptr, _Array._size);
-            _size = _Array.Size() + 1;
-        }
-        
-#endif
-        
         if(_size != _Array.Size())
             _Alloc(_Array.Size());
             
@@ -461,22 +448,13 @@ protected:
 
     void _Alloc(size_type size)
     {
-    
-#ifdef _DEBUGZCARRAY
-        al_trace("Memory to allocate: %i\n", size);
-#endif
-        
         if(_ptr)
             _Delete();
             
         if(size == 0)
         {
-            al_trace("Tried to allocate zero sized array\n");
-#ifdef _DEBUGZCARRAY
-            throw("Cannot allocate a zero sized array.");
-#else
+            Z_message("Tried to allocate zero sized array\n");
             size = 1;
-#endif
         }
         
         _ptr = new type[ size ];
@@ -539,7 +517,7 @@ protected:
     {
         if(_X >= _size)
         {
-            al_trace("Array indices out of range.\n");
+            Z_message("Array indices out of range.\n");
             throw("Array indices out of range.");
         }
     }
@@ -548,7 +526,7 @@ protected:
     {
         if(Offset(_Y, _X) >= _size)
         {
-            al_trace("Array indices out of range.\n");
+            Z_message("Array indices out of range.\n");
             throw("Array indices out of range.");
         }
     }
@@ -557,7 +535,7 @@ protected:
     {
         if(Offset(_Z, _Y, _X) >= _size)
         {
-            al_trace("Array indices out of range.\n");
+            Z_message("Array indices out of range.\n");
             throw("Array indices out of range.");
         }
     }
@@ -566,7 +544,7 @@ protected:
     {
         if(_X >= _size)
         {
-            al_trace("Array index (%i) out of range (%i).\n", _X, _size);
+            Z_message("Array index (%i) out of range (%i).\n", _X, _size);
             return false;
         }
         
@@ -577,7 +555,7 @@ protected:
     {
         if(Offset(_Y, _X) >= _size)
         {
-            al_trace("Array indices out of range.\n");
+            Z_message("Array indices out of range.\n");
             return false;
         }
         
@@ -588,7 +566,7 @@ protected:
     {
         if(Offset(_Z, _Y, _X) >= _size)
         {
-            al_trace("Array indices out of range.\n");
+            Z_message("Array indices out of range.\n");
             return false;
         }
         

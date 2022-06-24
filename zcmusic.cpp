@@ -225,11 +225,11 @@ extern "C"
             return NULL;
         }
         
-        al_trace("Trying to load %s\n", filename);
+        Z_message("Trying to load %s\n", filename);
         
         if(strlen(filename)>255)
         {
-            al_trace("Music file '%s' not loaded: filename too long\n", filename);
+            Z_message("Music file '%s' not loaded: filename too long\n", filename);
             return NULL;
         }
         
@@ -241,7 +241,7 @@ extern "C"
             
             if(!p)
             {
-                al_trace("OGG file '%s' not loaded.\n",filename);
+                Z_message("OGG file '%s' not loaded.\n",filename);
                 goto error;
             }
             
@@ -269,7 +269,7 @@ extern "C"
             
             if(!p)
             {
-                al_trace("MP3 file '%s' not found.\n",filename);
+                Z_message("MP3 file '%s' not found.\n",filename);
                 goto error;
             }
             
@@ -299,25 +299,25 @@ extern "C"
             {
                 d = dumb_load_it(filename);
                 
-                if(!d) al_trace("IT file '%s' not found.\n",filename);
+                if(!d) Z_message("IT file '%s' not found.\n",filename);
             }
             else if(stricmp(ext,"xm")==0)
             {
                 d = dumb_load_xm(filename);
                 
-                if(!d) al_trace("XM file '%s' not found.\n",filename);
+                if(!d) Z_message("XM file '%s' not found.\n",filename);
             }
             else if(stricmp(ext,"s3m")==0)
             {
                 d = dumb_load_s3m(filename);
                 
-                if(!d) al_trace("S3M file '%s' not found.\n",filename);
+                if(!d) Z_message("S3M file '%s' not found.\n",filename);
             }
             else if(stricmp(ext,"mod")==0)
             {
                 d = dumb_load_mod(filename);
                 
-                if(!d) al_trace("MOD file '%s' not found.\n",filename);
+                if(!d) Z_message("MOD file '%s' not found.\n",filename);
             }
             
             if(d)
@@ -366,7 +366,7 @@ extern "C"
                     music->track=0;
                     return music;
                 }
-                else al_trace("%s file '%s' not found.\n",ext,filename);
+                else Z_message("%s file '%s' not found.\n",ext,filename);
                 
             }
         }

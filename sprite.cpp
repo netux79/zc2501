@@ -706,7 +706,6 @@ bool sprite_list::swap(int a,int b)
     sprites[b] = c;
     containedUIDs[sprites[a]->getUID()] = a;
     containedUIDs[sprites[b]->getUID()] = b;
-// checkConsistency();
     return true;
 }
 
@@ -720,7 +719,6 @@ bool sprite_list::add(sprite *s)
     
     containedUIDs[s->getUID()] = count;
     sprites[count++]=s;
-    //checkConsistency();
     return true;
 }
 
@@ -749,7 +747,6 @@ gotit:
     }
     
     --count;
-    //checkConsistency();
     return true;
 }
 
@@ -812,7 +809,6 @@ bool sprite_list::del(int j)
     }
     
     --count;
-    //checkConsistency();
     return true;
 }
 
@@ -1016,14 +1012,6 @@ sprite * sprite_list::getByUID(long uid)
         return spr(it->second);
         
     return NULL;
-}
-
-void sprite_list::checkConsistency()
-{
-    assert((int)containedUIDs.size() == count);
-    
-    for(int i=0; i<count; i++)
-        assert(sprites[i] == getByUID(sprites[i]->getUID()));
 }
 
 /**********************************/

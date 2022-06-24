@@ -208,16 +208,9 @@ extern int    Bpos;
 extern byte screengrid[22];
 extern byte ffcgrid[4];
 extern volatile int logic_counter;
-#ifdef _SCRIPT_COUNTER
-extern volatile int script_counter;
-#endif
 extern bool screenscrolling;
 extern bool close_button_quit;
 extern int fullscreen;
-
-#ifdef _SCRIPT_COUNTER
-void update_script_counter();
-#endif
 
 extern PALETTE tempbombpal;
 extern bool usebombpal;

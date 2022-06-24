@@ -35,7 +35,6 @@
 using std::string;
 using std::pair;
 
-// extern bool                debug;
 extern int                 link_animation_speed; //lower is faster animation
 extern std::vector<mapscr> TheMaps;
 extern zcmap               *ZCMaps;
@@ -509,7 +508,7 @@ void free_newtilebuf()
 
 void del_qst_buffers()
 {
-    al_trace("Cleaning maps. \n");
+    Z_message("Cleaning maps. \n");
     
     if(ZCMaps) free(ZCMaps);
     
@@ -523,10 +522,10 @@ void del_qst_buffers()
     
     if(colordata) free(colordata);
     
-    al_trace("Cleaning tile buffers. \n");
+    Z_message("Cleaning tile buffers. \n");
     free_newtilebuf();
     
-    al_trace("Cleaning misc. \n");
+    Z_message("Cleaning misc. \n");
     
     // See get_qst_buffers
     if(itemsbuf)
@@ -1480,8 +1479,6 @@ int readrules(PACKFILE *f, zquestheader *Header, bool keepdata)
         }
     }
     
-    //al_trace("Rules version %d\n", s_version);
-    
     memcpy(deprecated_rules, quest_rules, QUESTRULES_SIZE);
     
     if(s_version<2)
@@ -1829,7 +1826,6 @@ int readstrings(PACKFILE *f, zquestheader *Header, bool keepdata)
             return qe_invalid;
         }
         
-        //al_trace("Strings version %d\n", s_version);
         //section size
         if(!p_igetl(&dummy_int,f,true))
         {
@@ -2032,7 +2028,6 @@ int readdoorcombosets(PACKFILE *f, zquestheader *Header, bool keepdata)
             return qe_invalid;
         }
         
-        //al_trace("Door combo sets version %d\n", dummy_word);
         if(!p_igetw(&dummy_word,f,true))
         {
             return qe_invalid;
@@ -2341,8 +2336,6 @@ int readdmaps(PACKFILE *f, zquestheader *Header, word, word, word start_dmap, wo
         {
             return qe_invalid;
         }
-        
-        //al_trace("DMaps version %d\n", s_version);
         
         if(!p_igetw(&s_cversion,f,true))
         {
@@ -2702,7 +2695,6 @@ int readmisccolors(PACKFILE *f, zquestheader *Header, miscQdata *Misc, bool keep
         return qe_invalid;
     }
     
-    //al_trace("Misc. colors version %d\n", s_version);
     if(!p_igetw(&s_cversion,f,true))
     {
         return qe_invalid;
@@ -2893,7 +2885,6 @@ int readgameicons(PACKFILE *f, zquestheader *, miscQdata *Misc, bool keepdata)
         return qe_invalid;
     }
     
-    //al_trace("Game icons version %d\n", s_version);
     if(!p_igetw(&s_cversion,f,true))
     {
         return qe_invalid;
@@ -2959,7 +2950,6 @@ int readmisc(PACKFILE *f, zquestheader *Header, miscQdata *Misc, bool keepdata)
             return qe_invalid;
         }
         
-        //al_trace("Misc. data version %d\n", s_version);
         if(!p_igetw(&s_cversion,f,true))
         {
             return qe_invalid;
@@ -3594,7 +3584,6 @@ int readitems(PACKFILE *f, word version, word build, bool keepdata, bool zgpmode
             return qe_invalid;
         }
         
-        //al_trace("Items version %d\n", s_version);
         if(!p_igetw(&s_cversion,f,true))
         {
             return qe_invalid;
@@ -4803,7 +4792,6 @@ int readweapons(PACKFILE *f, zquestheader *Header, bool keepdata)
             return qe_invalid;
         }
         
-        //al_trace("Weapons version %d\n", s_version);
         if(!p_igetw(&s_cversion,f,true))
         {
             return qe_invalid;
@@ -5138,77 +5126,6 @@ int init_combo_classes()
     {
         combo_class_buf[i] = default_combo_classes[i];
         continue;
-        /*
-            al_trace("===== %03d (%s)=====\n", i, ctype_name[i]);
-            al_trace("name:  %s\n", combo_class_buf[i].name);
-            al_trace("block_enemies:  %d\n", combo_class_buf[i].block_enemies);
-            al_trace("block_hole:  %d\n", combo_class_buf[i].block_hole);
-            al_trace("block_trigger:  %d\n", combo_class_buf[i].block_trigger);
-            for(int j=0; j<32; j++)
-            {
-              al_trace("block_weapon[%d]:  %d\n", j, combo_class_buf[i].block_weapon[j]);
-            }
-            al_trace("conveyor_direction:  %d\n", combo_class_buf[i].conveyor_direction);
-            al_trace("create_enemy:  %d\n", combo_class_buf[i].create_enemy);
-            al_trace("create_enemy_when:  %d\n", combo_class_buf[i].create_enemy_when);
-            al_trace("create_enemy_change:  %ld\n", combo_class_buf[i].create_enemy_change);
-            al_trace("directional_change_type:  %d\n", combo_class_buf[i].directional_change_type);
-            al_trace("distance_change_tiles:  %ld\n", combo_class_buf[i].distance_change_tiles);
-            al_trace("dive_item:  %d\n", combo_class_buf[i].dive_item);
-            al_trace("dock:  %d\n", combo_class_buf[i].dock);
-            al_trace("fairy:  %d\n", combo_class_buf[i].fairy);
-            al_trace("ff_combo_attr_change:  %d\n", combo_class_buf[i].ff_combo_attr_change);
-            al_trace("foot_decorations_tile:  %ld\n", combo_class_buf[i].foot_decorations_tile);
-            al_trace("foot_decorations_type:  %d\n", combo_class_buf[i].foot_decorations_type);
-            al_trace("hookshot_grab_point:  %d\n", combo_class_buf[i].hookshot_grab_point);
-            al_trace("ladder_pass:  %d\n", combo_class_buf[i].ladder_pass);
-            al_trace("lock_block_type:  %d\n", combo_class_buf[i].lock_block_type);
-            al_trace("lock_block_change:  %ld\n", combo_class_buf[i].lock_block_change);
-            al_trace("magic_mirror_type:  %d\n", combo_class_buf[i].magic_mirror_type);
-            al_trace("modify_hp_amount:  %d\n", combo_class_buf[i].modify_hp_amount);
-            al_trace("modify_hp_delay:  %d\n", combo_class_buf[i].modify_hp_delay);
-            al_trace("modify_hp_type:  %d\n", combo_class_buf[i].modify_hp_type);
-            al_trace("modify_mp_amount:  %d\n", combo_class_buf[i].modify_mp_amount);
-            al_trace("modify_mp_delay:  %d\n", combo_class_buf[i].modify_mp_delay);
-            al_trace("modify_mp_type:  %d\n", combo_class_buf[i].modify_mp_type);
-            al_trace("no_push_blocks:  %d\n", combo_class_buf[i].no_push_blocks);
-            al_trace("overhead:  %d\n", combo_class_buf[i].overhead);
-            al_trace("place_enemy:  %d\n", combo_class_buf[i].place_enemy);
-            al_trace("push_direction:  %d\n", combo_class_buf[i].push_direction);
-            al_trace("push_weight:  %d\n", combo_class_buf[i].push_weight);
-            al_trace("push_wait:  %d\n", combo_class_buf[i].push_wait);
-            al_trace("pushed:  %d\n", combo_class_buf[i].pushed);
-            al_trace("raft:  %d\n", combo_class_buf[i].raft);
-            al_trace("reset_room:  %d\n", combo_class_buf[i].reset_room);
-            al_trace("save_point_type:  %d\n", combo_class_buf[i].save_point_type);
-            al_trace("screen_freeze_type:  %d\n", combo_class_buf[i].screen_freeze_type);
-            al_trace("secret_combo:  %d\n", combo_class_buf[i].secret_combo);
-            al_trace("singular:  %d\n", combo_class_buf[i].singular);
-            al_trace("slow_movement:  %d\n", combo_class_buf[i].slow_movement);
-            al_trace("statue_type:  %d\n", combo_class_buf[i].statue_type);
-            al_trace("step_type:  %d\n", combo_class_buf[i].step_type);
-            al_trace("step_change_to:  %ld\n", combo_class_buf[i].step_change_to);
-            for(int j=0; j<32; j++)
-            {
-              al_trace("strike_weapons[%d]:  %d\n", j, combo_class_buf[i].strike_weapons[j]);
-            }
-            al_trace("strike_remnants:  %ld\n", combo_class_buf[i].strike_remnants);
-            al_trace("strike_remnants_type:  %d\n", combo_class_buf[i].strike_remnants_type);
-            al_trace("strike_change:  %ld\n", combo_class_buf[i].strike_change);
-            al_trace("strike_item:  %d\n", combo_class_buf[i].strike_item);
-            al_trace("touch_item:  %d\n", combo_class_buf[i].touch_item);
-            al_trace("touch_stairs:  %d\n", combo_class_buf[i].touch_stairs);
-            al_trace("trigger_type:  %d\n", combo_class_buf[i].trigger_type);
-            al_trace("trigger_sensitive:  %d\n", combo_class_buf[i].trigger_sensitive);
-            al_trace("warp_type:  %d\n", combo_class_buf[i].warp_type);
-            al_trace("warp_sensitive:  %d\n", combo_class_buf[i].warp_sensitive);
-            al_trace("warp_direct:  %d\n", combo_class_buf[i].warp_direct);
-            al_trace("warp_location:  %d\n", combo_class_buf[i].warp_location);
-            al_trace("water:  %d\n", combo_class_buf[i].water);
-            al_trace("whistle:  %d\n", combo_class_buf[i].whistle);
-            al_trace("win_game:  %d\n", combo_class_buf[i].win_game);
-            al_trace("\n\n");
-        */
     }
     
     return 0;
@@ -5583,7 +5500,6 @@ int readlinksprites(PACKFILE *f, zquestheader *Header, bool keepdata)
         return qe_invalid;
     }
     
-    //al_trace("Link sprites version %d\n", s_version);
     if(!p_igetw(&s_cversion,f,true))
     {
         return qe_invalid;
@@ -5609,7 +5525,6 @@ int readsubscreens(PACKFILE *f, zquestheader *Header, bool keepdata)
         return qe_invalid;
     }
     
-    //al_trace("Subscreens version %d\n", s_version);
     if(!p_igetw(&s_cversion,f,true))
     {
         return qe_invalid;
@@ -6647,7 +6562,6 @@ int readffscript(PACKFILE *f, zquestheader *Header, bool keepdata)
         return qe_invalid;
     }
     
-    //al_trace("Scripts version %d\n", s_version);
     //section size
     if(!p_igetl(&dummy,f,true))
     {
@@ -7022,7 +6936,6 @@ int readsfx(PACKFILE *f, zquestheader *Header, bool keepdata)
         return qe_invalid;
     }
     
-    //al_trace("SFX version %d\n", s_version);
     if(!p_igetw(&s_cversion,f,true))
     {
         return qe_invalid;
@@ -7174,8 +7087,6 @@ int readsfx(PACKFILE *f, zquestheader *Header, bool keepdata)
         
         (temp_sample.param) = dummyd;
         
-        // al_trace("F%i: L%i\n",i,temp_sample.len);
-//    temp_sample.data = new byte[(temp_sample.bits==8?1:2)*temp_sample.len];
         int len = (temp_sample.bits==8?1:2)*(temp_sample.stereo==0?1:2)*temp_sample.len;
         temp_sample.data = calloc(len,1);
         
@@ -7233,7 +7144,7 @@ int readsfx(PACKFILE *f, zquestheader *Header, bool keepdata)
             if(s_version<3)
             {
                 cpylen = (temp_sample.bits==8?1:2)*temp_sample.len;
-                al_trace("WARNING: Quest SFX %d is in stereo, and may be corrupt.\n",i);
+                Z_message("WARNING: Quest SFX %d is in stereo, and may be corrupt.\n",i);
             }
             
             memcpy(customsfxdata[i].data,temp_sample.data,cpylen);
@@ -7308,7 +7219,6 @@ int readguys(PACKFILE *f, zquestheader *Header, bool keepdata)
             return qe_invalid;
         }
         
-        //al_trace("Guys version %d\n", guyversion);
         if(!p_igetw(&dummy2,f,true))
         {
             return qe_invalid;
@@ -9748,7 +9658,6 @@ int readmaps(PACKFILE *f, zquestheader *Header, bool keepdata)
             return qe_invalid;
         }
         
-        //al_trace("Maps version %d\n", version);
         if(!p_igetw(&dummy,f,true))
         {
             return qe_invalid;
@@ -9976,7 +9885,6 @@ int readcombos(PACKFILE *f, zquestheader *Header, word version, word build, word
             return qe_invalid;
         }
         
-        //al_trace("Combos version %d\n", section_version);
         if(!p_igetw(&section_cversion,f,true))
         {
             return qe_invalid;
@@ -10284,7 +10192,6 @@ int readcomboaliases(PACKFILE *f, zquestheader *Header, word version, word build
         return qe_invalid;
     }
     
-    //al_trace("Combo aliases version %d\n", sversion);
     if(!p_igetw(&c_sversion,f,true))
     {
         return qe_invalid;
@@ -10420,7 +10327,6 @@ int readcolordata(PACKFILE *f, miscQdata *Misc, word version, word build, word s
             return qe_invalid;
         }
         
-        //al_trace("Color data version %d\n", s_version);
         if(!p_igetw(&dummy,f,true))
         {
             return qe_invalid;
@@ -10608,7 +10514,7 @@ int readtiles(PACKFILE *f, tiledata *buf, zquestheader *Header, word version, wo
     
     if(Header!=NULL&&!Header->data_flags[ZQ_TILES])         //keep for old quests
     {
-        al_trace("Quest does not use tiles.\n");
+        Z_message("Quest does not use tiles.\n");
         delete[] temp_tile;
         temp_tile=NULL;
         return 0;
@@ -10787,7 +10693,6 @@ int readtunes(PACKFILE *f, zquestheader *Header, zctune *tunes /*zcmidi_ *midis*
             return qe_invalid;
         }
         
-        //al_trace("Tunes version %d\n", section_version);
         if(!p_igetw(&dummy2,f,true))
         {
             return qe_invalid;
@@ -10950,7 +10855,6 @@ int readcheatcodes(PACKFILE *f, zquestheader *Header, bool keepdata)
             return qe_invalid;
         }
         
-        //al_trace("Cheats version %d\n", dummy);
         if(!p_igetw(&dummy,f,true))
         {
             return qe_invalid;
@@ -11046,7 +10950,6 @@ int readinitdata(PACKFILE *f, zquestheader *Header, bool keepdata)
             return qe_invalid;
         }
         
-        //al_trace("Init data version %d\n", s_version);
         if(!p_igetw(&s_cversion,f,true))
         {
             return qe_invalid;
@@ -12229,7 +12132,6 @@ int readitemdropsets(PACKFILE *f, int version, word build, bool keepdata)
             return qe_invalid;
         }
         
-        //al_trace("Item drop sets version %d\n", s_version);
         if(!p_igetw(&s_cversion,f,true))
         {
             return qe_invalid;
@@ -12464,7 +12366,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
     /*Reading Header...*/
     ret=readheader(f, &tempheader, true);
     checkstatus(ret);
-    al_trace("Made in ZQuest %x Beta %d\n",tempheader.zelda_version, tempheader.build);
+    Z_message("Made in ZQuest %x Beta %d\n",tempheader.zelda_version, tempheader.build);
     
     if(tempheader.zelda_version>=0x193)
     {

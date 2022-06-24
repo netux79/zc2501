@@ -231,17 +231,6 @@ void Z_message(const char *format,...)
     al_trace("%s",buf);
 }
 
-void Z_title(const char *format,...)
-{
-    char buf[256];
-    va_list ap;
-    va_start(ap, format);
-    vsprintf(buf, format, ap);
-    va_end(ap);
-    
-    al_trace("%s\n",buf);
-}
-
 int anim_3_4(int clk, int speed)
 {
     clk /= speed;

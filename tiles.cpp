@@ -2545,7 +2545,7 @@ int tilesize(byte format)
         return (64<<format);
     }
     
-    al_trace("Invalid tile format encountered.\n");
+    Z_message("Invalid tile format encountered.\n");
     
     // BUG: This is triggered by the 'grab' option, and certainly others as well.
     // if at any point a selected tile is 'blank' (newtilebuf[0] for example), then we have might a problem.

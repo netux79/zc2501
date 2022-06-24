@@ -1375,7 +1375,7 @@ void do_drawstringr(BITMAP *bmp, int i, int *sdci, int xoffset, int yoffset)
     
     if(!str)
     {
-        al_trace("String pointer is null! Internal error. \n");
+        Z_message("String pointer is null! Internal error. \n");
         return;
     }
     
@@ -1741,7 +1741,7 @@ void do_drawquad3dr(BITMAP *bmp, int i, int *sdci, int xoffset, int yoffset)
     
     if(!v_ptr)
     {
-        al_trace("Quad3d: Vector pointer is null! Internal error. \n");
+        Z_message("Quad3d: Vector pointer is null! Internal error. \n");
         return;
     }
     
@@ -1820,7 +1820,7 @@ void do_drawtriangle3dr(BITMAP *bmp, int i, int *sdci, int xoffset, int yoffset)
     
     if(!v_ptr)
     {
-        al_trace("Quad3d: Vector pointer is null! Internal error. \n");
+        Z_message("Quad3d: Vector pointer is null! Internal error. \n");
         return;
     }
     
@@ -1958,7 +1958,7 @@ void do_drawlayerr(BITMAP *bmp, int *sdci, int xoffset, int yoffset, bool isOffS
     
     if(!m || index >= TheMaps.size())
     {
-        al_trace("DrawLayer: invalid map, layer, or screen index. \n");
+        Z_message("DrawLayer: invalid map, layer, or screen index. \n");
         return;
     }
     
@@ -2029,7 +2029,7 @@ void do_drawscreenr(BITMAP *bmp, int *sdci, int xoffset, int yoffset, bool isOff
     
     if(index >= TheMaps.size())
     {
-        al_trace("DrawScreen: invalid map or screen index. \n");
+        Z_message("DrawScreen: invalid map or screen index. \n");
         return;
     }
     

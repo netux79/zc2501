@@ -45,7 +45,6 @@ void set_bit(byte *bitstr,int bit,byte val);
 
 void Z_error(const char *format,...);
 void Z_message(const char *format,...);
-void Z_title(const char *format,...);
 
 int anim_3_4(int clk, int speed);
 

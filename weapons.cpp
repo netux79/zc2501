@@ -157,7 +157,6 @@ int weapon::seekEnemy2(int j)
         return j;
     }
     
-    //al_trace("Guy: %d, gx: %f, gy: %f, x: %f, y: %f\n", j, float(GuyX(j)), float(GuyY(j)), float(dummy_fix[0]), float(dummy_fix[1]));
     angle = atan2(double(GuyY(j)-dummy_fix[1]),double(GuyX(j)-dummy_fix[0]));
     
     if(angle==-PI || angle==PI) dir=left;

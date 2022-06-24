@@ -57,28 +57,6 @@ int draw_screen_clip_rect_x1=0;
 int draw_screen_clip_rect_x2=255;
 int draw_screen_clip_rect_y1=0;
 int draw_screen_clip_rect_y2=223;
-
-
-
-void Z_message_d(const char *format,...)
-{
-#ifdef _DEBUG
-    char buf[512];
-    va_list ap;
-    va_start(ap, format);
-    vsprintf(buf, format, ap);
-    va_end(ap);
-    
-    al_trace("%s",buf);
-#else
-    format=format;
-#endif
-}
-
-
-
-//bool draw_screen_clip_rect_show_link=true;
-//bool draw_screen_clip_rect_show_guys=false;
 bool checktrigger=false;
 
 int isdungeon(int dmap, int scr) // The arg is only used by loadscr2 and loadscr

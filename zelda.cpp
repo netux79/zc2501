@@ -66,15 +66,6 @@ void update_logic_counter()
 }
 END_OF_FUNCTION(update_logic_counter)
 
-#ifdef _SCRIPT_COUNTER
-volatile int script_counter=0;
-void update_script_counter()
-{
-    ++script_counter;
-}
-END_OF_FUNCTION(update_script_counter)
-#endif
-
 void throttleFPS()
 {
     if(Throttlefps)
@@ -258,18 +249,12 @@ void initZScriptArrayRAM(bool firstplay)
         
         for(dword i = 0; i < game->globalRAM.size(); i++)
         {
-#ifdef _DEBUGARRAYALLOC
-            al_trace("Global Array: %i\n",i);
-#endif
             ZScriptArray &from = saves[currgame].globalRAM[i];
             ZScriptArray &to = game->globalRAM[i];
             to.Resize(from.Size());
             
             for(dword j = 0; j < from.Size(); j++)
             {
-#ifdef _DEBUGARRAYALLOC
-                al_trace("Element: %i\nInit: %i, From save file: %i\n", j, to[j], from[j]);
-#endif
                 to[j] = from[j];
             }
         }
@@ -467,7 +452,6 @@ FONT *setmsgfont()
 
 void donewmsg(int str)
 {
-    //al_trace("donewmsg %d\n",str);
     if(msg_onscreen || msg_active)
         dismissmsg();
         
@@ -2259,15 +2243,15 @@ int main(int argc, char* argv[])
     {
     
     case -1:
-        Z_title("Zelda Classic %s Alpha (Build %d)",VerStr(ZELDA_VERSION), VERSION_BUILD);
+        Z_message("Zelda Classic %s Alpha (Build %d)",VerStr(ZELDA_VERSION), VERSION_BUILD);
         break;
         
     case 1:
-        Z_title("Zelda Classic %s Beta (Build %d)",VerStr(ZELDA_VERSION), VERSION_BUILD);
+        Z_message("Zelda Classic %s Beta (Build %d)",VerStr(ZELDA_VERSION), VERSION_BUILD);
         break;
         
     case 0:
-        Z_title("Zelda Classic %s (Build %d)",VerStr(ZELDA_VERSION), VERSION_BUILD);
+        Z_message("Zelda Classic %s (Build %d)",VerStr(ZELDA_VERSION), VERSION_BUILD);
     }
     
     // Before anything else, let's register our custom trace handler:
@@ -2354,12 +2338,6 @@ int main(int argc, char* argv[])
     LOCK_VARIABLE(logic_counter);
     LOCK_FUNCTION(update_logic_counter);
     install_int_ex(update_logic_counter, BPS_TO_TIMER(60));
-    
-#ifdef _SCRIPT_COUNTER
-    LOCK_VARIABLE(script_counter);
-    LOCK_FUNCTION(update_script_counter);
-    install_int_ex(update_script_counter, 1);
-#endif
     
     if(!Z_init_timers())
     {
@@ -2727,13 +2705,9 @@ END_OF_MAIN()
 
 void remove_installed_timers()
 {
-    al_trace("Removing timers. \n");
+    Z_message("Removing timers. \n");
     remove_int(update_logic_counter);
     Z_remove_timers();
-#ifdef _SCRIPT_COUNTER
-    remove_int(update_script_counter);
-#endif
-    
 }
 
 
@@ -2753,7 +2727,7 @@ void quit_game()
     remove_installed_timers();
     delete_everything_else();
     
-    al_trace("Freeing Data: \n");
+    Z_message("Freeing Data: \n");
     
     if(game) delete game;
     
@@ -2767,7 +2741,7 @@ void quit_game()
     //  if(mappic)
     //    destroy_bitmap(mappic);
     
-    al_trace("Bitmaps... \n");
+    Z_message("Bitmaps... \n");
     destroy_bitmap(framebuf);
     destroy_bitmap(scrollbuf);
     destroy_bitmap(tmp_scr);
@@ -2778,7 +2752,7 @@ void quit_game()
     set_clip_state(pricesdisplaybuf, 1);
     destroy_bitmap(pricesdisplaybuf);
     
-    al_trace("Subscreens... \n");
+    Z_message("Subscreens... \n");
     
     for(int i=0; i<4; i++)
     {
@@ -2795,7 +2769,7 @@ void quit_game()
         }
     }
     
-    al_trace("SFX... \n");
+    Z_message("SFX... \n");
     zcmusic_exit();
     
     for(int i=0; i<WAV_COUNT; i++)
@@ -2809,7 +2783,7 @@ void quit_game()
         }
     }
     
-    al_trace("Misc... \n");
+    Z_message("Misc... \n");
     
     for(int i=0; i<WPNCNT; i++)
     {
@@ -2826,7 +2800,7 @@ void quit_game()
         delete [] guy_string[i];
     }
     
-    al_trace("Script buffers... \n");
+    Z_message("Script buffers... \n");
     
     for(int i=0; i<512; i++)
     {
@@ -2871,16 +2845,14 @@ void quit_game()
     //if(TheMaps[i].sflag != NULL) delete [] TheMaps[i].sflag;
     //if(TheMaps[i].cset != NULL) delete [] TheMaps[i].cset;
     //}
-    al_trace("Screen Data... \n");
     
-    al_trace("Deleting quest buffers... \n");
+    Z_message("Deleting quest buffers... \n");
     del_qst_buffers();
     
     if(quest_path) free(quest_path);
     
     //if(TheMaps != NULL) free(TheMaps);
     //if(ZCMaps != NULL) free(ZCMaps);
-    //  dumb_exit();
 }
 
 /*** end of zelda.cc ***/
