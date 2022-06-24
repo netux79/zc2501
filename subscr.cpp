@@ -3445,9 +3445,9 @@ void show_custom_subscreen(BITMAP *dest, miscQdata *misc, subscreen_group *css, 
                 char *ts;
                 
                 if(game)
-                    ts = time_str_short2(game->get_time());
+                    ts = time_str_short(game->get_time());
                 else
-                    ts = time_str_short2(0);
+                    ts = time_str_short(0);
                     
 //          textout_shadowed_ex(dest,tempfont,ts,x,y,subscreen_color(misc, css->objects[i].colortype1, css->objects[i].color1),subscreen_color(misc, css->objects[i].colortype2, css->objects[i].color2),subscreen_color(misc, css->objects[i].colortype3, css->objects[i].color3));
                 textout_styled_aligned_ex(dest,tempfont,ts,x,y,css->objects[i].d3,css->objects[i].d2,subscreen_color(misc, css->objects[i].colortype1, css->objects[i].color1),subscreen_color(misc, css->objects[i].colortype2, css->objects[i].color2),subscreen_color(misc, css->objects[i].colortype3, css->objects[i].color3));
@@ -5092,7 +5092,7 @@ int sso_w(subscreen_object *tempsso)
         break;
         
     case ssoBSTIME:
-        w=text_length(ss_font(tempsso->d1), time_str_short2(game->get_time()));
+        w=text_length(ss_font(tempsso->d1), time_str_short(game->get_time()));
         break;
         
     case ssoTIME:

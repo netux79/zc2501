@@ -93,6 +93,7 @@
 #define VERSION_BUILD       28                              //build number of this version
 #define IS_BETA             0                               //is this a beta?
 #define DATE_STR            "October 4, 2014"
+#define DATA_PASSWORD       "longtan"                       /* Password used to encrypt the game datafiles */
 
 #define MIN_VERSION         0x0184
 
@@ -102,15 +103,12 @@
 #define SFXDAT_BUILD          15                            //build of sfx.dat
 #define FONTSDAT_VERSION      0x0211                        //version of fonts.dat
 #define FONTSDAT_BUILD        18                            //build of fonts.dat
-#define QSTDAT_VERSION        0x0211                        //version of qst.dat
-#define QSTDAT_BUILD          18                            //build of qst.dat
 
 enum {ENC_METHOD_192B104=0, ENC_METHOD_192B105, ENC_METHOD_192B185, ENC_METHOD_211B9, ENC_METHOD_211B18, ENC_METHOD_MAX};
 
 #define PI 3.14159265358979323846
 #define HP_PER_HEART          16
 #define DAMAGE_MULTIPLIER     2
-
 
 #define ZC_ID(a,b,c,d)  (((a)<<24) | ((b)<<16) | ((c)<<8) | (d))
 
@@ -223,7 +221,6 @@ typedef unsigned int         dword;                              //0-           
 typedef int                  long32;                             //-2147,483,648  2,147,483,647  (32 bits)  
 typedef unsigned long long   qword;                              //0-18,446,744,073,709,551,616  (64 bits)
 
-extern int readsize, writesize;
 extern bool fake_pack_writing;
 
 // system colors
@@ -2569,11 +2566,6 @@ INLINE bool pfwrite(void *p,long n,PACKFILE *f)
         success=(pack_fwrite(p,n,f)==n);
     }
     
-    if(success)
-    {
-        writesize+=n;
-    }
-    
     return success;
 }
 
@@ -2585,21 +2577,11 @@ INLINE bool pfread(void *p,long n,PACKFILE *f,bool keepdata)
     {
         success=(pack_fread(p,n,f)==n);
         
-        if(success)
-        {
-            readsize+=n;
-        }
-        
         return success;
     }
     else
     {
         success=(pack_fseek(f,n)==0);
-        
-        if(success)
-        {
-            readsize+=n;
-        }
         
         return success;
     }
@@ -2630,7 +2612,6 @@ INLINE bool p_getc(void *p,PACKFILE *f,bool keepdata)
         *cp = c;
     }
     
-    readsize+=1;
     return true;
 }
 
@@ -2644,11 +2625,6 @@ INLINE bool p_putc(int c,PACKFILE *f)
         if(!(f->normal.flags&PACKFILE_FLAG_WRITE)) return false;  //must be writing to file
         pack_putc(c,f);
         success=(pack_ferror(f)==0);
-    }
-    
-    if(success)
-    {
-        writesize+=1;
     }
     
     return success;
@@ -2679,7 +2655,6 @@ INLINE bool p_igetw(void *p,PACKFILE *f,bool keepdata)
         *cp = c;
     }
     
-    readsize+=2;
     return true;
 }
 
@@ -2694,11 +2669,6 @@ INLINE bool p_iputw(int c,PACKFILE *f)
         
         pack_iputw(c,f);
         success=(pack_ferror(f)==0);
-    }
-    
-    if(success)
-    {
-        writesize+=2;
     }
     
     return success;
@@ -2729,7 +2699,6 @@ INLINE bool p_igetl(void *p,PACKFILE *f,bool keepdata)
         *cp = c;
     }
     
-    readsize+=4;
     return true;
 }
 
@@ -2765,7 +2734,6 @@ INLINE bool p_igetf(void *p,PACKFILE *f,bool keepdata)
         }
     }
     
-    readsize += sizeof(float);
     return true;
 }
 
@@ -2779,11 +2747,6 @@ INLINE bool p_iputl(long c,PACKFILE *f)
         if(!(f->normal.flags&PACKFILE_FLAG_WRITE)) return false;  //must be writing to file
         pack_iputl(c,f);
         success=(pack_ferror(f)==0);
-    }
-    
-    if(success)
-    {
-        writesize+=4;
     }
     
     return success;
@@ -2814,7 +2777,6 @@ INLINE bool p_mgetw(void *p,PACKFILE *f,bool keepdata)
         *cp = c;
     }
     
-    readsize+=2;
     return true;
 }
 
@@ -2828,11 +2790,6 @@ INLINE bool p_mputw(int c,PACKFILE *f)
         if(!(f->normal.flags&PACKFILE_FLAG_WRITE)) return false;  //must be writing to file
         pack_mputw(c,f);
         success=(pack_ferror(f)==0);
-    }
-    
-    if(success)
-    {
-        writesize+=2;
     }
     
     return success;
@@ -2863,7 +2820,6 @@ INLINE bool p_mgetl(void *p,PACKFILE *f,bool keepdata)
         *cp = c;
     }
     
-    readsize+=4;
     return true;
 }
 
@@ -2878,11 +2834,6 @@ INLINE bool p_mputl(long c,PACKFILE *f)
         
         pack_mputl(c,f);
         success=(pack_ferror(f)==0);
-    }
-    
-    if(success)
-    {
-        writesize+=4;
     }
     
     return success;

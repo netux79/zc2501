@@ -578,7 +578,6 @@ int load_savedgames()
     PACKFILE *f=NULL;
     char tmpfilename[32];
     temp_name(tmpfilename);
-//  const char *passwd = datapwd;
 
     /* Calculate the savefile name based on the quest filename */
     replace_extension(SAVE_FILE, quest_path, "sav", sizeof(SAVE_FILE));
@@ -597,7 +596,7 @@ int load_savedgames()
         goto newdata;
     }
     
-    if(file_size_ex_password(SAVE_FILE, "") == 0)
+    if(file_size_ex(SAVE_FILE) == 0)
     {
         if(errno==0) // No error, file's empty
         {
@@ -610,7 +609,7 @@ int load_savedgames()
     }
     
     // decode to temp file
-    ret = decode_file_007(SAVE_FILE, tmpfilename, SAVE_HEADER, ENC_METHOD_MAX-1, strstr(SAVE_FILE, ".dat#")!=NULL, "");
+    ret = decode_file_007(SAVE_FILE, tmpfilename, SAVE_HEADER, ENC_METHOD_MAX-1, strstr(SAVE_FILE, ".dat#")!=NULL);
     
     if(ret)
     {
@@ -618,7 +617,7 @@ int load_savedgames()
     }
     
     // load the games
-    f = pack_fopen_password(tmpfilename, F_READ_PACKED, "");
+    f = pack_fopen(tmpfilename, F_READ_PACKED);
     
     if(!f)
         goto cantopen;
@@ -895,7 +894,7 @@ int save_savedgames()
     char tmpfilename[32];
     temp_name(tmpfilename);
     
-    PACKFILE *f = pack_fopen_password(tmpfilename, F_WRITE_PACKED, "");
+    PACKFILE *f = pack_fopen(tmpfilename, F_WRITE_PACKED);
     
     if(!f)
     {

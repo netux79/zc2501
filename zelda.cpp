@@ -147,15 +147,12 @@ bool close_button_quit=false;
 PALETTE tempbombpal;
 bool usebombpal;
 
-int readsize, writesize;
 bool fake_pack_writing=false;
 combo_alias combo_aliases[MAXCOMBOALIASES];  //Temporarily here so ZC can compile. All memory from this is freed after loading the quest file.
 
 SAMPLE customsfxdata[WAV_COUNT];
 unsigned char customsfxflag[WAV_COUNT>>3];
 int sfxdat=1;
-BITMAP *hw_screen;
-int zqwin_scale;
 
 int fullscreen;
 int homescr,currscr,frame=0,currmap=0,dlevel,warpscr,worldscr;
@@ -2308,9 +2305,6 @@ int main(int argc, char* argv[])
         quit_game();
     }
 
-    resolve_password(datapwd);
-    //packfile_password(datapwd);
-
     // set and load game configurations
     set_config_file("ag.cfg");
     load_game_configs();
@@ -2383,7 +2377,7 @@ int main(int argc, char* argv[])
     sprintf(sfxdat_sig,"SFX.Dat %s Build %d",VerStr(SFXDAT_VERSION), SFXDAT_BUILD);
     sprintf(fontsdat_sig,"Fonts.Dat %s Build %d",VerStr(FONTSDAT_VERSION), FONTSDAT_BUILD);
     
-    packfile_password(NULL); // Temporary measure. -L
+    packfile_password(NULL);
     Z_message("Zelda.Dat...");
     
     if((data=load_datafile("zelda.dat"))==NULL)
@@ -2399,7 +2393,7 @@ int main(int argc, char* argv[])
     }
     
     Z_message("OK\n");
-    packfile_password(datapwd); // Temporary measure. -L
+    packfile_password(DATA_PASSWORD);
     
     Z_message("Fonts.Dat...");
     
@@ -2586,6 +2580,7 @@ int main(int argc, char* argv[])
     set_close_button_callback((void (*)()) hit_close_button);
     set_window_title("Zelda Classic");
 
+    packfile_password(DATA_PASSWORD);
     int ret = loadquest(quest_path,&QHeader,&QMisc,tunes+ZC_MIDI_COUNT);
     if (ret)
     {
@@ -2597,7 +2592,7 @@ int main(int argc, char* argv[])
 
 // load saved games
     Z_message("Loading saved games... ");
-    
+    packfile_password(NULL);
     if(load_savedgames() != 0)
     {
         Z_error("Insufficient memory");

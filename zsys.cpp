@@ -21,22 +21,6 @@ using std::string;
 #include "zsys.h"
 #include "zc_sys.h"
 
-extern int zqwin_scale;
-extern BITMAP *hw_screen;
-
-char *time_str_long(dword time)
-{
-    static char s[16];
-    
-    dword decs = (time%60)*100/60;
-    dword secs = (time/60)%60;
-    dword mins = (time/3600)%60;
-    dword hours = time/216000;
-    
-    sprintf(s,"%d:%02d:%02d.%02d",hours,mins,secs,decs);
-    return s;
-}
-
 char *time_str_med(dword time)
 {
     static char s[16];
@@ -50,17 +34,6 @@ char *time_str_med(dword time)
 }
 
 char *time_str_short(dword time)
-{
-    static char s[16];
-    
-    dword mins = (time/3600)%60;
-    dword hours = time/216000;
-    
-    sprintf(s,"%d:%02d",hours,mins);
-    return s;
-}
-
-char *time_str_short2(dword time)
 {
     static char s[16];
     
@@ -142,15 +115,6 @@ int bound(int &x,int low,int high)
     return x;
 }
 
-void chop_path(char *path)
-{
-    int p = (int)strlen(path);
-    int f = (int)strlen(get_filename(path));
-    
-    if(f<p)
-        path[p-f]=0;
-}
-
 int vbound(int x,int low,int high)
 {
     assert(low <= high);
@@ -179,14 +143,6 @@ int used_switch(int argc,char *argv[],const char *s)
             return i;
             
     return 0;
-}
-
-char datapwd[8]   = { char('l'+11),char('o'+22),char('n'+33),char('g'+44),char('t'+55),char('a'+66),char('n'+77),char(0+88) };
-
-void resolve_password(char *pwd)
-{
-    for(int i=0; i<8; i++)
-        pwd[i]-=(i+1)*11;
 }
 
 void set_bit(byte *bitstr,int bit,byte val)
@@ -284,74 +240,6 @@ static int rand_007(int method)
     return (CX << 16) + BX;
 }
 
-void encode_007(byte *buf, dword size, dword key2, word *check1, word *check2, int method)
-{
-    dword i;
-    byte *p;
-    
-    *check1 = 0;
-    *check2 = 0;
-    
-    p = buf;
-    
-    for(i=0; i<size; i++)
-    {
-        *check1 += *p;
-        *check2 = (*check2 << 4) + (*check2 >> 12) + *p;
-        ++p;
-    }
-    
-    p = buf;
-    seed = key2;
-    
-    for(i=0; i<size; i+=2)
-    {
-        byte q = rand_007(method);
-        *p ^= q;
-        ++p;
-        
-        if(i+1 < size)
-        {
-            *p += q;
-            ++p;
-        }
-    }
-}
-
-bool decode_007(byte *buf, dword size, dword key2, word check1, word check2, int method)
-{
-    dword i;
-    word c1 = 0, c2 = 0;
-    byte *p;
-    
-    p = buf;
-    seed = key2;
-    
-    for(i=0; i<size; i+=2)
-    {
-        unsigned char q = rand_007(method);
-        *p ^= q;
-        ++p;
-        
-        if(i+1 < size)
-        {
-            *p -= q;
-            ++p;
-        }
-    }
-    
-    p = buf;
-    
-    for(i=0; i<size; i++)
-    {
-        c1 += *p;
-        c2 = (c2 << 4) + (c2 >> 12) + *p;
-        ++p;
-    }
-    
-    return (c1 == check1) && (c2 == check2);
-}
-
 //
 // RETURNS:
 //   0 - OK
@@ -436,7 +324,7 @@ int encode_file_007(const char *srcfile, const char *destfile, int key2, const c
 //   5 - checksum mismatch
 //   6 - header mismatch
 //
-int decode_file_007(const char *srcfile, const char *destfile, const char *header, int method, bool packed, const char *password)
+int decode_file_007(const char *srcfile, const char *destfile, const char *header, int method, bool packed)
 {
     FILE *normal_src=NULL, *dest=NULL;
     PACKFILE *packed_src=NULL;
@@ -445,7 +333,7 @@ int decode_file_007(const char *srcfile, const char *destfile, const char *heade
     short c1 = 0, c2 = 0, check1, check2;
     
     // open files
-    size = file_size_ex_password(srcfile, password);
+    size = file_size_ex(srcfile);
     
     if(size < 1)
     {
@@ -470,11 +358,11 @@ int decode_file_007(const char *srcfile, const char *destfile, const char *heade
     }
     else
     {
-        packed_src = pack_fopen_password(srcfile, F_READ_PACKED,password);
+        packed_src = pack_fopen(srcfile, F_READ_PACKED);
         
         if(errno==EDOM)
         {
-            packed_src = pack_fopen_password(srcfile, F_READ,password);
+            packed_src = pack_fopen(srcfile, F_READ);
         }
         
         if(!packed_src)

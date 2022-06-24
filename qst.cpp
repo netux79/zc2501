@@ -236,9 +236,7 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
     char tmpfilename[32];
     temp_name(tmpfilename);
     int current_method=0;
-    
     PACKFILE *f;
-    const char *passwd= encrypted ? datapwd : "";
     
     // oldquest flag is set when an unencrypted qst file is suspected.
     bool oldquest = false;
@@ -246,7 +244,7 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
     
     if(encrypted)
     {
-        ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_MAX-1, strstr(filename, ".dat#")!=NULL, passwd);
+        ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_MAX-1, strstr(filename, ".dat#")!=NULL);
         
         if(ret)
         {
@@ -265,31 +263,30 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
             if(ret==5)                                              //old encryption?
             {
                 current_method++;
-                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_211B9, strstr(filename, ".dat#")!=NULL, passwd);
+                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_211B9, strstr(filename, ".dat#")!=NULL);
             }
             
             if(ret==5)                                              //old encryption?
             {
                 current_method++;
-                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B185, strstr(filename, ".dat#")!=NULL, passwd);
+                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B185, strstr(filename, ".dat#")!=NULL);
             }
             
             if(ret==5)                                              //old encryption?
             {
                 current_method++;
-                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B105, strstr(filename, ".dat#")!=NULL, passwd);
+                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B105, strstr(filename, ".dat#")!=NULL);
             }
             
             if(ret==5)                                              //old encryption?
             {
                 current_method++;
-                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B104, strstr(filename, ".dat#")!=NULL, passwd);
+                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B104, strstr(filename, ".dat#")!=NULL);
             }
             
             if(ret)
             {
                 oldquest = true;
-                passwd="";
             }
         }
         
@@ -299,13 +296,13 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
         oldquest = true;
     }
     
-    f = pack_fopen_password(oldquest ? filename : tmpfilename, compressed ? F_READ_PACKED : F_READ, passwd);
+    f = pack_fopen(oldquest ? filename : tmpfilename, compressed ? F_READ_PACKED : F_READ);
     
     if(!f)
     {
         if((compressed==1)&&(errno==EDOM))
         {
-            f = pack_fopen_password(oldquest ? filename : tmpfilename, F_READ, passwd);
+            f = pack_fopen(oldquest ? filename : tmpfilename, F_READ);
         }
         
         if(!f)
@@ -2552,7 +2549,7 @@ int readdmaps(PACKFILE *f, zquestheader *Header, word, word, word start_dmap, wo
         }
         else if(s_version>3)
         {
-            char temp;
+            char temp=0;
             
             if(!p_getc(&temp,f,keepdata))
             {
@@ -2635,7 +2632,6 @@ int readmisccolors(PACKFILE *f, zquestheader *Header, miscQdata *Misc, bool keep
     }
     
     //finally...  section data
-    readsize=0;
     
     if(!p_getc(&temp_misc.colors.text,f,true))
     {
@@ -2825,7 +2821,6 @@ int readgameicons(PACKFILE *f, zquestheader *, miscQdata *Misc, bool keepdata)
     }
     
     //finally...  section data
-    readsize=0;
     
     icons=4;
     
@@ -2891,7 +2886,6 @@ int readmisc(PACKFILE *f, zquestheader *Header, miscQdata *Misc, bool keepdata)
     }
     
     //finally...  section data
-    readsize=0;
     
     //shops
     if(Header->zelda_version > 0x192)
@@ -5071,7 +5065,7 @@ int readlinksprites2(PACKFILE *f, int v_linksprites, int cv_linksprites, bool ke
     
     if(v_linksprites>=0)
     {
-        word tile, tile2;
+        word tile=0, tile2;
         byte flip, extend, dummy_byte;
         
         for(int i=0; i<4; i++)

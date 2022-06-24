@@ -761,7 +761,7 @@ MP3FILE *load_mp3_file(char *filename)
     if((p = (MP3FILE *)malloc(sizeof(MP3FILE)))==NULL)
         goto error;
         
-    if((f = pack_fopen_password(filename, F_READ,""))==NULL)
+    if((f = pack_fopen(filename, F_READ))==NULL)
         goto error;
     
     // ID3 tags sometimes cause problems with almp3, so try to skip them
@@ -974,7 +974,7 @@ OGGFILE *load_ogg_file(char *filename)
         goto error;
     }
     
-    if((f = pack_fopen_password(filename, F_READ,""))==NULL)
+    if((f = pack_fopen(filename, F_READ))==NULL)
     {
         goto error;
     }
