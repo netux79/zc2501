@@ -80,10 +80,6 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
 
 char *byte_conversion(int number1, int number2, int format1, int format2);
 
-bool valid_zqt(PACKFILE *f);
-
-void get_questpwd(char *encrypted_pwd, short pwdkey, char *pwd);
-
 void update_guy_1(guydata *tempguy);
 void initMsgStr(MsgStr *str);
 void init_msgstrings(int start, int end);
@@ -116,8 +112,6 @@ int readsfx(PACKFILE *f, zquestheader *Header, bool keepdata);
 int readitemdropsets(PACKFILE *f, word version, word build, bool keepdata);
 int readfavorites(PACKFILE *f, int, word, bool keepdata);
 
-
-int get_version_and_build(PACKFILE *f, word *version, word *build);
 
 extern void delete_combo_aliases();
 void reset_subscreen(subscreen_group *tempss);

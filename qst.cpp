@@ -25,7 +25,6 @@
 #include "subscr.h"
 #include "zc_custom.h"
 #include "sfx.h"
-#include "md5.h"
 
 #ifndef _AL_MALLOC
 #define _AL_MALLOC(a) _al_malloc(a)
@@ -230,45 +229,6 @@ char *ordinal(int num)
         
     sprintf(ord_str,"%d%s",num%10000,end);
     return ord_str;
-}
-
-int get_version_and_build(PACKFILE *f, word *version, word *build)
-{
-    int ret;
-    *version=0;
-    *build=0;
-    byte temp_map_count=map_count;
-    byte temp_midi_flags[MIDIFLAGS_SIZE];
-    memcpy(temp_midi_flags, midi_flags, MIDIFLAGS_SIZE);
-    
-    zquestheader tempheader;
-    
-    if(!f)
-    {
-        return qe_invalid;
-    }
-    
-    ret=readheader(f, &tempheader, true);
-    
-    if(ret)
-    {
-        return ret;
-    }
-    
-    map_count=temp_map_count;
-    memcpy(midi_flags, temp_midi_flags, MIDIFLAGS_SIZE);
-    *version=tempheader.zelda_version;
-    *build=tempheader.build;
-    return 0;
-}
-
-bool valid_zqt(PACKFILE *f)
-{
-    if(!f)
-        return false;
-        
-    //for now, everything else is valid
-    return true;
 }
 
 PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefilename, bool compressed,bool encrypted)
@@ -1008,28 +968,6 @@ INLINE int tcmbflag2(int map, int pos)
     return TheMaps[map*MAPSCRS+TEMPLATE2].sflag[pos];
 }
 
-
-void get_questpwd(char *encrypted_pwd, short pwdkey, char *pwd)
-{
-    char temp_pwd[30];
-    memset(temp_pwd,0,30);
-    
-    if(pwdkey!=0)
-    {
-        memcpy(temp_pwd,encrypted_pwd,30);
-        temp_pwd[29]=0;
-        
-        for(int i=0; i<30; i++)
-        {
-            temp_pwd[i] -= pwdkey;
-            int t=pwdkey>>15;
-            pwdkey = (pwdkey<<1)+t;
-        }
-    }
-    
-    memcpy(pwd,temp_pwd,30);
-}
-
 int readheader(PACKFILE *f, zquestheader *Header, bool keepdata)
 {
     word dummyw;
@@ -1040,9 +978,8 @@ int readheader(PACKFILE *f, zquestheader *Header, bool keepdata)
     byte temp_map_count;
     byte temp_midi_flags[MIDIFLAGS_SIZE];
     word version;
-    char temp_pwd[30], temp_pwd2[30];
+    char temp_pwd[30];
     short temp_pwdkey;
-    cvs_MD5Context ctx;
     memset(temp_midi_flags, 0, MIDIFLAGS_SIZE);
     memset(&tempheader, 0, sizeof(tempheader));
     
@@ -1177,11 +1114,6 @@ int readheader(PACKFILE *f, zquestheader *Header, bool keepdata)
         {
             return qe_invalid;
         }
-        
-        get_questpwd(temp_pwd, temp_pwdkey, temp_pwd2);
-        cvs_MD5Init(&ctx);
-        cvs_MD5Update(&ctx, (const unsigned char*)temp_pwd2, (unsigned)strlen(temp_pwd2));
-        cvs_MD5Final(tempheader.pwd_hash, &ctx);
         
         if(tempheader.zelda_version < 0x177)                       // lacks new header stuff...
         {
@@ -1341,11 +1273,6 @@ int readheader(PACKFILE *f, zquestheader *Header, bool keepdata)
             {
                 return qe_invalid;
             }
-            
-            get_questpwd(temp_pwd, temp_pwdkey, temp_pwd2);
-            cvs_MD5Init(&ctx);
-            cvs_MD5Update(&ctx, (const unsigned char*)temp_pwd2, (unsigned)strlen(temp_pwd2));
-            cvs_MD5Final(tempheader.pwd_hash, &ctx);
         }
         else
         {

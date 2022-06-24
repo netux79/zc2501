@@ -2376,8 +2376,6 @@ int main(int argc, char* argv[])
     
     zcmusic_init();
     
-//  setPackfilePassword(datapwd);
-    
     // load the data files
     Z_message("Loading data files:\n");
     
@@ -2419,7 +2417,6 @@ int main(int argc, char* argv[])
     
     Z_message("OK\n");
     
-//  setPackfilePassword(NULL);
     packfile_password(NULL);
     
     Z_message("SFX.Dat...");
@@ -2589,9 +2586,7 @@ int main(int argc, char* argv[])
     set_close_button_callback((void (*)()) hit_close_button);
     set_window_title("Zelda Classic");
 
-    //setPackfilePassword(datapwd);
     int ret = loadquest(quest_path,&QHeader,&QMisc,tunes+ZC_MIDI_COUNT);
-    //setPackfilePassword(NULL);
     if (ret)
     {
         Z_message("FAIL (Error loading:  %s: %s)\n", get_filename(quest_path),

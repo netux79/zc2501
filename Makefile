@@ -17,7 +17,7 @@ ZELDA_PREFIX = zelda
 
 ZELDA_EXE = $(ZELDA_PREFIX)$(EXEEXT)
 
-ZELDA_OBJECTS = colors.o decorations.o defdata.o ending.o ffscript.o gamedata.o guys.o items.o link.o maps.o md5.o pal.o particles.o qst.o script_drawing.o sprite.o subscr.o tiles.o title.o weapons.o zc_custom.o zc_items.o zc_sprite.o zc_subscr.o zc_sys.o zcmusic.o zelda.o zscriptversion.o zsys.o
+ZELDA_OBJECTS = colors.o decorations.o defdata.o ending.o ffscript.o gamedata.o guys.o items.o link.o maps.o pal.o particles.o qst.o script_drawing.o sprite.o subscr.o tiles.o title.o weapons.o zc_custom.o zc_items.o zc_sprite.o zc_subscr.o zc_sys.o zcmusic.o zelda.o zscriptversion.o zsys.o
 
 .PHONY: default veryclean clean all msg linux done
 
@@ -58,13 +58,11 @@ link.o: link.cpp colors.h decorations.h ffscript.h guys.h items.h link.h maps.h 
 	$(CC) $(OPTS) $(CFLAG) -c link.cpp -o link.o $(SFLAG)
 maps.o: maps.cpp colors.h ffscript.h guys.h items.h link.h maps.h pal.h particles.h qst.h sfx.h sprite.h subscr.h tiles.h weapons.h zc_custom.h zc_subscr.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c maps.cpp -o maps.o $(SFLAG)
-md5.o: md5.cpp md5.h
-	$(CC) $(OPTS) $(CFLAG) -c md5.cpp -o md5.o $(SFLAG)
 pal.o: pal.cpp colors.h items.h link.h maps.h pal.h qst.h sfx.h sprite.h subscr.h tiles.h zc_custom.h zc_sys.h zcmusic.h zdefs.h zelda.h zeldadat.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c pal.cpp -o pal.o $(SFLAG)
 particles.o: particles.cpp particles.h sprite.h zdefs.h
 	$(CC) $(OPTS) $(CFLAG) -c particles.cpp -o particles.o $(SFLAG)
-qst.o: qst.cpp colors.h defdata.h guys.h items.h md5.h qst.h sfx.h sprite.h subscr.h tiles.h weapons.h zc_custom.h zcmusic.h zdefs.h zsys.h
+qst.o: qst.cpp colors.h defdata.h guys.h items.h qst.h sfx.h sprite.h subscr.h tiles.h weapons.h zc_custom.h zcmusic.h zdefs.h zsys.h
 	$(CC) $(OPTS) $(CFLAG) -c qst.cpp -o qst.o $(SFLAG)
 script_drawing.o: script_drawing.cpp ffscript.h maps.h rendertarget.h script_drawing.h tiles.h zelda.h
 	$(CC) $(OPTS) $(CFLAG) -c script_drawing.cpp -o script_drawing.o $(SFLAG)

@@ -130,8 +130,6 @@ extern "C"
         //lock mutex
         pthread_mutex_lock(&playlistmutex);
         //do all kinds of gymnastics to get around Allegro stupidity
-//	char *oldpwd = getCurPackfilePassword();
-//	setPackfilePassword(NULL);
         std::vector<ZCMUSIC*>::iterator b = playlist.begin();
         
         while(b != playlist.end())
@@ -175,9 +173,6 @@ extern "C"
         }
         
         pthread_mutex_unlock(&playlistmutex);
-//	setPackfilePassword(oldpwd);
-//	if(oldpwd != NULL)
-//		delete[] oldpwd;
         return true;
     }
     
