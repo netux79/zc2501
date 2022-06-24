@@ -922,19 +922,10 @@ int save_savedgames()
 
 void load_game_icon(gamedata *g)
 {
-    int ring=0;
-    
     flushItemCache();
-    int maxringid = getHighestLevelOfFamily(&zinit, itemsbuf, itype_ring);
+    int maxringid = getHighestLevelOfFamily(g, itemsbuf, itype_ring);
     
-    if(maxringid != -1)
-    {
-        ring = itemsbuf[maxringid].fam_type;
-    }
-    
-    //blue rings now start at level 2 for some reason, account for that -DD
-    ring = ring ? ring-1 : 0;
-    ring = zc_min(ring, 3);
+    int ring = (maxringid != -1) ? itemsbuf[maxringid].fam_type-1 : 0;
     
     int t = QMisc.icons[ring];
     
