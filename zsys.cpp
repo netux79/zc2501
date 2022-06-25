@@ -135,16 +135,6 @@ float vbound(float x,float low,float high)
     return x;
 }
 
-int used_switch(int argc,char *argv[],const char *s)
-{
-    // assumes a switch won't be in argv[0]
-    for(int i=1; i<argc; i++)
-        if(stricmp(argv[i],s)==0)
-            return i;
-            
-    return 0;
-}
-
 void set_bit(byte *bitstr,int bit,byte val)
 {
     bitstr += bit>>3;

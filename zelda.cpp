@@ -289,8 +289,6 @@ dword getNumGlobalArrays()
 int resx,resy,scrx,scry;
 bool sbig;                                                  // big screen
 int screen_scale = 2; //default = 2 (640x480)
-bool scanlines;                                             //do scanlines if sbig==1
-
 
 // quest file data
 zquestheader QHeader;
@@ -578,17 +576,9 @@ LinkClass   Link;
 #include "maps.h"
 #include "subscr.h"
 #include "guys.h"
-
 #include "title.h"
 #include "ending.h"
-
 #include "zc_sys.h"
-
-// Wait... this is only used by ffscript.cpp!?
-void addLwpn(int x,int y,int z,int id,int type,int power,int dir, int parentid)
-{
-    Lwpns.add(new weapon((fix)x,(fix)y,(fix)z,id,type,power,dir,-1,parentid));
-}
 
 void ALLOFF(bool messagesToo, bool decorationsToo)
 {
@@ -1377,7 +1367,7 @@ void restart_level()
 
 void putintro()
 {
-    if(!stricmp("                                                                        ", DMaps[currdmap].intro))
+    if(!strcmp("                                                                        ", DMaps[currdmap].intro))
     {
         introclk=intropos=72;
         return;
@@ -2347,7 +2337,7 @@ int main(int argc, char* argv[])
     framebuf  = create_bitmap_ex(8,256,224);
     temp_buf  = create_bitmap_ex(8,256,224);
     scrollbuf = create_bitmap_ex(8,512,406);
-    tmp_scr   = create_bitmap_ex(8,320,240);
+    tmp_scr   = create_bitmap_ex(8,256,224);
     tmp_bmp   = create_bitmap_ex(8,32,32);
     prim_bmp  = create_bitmap_ex(8,512,512);
     msgdisplaybuf = create_bitmap_ex(8,256, 176);
@@ -2496,53 +2486,10 @@ int main(int argc, char* argv[])
         guy_string[i] = new char[64];
     }
     
-    for(int i=0; i<512; i++)
-    {
-        ffscripts[i] = new ffscript[1];
-        ffscripts[i][0].command = 0xFFFF;
-    }
-    
-    for(int i=0; i<256; i++)
-    {
-        itemscripts[i] = new ffscript[1];
-        itemscripts[i][0].command = 0xFFFF;
-    }
-    
-    for(int i=0; i<256; i++)
-    {
-        guyscripts[i] = new ffscript[1];
-        guyscripts[i][0].command = 0xFFFF;
-    }
-    
-    for(int i=0; i<256; i++)
-    {
-        wpnscripts[i] = new ffscript[1];
-        wpnscripts[i][0].command = 0xFFFF;
-    }
-    
-    for(int i=0; i<256; i++)
-    {
-        screenscripts[i] = new ffscript[1];
-        screenscripts[i][0].command = 0xFFFF;
-    }
-    
-    for(int i=0; i<NUMSCRIPTGLOBAL; i++)
-    {
-        globalscripts[i] = new ffscript[1];
-        globalscripts[i][0].command = 0xFFFF;
-    }
-    
-    for(int i=0; i<3; i++)
-    {
-        linkscripts[i] = new ffscript[1];
-        linkscripts[i][0].command = 0xFFFF;
-    }
+    init_scripts();
     
     //script drawing bitmap allocation
     zscriptDrawingRenderTarget = new ZScriptDrawingRenderTarget();
-    
-    
-    // initialize sound driver
     
     Z_message("Initializing sound driver... ");
     
@@ -2792,41 +2739,8 @@ void quit_game()
     
     Z_message("Script buffers... \n");
     
-    for(int i=0; i<512; i++)
-    {
-        if(ffscripts[i]!=NULL) delete [] ffscripts[i];
-    }
-    
-    for(int i=0; i<256; i++)
-    {
-        if(itemscripts[i]!=NULL) delete [] itemscripts[i];
-    }
-    
-    for(int i=0; i<256; i++)
-    {
-        if(guyscripts[i]!=NULL) delete [] guyscripts[i];
-    }
-    
-    for(int i=0; i<256; i++)
-    {
-        if(wpnscripts[i]!=NULL) delete [] wpnscripts[i];
-    }
-    
-    for(int i=0; i<256; i++)
-    {
-        if(screenscripts[i]!=NULL) delete [] screenscripts[i];
-    }
-    
-    for(int i=0; i<NUMSCRIPTGLOBAL; i++)
-    {
-        if(globalscripts[i]!=NULL) delete [] globalscripts[i];
-    }
-    
-    for(int i=0; i<3; i++)
-    {
-        if(linkscripts[i]!=NULL) delete [] linkscripts[i];
-    }
-    
+    delete_scripts();
+
     delete zscriptDrawingRenderTarget;
     
     //for(int i=0; i<map_count*MAPSCRS; i++)

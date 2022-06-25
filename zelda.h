@@ -83,7 +83,6 @@ void Z_eventlog(const char *format, ...);
 void Z_scripterrlog(const char * const format, ...);
 
 // zelda.cc
-void addLwpn(int x,int y,int z,int id,int type,int power,int dir, int parentid);
 void ALLOFF(bool messagesToo = true, bool decorationsToo = true);
 void centerLink();
 fix  LinkX();
@@ -271,9 +270,6 @@ dword getNumGlobalArrays();
 extern int  resx,resy,scrx,scry;
 extern bool sbig;                                           // big screen
 extern int screen_scale; //user adjustable screen size.
-
-extern bool scanlines;                                      //do scanlines if sbig==1
-
 extern char *quest_path;
 extern gamedata *saves;
 extern gamedata *game;

@@ -5726,6 +5726,11 @@ void do_loadnpc(const bool v)
     }
 }
 
+void addLwpn(int x,int y,int z,int id,int type,int power,int dir, int parentid)
+{
+    Lwpns.add(new weapon((fix)x,(fix)y,(fix)z,id,type,power,dir,-1,parentid));
+}
+
 void do_createlweapon(const bool v)
 {
     const long32 ID = SH::get_arg(sarg1, v) / 10000;

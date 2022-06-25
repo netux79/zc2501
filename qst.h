@@ -124,6 +124,8 @@ void reset_weaponname(int i);
 void init_guys(int guyversion);
 void init_item_drop_sets();
 void init_favorites();
+void init_scripts();
+void delete_scripts();
 
 #endif                                                      // _ZC_QST_H_
 

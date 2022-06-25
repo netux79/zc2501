@@ -102,7 +102,6 @@ void load_game_configs()
     resy = get_config_int(cfg_sect,"resy",480);
     //screen_scale = get_config_int(cfg_sect,"screen_scale",2);
     
-    scanlines = get_config_int(cfg_sect,"scanlines",0)!=0;
     fullscreen = get_config_int(cfg_sect,"fullscreen",1);
     
     heart_beep = get_config_int(cfg_sect,"heart_beep",1)!=0;
@@ -159,7 +158,6 @@ void save_game_configs()
     //set_config_int(cfg_sect,"screen_scale",screen_scale);
     //set_config_int(cfg_sect,"sbig",sbig);
     
-    set_config_int(cfg_sect,"scanlines",scanlines);
     set_config_int(cfg_sect,"heart_beep",heart_beep);
     set_config_int(cfg_sect,"use_sfx_dat",sfxdat);
     set_config_int(cfg_sect,"fullscreen",fullscreen);
@@ -313,250 +311,6 @@ qword trianglelines[16]=
 };
 
 word screen_triangles[28][32];
-/*
-  qword triangles[4][16]= //[direction][value]
-  {
-  {
-  0x00000000, 0x10000000, 0x21000000, 0x32100000, 0x43210000, 0x54321000, 0x65432100, 0x76543210, 0x87654321, 0x88765432, 0x88876543, 0x88887654, 0x88888765, 0x88888876, 0x88888887, 0x88888888
-  },
-  {
-  0x00000000, 0xF0000000, 0xEF000000, 0xFDF00000, 0xCFDF0000, 0xBCFDF000, 0xABCFDF00, 0x9ABCFDF0, 0x89ABCFDF, 0x889ABCFD, 0x8889ABCD, 0x88889ABC, 0x888889AB, 0x8888889A, 0x88888889, 0x88888888
-  },
-  {
-  0x00000000, 0x00000001, 0x00000012, 0x00000123, 0x00001234, 0x00012345, 0x00123456, 0x01234567, 0x12345678, 0x23456788, 0x34567888, 0x45678888, 0x56788888, 0x67888888, 0x78888888, 0x88888888
-  },
-  {
-  0x00000000, 0x0000000F, 0x000000FE, 0x00000FED, 0x0000FEDC, 0x000FEDCB, 0x00FEDCBA, 0x0FEDCBA9, 0xFEDCBA98, 0xEDCBA988, 0xDCBA9888, 0xCBA98888, 0xBA988888, 0xA9888888, 0x98888888, 0x88888888
-  }
-  };
-  */
-
-
-/*
-  byte triangles[4][16][8]= //[direction][value][line]
-  {
-  {
-  {
-  0,  0,  0,  0,  0,  0,  0,  0
-  },
-  {
-  1,  0,  0,  0,  0,  0,  0,  0
-  },
-  {
-  2,  1,  0,  0,  0,  0,  0,  0
-  },
-  {
-  3,  2,  1,  0,  0,  0,  0,  0
-  },
-  {
-  4,  3,  2,  1,  0,  0,  0,  0
-  },
-  {
-  5,  4,  3,  2,  1,  0,  0,  0
-  },
-  {
-  6,  5,  4,  3,  2,  1,  0,  0
-  },
-  {
-  7,  6,  5,  4,  3,  2,  1,  0
-  },
-  {
-  8,  7,  6,  5,  4,  3,  2,  1
-  },
-  {
-  8,  8,  7,  6,  5,  4,  3,  2
-  },
-  {
-  8,  8,  8,  7,  6,  5,  4,  3
-  },
-  {
-  8,  8,  8,  8,  7,  6,  5,  4
-  },
-  {
-  8,  8,  8,  8,  8,  7,  6,  5
-  },
-  {
-  8,  8,  8,  8,  8,  8,  7,  6
-  },
-  {
-  8,  8,  8,  8,  8,  8,  8,  7
-  },
-  {
-  8,  8,  8,  8,  8,  8,  8,  8
-  }
-  },
-  {
-  {
-  0,  0,  0,  0,  0,  0,  0,  0
-  },
-  {
-  15,  0,  0,  0,  0,  0,  0,  0
-  },
-  {
-  14, 15,  0,  0,  0,  0,  0,  0
-  },
-  {
-  13, 14, 15,  0,  0,  0,  0,  0
-  },
-  {
-  12, 13, 14, 15,  0,  0,  0,  0
-  },
-  {
-  11, 12, 13, 14, 15,  0,  0,  0
-  },
-  {
-  10, 11, 12, 13, 14, 15,  0,  0
-  },
-  {
-  9, 10, 11, 12, 13, 14, 15,  0
-  },
-  {
-  8,  9, 10, 11, 12, 13, 14, 15
-  },
-  {
-  8,  8,  9, 10, 11, 12, 13, 14
-  },
-  {
-  8,  8,  8,  9, 10, 11, 12, 13
-  },
-  {
-  8,  8,  8,  8,  9, 10, 11, 12
-  },
-  {
-  8,  8,  8,  8,  8,  9, 10, 11
-  },
-  {
-  8,  8,  8,  8,  8,  8,  9, 10
-  },
-  {
-  8,  8,  8,  8,  8,  8,  8,  9
-  },
-  {
-  8,  8,  8,  8,  8,  8,  8,  8
-  }
-  },
-  {
-  {
-  0,  0,  0,  0,  0,  0,  0,  0
-  },
-  {
-  0,  0,  0,  0,  0,  0,  0,  1
-  },
-  {
-  0,  0,  0,  0,  0,  0,  1,  2
-  },
-  {
-  0,  0,  0,  0,  0,  1,  2,  3
-  },
-  {
-  0,  0,  0,  0,  1,  2,  3,  4
-  },
-  {
-  0,  0,  0,  1,  2,  3,  4,  5
-  },
-  {
-  0,  0,  1,  2,  3,  4,  5,  6
-  },
-  {
-  0,  1,  2,  3,  4,  5,  6,  7
-  },
-  {
-  1,  2,  3,  4,  5,  6,  7,  8
-  },
-  {
-  2,  3,  4,  5,  6,  7,  8,  8
-  },
-  {
-  3,  4,  5,  6,  7,  8,  8,  8
-  },
-  {
-  4,  5,  6,  7,  8,  8,  8,  8
-  },
-  {
-  5,  6,  7,  8,  8,  8,  8,  8
-  },
-  {
-  6,  7,  8,  8,  8,  8,  8,  8
-  },
-  {
-  7,  8,  8,  8,  8,  8,  8,  8
-  },
-  {
-  8,  8,  8,  8,  8,  8,  8,  8
-  }
-  },
-  {
-  {
-  0,  0,  0,  0,  0,  0,  0,  0
-  },
-  {
-  0,  0,  0,  0,  0,  0,  0, 15
-  },
-  {
-  0,  0,  0,  0,  0,  0, 15, 14
-  },
-  {
-  0,  0,  0,  0,  0, 15, 14, 13
-  },
-  {
-  0,  0,  0,  0, 15, 14, 13, 12
-  },
-  {
-  0,  0,  0, 15, 14, 13, 12, 11
-  },
-  {
-  0,  0, 15, 14, 13, 12, 11, 10
-  },
-  {
-  0, 15, 14, 13, 12, 11, 10,  9
-  },
-  {
-  15, 14, 13, 12, 11, 10,  9,  8
-  },
-  {
-  14, 13, 12, 11, 10,  9,  8,  8
-  },
-  {
-  13, 12, 11, 10,  9,  8,  8,  8
-  },
-  {
-  12, 11, 10,  9,  8,  8,  8,  8
-  },
-  {
-  11, 10,  9,  8,  8,  8,  8,  8
-  },
-  {
-  10,  9,  8,  8,  8,  8,  8,  8
-  },
-  {
-  9,  8,  8,  8,  8,  8,  8,  8
-  },
-  {
-  8,  8,  8,  8,  8,  8,  8,  8
-  }
-  }
-  };
-  */
-
-
-
-/*
-  for (int blockrow=0; blockrow<30; ++i)
-  {
-  for (int linerow=0; linerow<8; ++i)
-  {
-  qword *triangleline=(qword*)(tmp_scr->line[(blockrow*8+linerow)]);
-  for (int blockcolumn=0; blockcolumn<40; ++i)
-  {
-  triangleline=triangles[0][screen_triangles[blockrow][blockcolumn]][linerow];
-  ++triangleline;
-  }
-  }
-  }
-  */
-
-// the ULL suffixes are to prevent this warning:
-// warning: integer constant is too large for "long" type
 
 qword triangles[4][16][8]= //[direction][value][line]
 {
@@ -1396,13 +1150,12 @@ void black_opening(BITMAP *dest,int x,int y,int a,int max_a)
         double new_w=(w/2)+abs(w/2-x);
         double new_h=(h/2)+abs(h/2-y);
         int r=int(sqrt((new_w*new_w)+(new_h*new_h))*a/max_a);
-        //circlefill(tmp_scr,x,y,a<<3,0);
         circlefill(tmp_scr,x,y,r,0);
         break;
     }
     }
     
-    masked_blit(tmp_scr,dest,0,0,0,0,320,240);
+    masked_blit(tmp_scr,dest,0,0,0,0,w,h);
 }
 
 //----------------------------------------------------------------
@@ -2876,37 +2629,27 @@ void draw_lens_over()
 
 //----------------------------------------------------------------
 
-void draw_wavy(BITMAP *source, BITMAP *target, int amplitude, bool interpol)
+void draw_wavy(BITMAP *buffer, int amplitude)
 {
     //recreating a big bitmap every frame is highly sluggish.
     static BITMAP *wavebuf = create_bitmap_ex(8,288,240-original_playing_field_offset);
     
     clear_to_color(wavebuf,0);
-    blit(source,wavebuf,0,original_playing_field_offset,16,0,256,224-original_playing_field_offset);
+    blit(buffer,wavebuf,0,original_playing_field_offset,16,0,256,224-original_playing_field_offset);
     
-    int ofs;
-    //  int amplitude=8;
-    //  int wavelength=4;
     amplitude = zc_min(2048,amplitude); // some arbitrary limit to prevent crashing
     int amp2=168;
     int i=frame%amp2;
     
     for(int j=0; j<168; j++)
     {
-        if(j&1 && interpol)
-        {
-            ofs=int(sin((double(i+j)*2*PI/amp2))*amplitude);
-        }
-        else
-        {
-            ofs=-int(sin((double(i+j)*2*PI/amp2))*amplitude);
-        }
+        int ofs=-int(sin((double(i+j)*2*PI/amp2))*amplitude);
         
         if(ofs)
         {
             for(int k=0; k<256; k++)
             {
-                target->line[j+original_playing_field_offset][k]=wavebuf->line[j][k+ofs+16];
+                buffer->line[j+original_playing_field_offset][k]=wavebuf->line[j][k+ofs+16];
             }
         }
     }
@@ -2976,9 +2719,6 @@ void draw_fuzzy(int fuzz)
 
 void updatescr(bool allowwavy)
 {
-    static BITMAP *wavybuf = create_bitmap_ex(8,256,224);
-    static BITMAP *panorama = create_bitmap_ex(8,256,224);
-     
     if(!Playing)
         black_opening_count=0;
         
@@ -3025,11 +2765,9 @@ void updatescr(bool allowwavy)
         wavy = (DMaps[currdmap].flags&dmfWAVY ? 4 : 0);
     }
     
-    blit(framebuf, wavybuf, 0, 0, 0, 0, 256, 224);
-    
     if(wavy && Playing && allowwavy)
     {
-        draw_wavy(framebuf, wavybuf, wavy,false);
+        draw_wavy(framebuf, wavy);
     }
     
     if(clearwavy)
@@ -3037,28 +2775,24 @@ void updatescr(bool allowwavy)
     else if(Playing && !Paused)
         wavy--; // Wavy was set by a script. Decrement it.
         
-    if(!(msgdisplaybuf->clip) && Playing && msgpos && !screenscrolling)
+    /*if(!(msgdisplaybuf->clip) && Playing && msgpos && !screenscrolling)
     {
         masked_blit(msgdisplaybuf,framebuf,0,0,0,playing_field_offset,256,168);
-    }
+    }*/
     
     bool nosubscr = (tmpscr->flags3&fNOSUBSCR && !(tmpscr->flags3&fNOSUBSCROFFSET));
     
+    /* Use tmp_scr as buffer when we want to display panorama screen */
     if(nosubscr)
     {
-        rectfill(panorama,0,0,255,passive_subscreen_height/2,0);
-        rectfill(panorama,0,168+passive_subscreen_height/2,255,168+passive_subscreen_height-1,0);
-        blit(wavybuf,panorama,0,playing_field_offset,0,passive_subscreen_height/2,256,224-passive_subscreen_height);
+        rectfill(tmp_scr,0,0,255,passive_subscreen_height/2,0);
+        rectfill(tmp_scr,0,168+passive_subscreen_height/2,255,168+passive_subscreen_height-1,0);
+        blit(framebuf,tmp_scr,0,playing_field_offset,0,passive_subscreen_height/2,256,224-passive_subscreen_height);
     }
     
     //TODO: Optimize blit 'overcalls' -Gleeok
-    BITMAP *source = nosubscr ? panorama : wavybuf;
-    BITMAP *target = NULL;
-    
-    target=screen;
-        
-//  static BITMAP *tempscreen=NULL;
-    static BITMAP *scanlinesbmp=NULL;
+    BITMAP *source = nosubscr ? tmp_scr : framebuf;
+    BITMAP *target = screen;
     
     if(resx != SCREEN_W || resy != SCREEN_H)
     {
@@ -3079,22 +2813,7 @@ void updatescr(bool allowwavy)
     
     if(sbig)
     {
-        if(scanlines)
-        {
-            if(!scanlinesbmp)
-                scanlinesbmp = create_bitmap_ex(8, sx, sy);
-                
-            stretch_blit(source, scanlinesbmp, 0, 0, 256, 224, 0, 0, sx, sy);
-            
-            for(int i=0; i<224; ++i)
-                _allegro_hline(scanlinesbmp, 0, (i*screen_scale)+1, sx, BLACK);
-                
-            blit(scanlinesbmp, target, 0, 0, scrx+32-mx, scry+8-my, sx, sy);
-        }
-        else
-        {
-            stretch_blit(source, target, 0, 0, 256, 224, scrx+32-mx, scry+8-my, sx, sy);
-        }
+        stretch_blit(source, target, 0, 0, 256, 224, scrx+32-mx, scry+8-my, sx, sy);
         
         if(quakeclk>0)
             rectfill(target, // I don't know if these are right...
@@ -3103,9 +2822,6 @@ void updatescr(bool allowwavy)
                      scrx+32 - mx + sx, //x2
                      scry+8 - my + sy + (16 * scale_mul), //y2
                      0);
-                     
-        //stretch_blit(nosubscr?panorama:wavybuf,target,0,0,256,224,scrx+32-128,scry+8-112,512,448);
-        //if(quakeclk>0) rectfill(target,scrx+32-128,scry+8-112+448,scrx+32-128+512,scry+8-112+456,0);
     }
     else
     {
@@ -3120,8 +2836,6 @@ void updatescr(bool allowwavy)
     if(Paused)
         show_paused(target);
         
-    //if(panorama!=NULL) destroy_bitmap(panorama);
-    
     ++framecnt;
 }
 

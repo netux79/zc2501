@@ -6659,9 +6659,8 @@ bool is_string_command(int command)
     return false;
 }
 
-void reset_scripts()
+void delete_scripts()
 {
-    //OK, who spaced this? ;)
     for(int i=0; i<NUMSCRIPTFFC; i++)
     {
         if(ffscripts[i]!=NULL) delete [] ffscripts[i];
@@ -6696,8 +6695,10 @@ void reset_scripts()
     {
         if(linkscripts[i]!=NULL) delete [] linkscripts[i];
     }
-    
-    
+}
+
+void init_scripts()
+{
     for(int i=0; i<NUMSCRIPTFFC; i++)
     {
         ffscripts[i] = new ffscript[1];
@@ -12267,8 +12268,6 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
     {
         itemmap[i] = pair<string,string>("","");
     }
-    
-    reset_scripts();
     
     zquestheader tempheader;
     memset(&tempheader, 0, sizeof(zquestheader));
