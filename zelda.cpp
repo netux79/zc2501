@@ -92,7 +92,7 @@ bool dmap_list_zero=true;
 RGB_MAP rgb_table;
 COLOR_MAP trans_table, trans_table2;
 
-BITMAP     *framebuf, *scrollbuf, *tmp_bmp, *tmp_scr, *msgdisplaybuf, *pricesdisplaybuf, *real_screen, *temp_buf, *prim_bmp;
+BITMAP     *framebuf, *scrollbuf, *tmp_scr, *msgdisplaybuf, *pricesdisplaybuf, *real_screen, *prim_bmp, *lens_scr = NULL;
 DATAFILE   *data, *sfxdata, *fontsdata, *mididata;
 FONT       *nfont, *zfont, *z3font, *z3smallfont, *deffont, *lfont, *lfont_l, *pfont, *mfont, *ztfont, *sfont, *sfont2, *sfont3, *spfont, *ssfont1, *ssfont2, *ssfont3, *ssfont4, *gblafont,
            *goronfont, *zoranfont, *hylian1font, *hylian2font, *hylian3font, *hylian4font, *gboraclefont, *gboraclepfont, *dsphantomfont, *dsphantompfont;
@@ -2335,16 +2335,14 @@ int main(int argc, char* argv[])
     Z_message("Allocating bitmap buffers... ");
     
     framebuf  = create_bitmap_ex(8,256,224);
-    temp_buf  = create_bitmap_ex(8,256,224);
     scrollbuf = create_bitmap_ex(8,512,406);
-    tmp_scr   = create_bitmap_ex(8,256,224);
-    tmp_bmp   = create_bitmap_ex(8,32,32);
+    tmp_scr   = create_bitmap_ex(8,320,224);
     prim_bmp  = create_bitmap_ex(8,512,512);
     msgdisplaybuf = create_bitmap_ex(8,256, 176);
     msgbmpbuf = create_bitmap_ex(8, 512+16, 512+16);
     pricesdisplaybuf = create_bitmap_ex(8,256, 176);
     
-    if(!framebuf || !scrollbuf || !tmp_bmp || !tmp_scr || !msgdisplaybuf || !pricesdisplaybuf)
+    if(!framebuf || !scrollbuf || !tmp_scr || !prim_bmp ||!msgdisplaybuf || !msgbmpbuf || !pricesdisplaybuf)
     {
         Z_error("Error");
         quit_game();
@@ -2667,11 +2665,8 @@ void quit_game()
     Z_message("Freeing Data: \n");
     
     if(game) delete game;
-    
     if(data) unload_datafile(data);
-    
     if(fontsdata) unload_datafile(fontsdata);
-    
     if(sfxdata) unload_datafile(sfxdata);
     
     //if(mididata) unload_datafile(mididata);
@@ -2682,12 +2677,11 @@ void quit_game()
     destroy_bitmap(framebuf);
     destroy_bitmap(scrollbuf);
     destroy_bitmap(tmp_scr);
-    destroy_bitmap(tmp_bmp);
     destroy_bitmap(prim_bmp);
-    set_clip_state(msgdisplaybuf, 1);
     destroy_bitmap(msgdisplaybuf);
-    set_clip_state(pricesdisplaybuf, 1);
+    destroy_bitmap(msgbmpbuf);
     destroy_bitmap(pricesdisplaybuf);
+    if (lens_scr) destroy_bitmap(lens_scr);
     
     Z_message("Subscreens... \n");
     

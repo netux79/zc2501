@@ -2600,12 +2600,8 @@ void draw_lens_under(BITMAP *dest, bool layer)
     }
 }
 
-BITMAP *lens_scr_d; // The "d" is for "destructible"!
-
 void draw_lens_over()
 {
-    // Oh, what the heck.
-    static BITMAP *lens_scr = NULL;
     static int last_width = -1;
     int width = itemsbuf[current_item_id(itype_lens,true)].misc1;
     
@@ -2631,11 +2627,8 @@ void draw_lens_over()
 
 void draw_wavy(BITMAP *buffer, int amplitude)
 {
-    //recreating a big bitmap every frame is highly sluggish.
-    static BITMAP *wavebuf = create_bitmap_ex(8,288,240-original_playing_field_offset);
-    
-    clear_to_color(wavebuf,0);
-    blit(buffer,wavebuf,0,original_playing_field_offset,16,0,256,224-original_playing_field_offset);
+    clear_to_color(tmp_scr,0);
+    blit(buffer,tmp_scr,0,original_playing_field_offset,16,0,256,224-original_playing_field_offset);
     
     amplitude = zc_min(2048,amplitude); // some arbitrary limit to prevent crashing
     int amp2=168;
@@ -2649,7 +2642,7 @@ void draw_wavy(BITMAP *buffer, int amplitude)
         {
             for(int k=0; k<256; k++)
             {
-                buffer->line[j+original_playing_field_offset][k]=wavebuf->line[j][k+ofs+16];
+                buffer->line[j+original_playing_field_offset][k]=tmp_scr->line[j][k+ofs+16];
             }
         }
     }

@@ -283,6 +283,8 @@ void ending()
         putendmsg(tmpmsg[2],32,112,6,noproc);
     }
     
+    BITMAP *tmp_bmp = create_bitmap_ex(8, 32, 32);
+
     for(int f=408; f<927; f++)
     {
         /*
@@ -399,6 +401,7 @@ void ending()
         }
     }
     
+    destroy_bitmap(tmp_bmp);
     clear_bitmap(scrollbuf);
     blit(framebuf,scrollbuf,0,0,0,0,256,224);
     endingpal();

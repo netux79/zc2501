@@ -2557,27 +2557,27 @@ void draw_screen(mapscr* this_screen, bool showlink)
     //1. Draw some layers onto scrollbuf with clipping
     //2. Blit scrollbuf onto framebuf
     //3. Draw some sprites onto framebuf
-    //4. Blit framebuf onto temp_buf
-    //5. Draw some layers onto temp_buf and scrollbuf
-    //6. Blit temp_buf onto framebuf with clipping
-    //6b. Draw the subscreen onto temp_buf, without clipping
+    //4. Blit framebuf onto tmp_scr
+    //5. Draw some layers onto tmp_scr and scrollbuf
+    //6. Blit tmp_scr onto framebuf with clipping
+    //6b. Draw the subscreen onto tmp_scr, without clipping
     //7. Draw some flying sprites onto framebuf
-    //8. Blit frame_buf onto temp_buf
-    //9. Draw some layers onto temp_buf
-    //10. Blit temp_buf onto framebuf with clipping
+    //8. Blit frame_buf onto tmp_scr
+    //9. Draw some layers onto tmp_scr
+    //10. Blit tmp_scr onto framebuf with clipping
     //11. Draw some text on framebuf and scrollbuf
     //12. Draw the subscreen onto framebuf, without clipping
     clear_bitmap(framebuf);
     set_clip_rect(framebuf,0,0,256,224);
     
-    clear_bitmap(temp_buf);
-    set_clip_state(temp_buf,1);
-    set_clip_rect(temp_buf,draw_screen_clip_rect_x1,draw_screen_clip_rect_y1,draw_screen_clip_rect_x2,draw_screen_clip_rect_y2);
+    clear_bitmap(tmp_scr);
+    set_clip_state(tmp_scr,1);
+    set_clip_rect(tmp_scr,draw_screen_clip_rect_x1,draw_screen_clip_rect_y1,draw_screen_clip_rect_x2,draw_screen_clip_rect_y2);
     
     int cmby2=0;
     int pcounter;
     
-    //1. Draw some layers onto temp_buf
+    //1. Draw some layers onto tmp_scr
     clear_bitmap(scrollbuf);
     
     if(this_screen->flags7&fLAYER2BG)
@@ -2854,54 +2854,54 @@ void draw_screen(mapscr* this_screen, bool showlink)
         }
     }
     
-    //4. Blit framebuf onto temp_buf
+    //4. Blit framebuf onto tmp_scr
     
     //you have to do this, because do_layer calls overcombo, which doesn't respect the clipping rectangle, which messes up the triforce curtain. -DD
-    blit(framebuf, temp_buf, 0, 0, 0, 0, 256, 224);
+    blit(framebuf, tmp_scr, 0, 0, 0, 0, 256, 224);
     
-    //5. Draw some layers onto temp_buf and scrollbuf
+    //5. Draw some layers onto tmp_scr and scrollbuf
     
     if(!(this_screen->flags7&fLAYER3BG))
     {
-        do_layer(temp_buf,2, this_screen, 0, 0, 2, false, true);
+        do_layer(tmp_scr,2, this_screen, 0, 0, 2, false, true);
         do_layer(scrollbuf, 2, this_screen, 0, 0, 2);
         
         for(pcounter=0; pcounter<particles.Count(); pcounter++)
         {
             if(((particle*)particles.spr(pcounter))->layer==2)
             {
-                particles.spr(pcounter)->draw(temp_buf);
+                particles.spr(pcounter)->draw(tmp_scr);
             }
         }
     }
     
-    do_layer(temp_buf,3, this_screen, 0, 0, 2, false, true);
+    do_layer(tmp_scr,3, this_screen, 0, 0, 2, false, true);
     do_layer(scrollbuf, 3, this_screen, 0, 0, 2);
-    //do_primitives(temp_buf, 3, this_screen, 0,playing_field_offset);//don't uncomment me
+    //do_primitives(tmp_scr, 3, this_screen, 0,playing_field_offset);//don't uncomment me
     
     for(pcounter=0; pcounter<particles.Count(); pcounter++)
     {
         if(((particle*)particles.spr(pcounter))->layer==3)
         {
-            particles.spr(pcounter)->draw(temp_buf);
+            particles.spr(pcounter)->draw(tmp_scr);
         }
     }
     
-    do_layer(temp_buf,-1, this_screen, 0, 0, 2);
+    do_layer(tmp_scr,-1, this_screen, 0, 0, 2);
     do_layer(scrollbuf,-1, this_screen, 0, 0, 2);
     
     for(pcounter=0; pcounter<particles.Count(); pcounter++)
     {
         if(((particle*)particles.spr(pcounter))->layer==-1)
         {
-            particles.spr(pcounter)->draw(temp_buf);
+            particles.spr(pcounter)->draw(tmp_scr);
         }
     }
     
-    //6. Blit temp_buf onto framebuf with clipping
+    //6. Blit tmp_scr onto framebuf with clipping
     
     set_clip_rect(framebuf,draw_screen_clip_rect_x1,draw_screen_clip_rect_y1,draw_screen_clip_rect_x2,draw_screen_clip_rect_y2);
-    blit(temp_buf, framebuf, 0, 0, 0, 0, 256, 224);
+    blit(tmp_scr, framebuf, 0, 0, 0, 0, 256, 224);
     
     //6b. Draw the subscreen, without clipping
     if(!get_bit(quest_rules,qr_SUBSCREENOVERSPRITES))
@@ -2955,43 +2955,43 @@ void draw_screen(mapscr* this_screen, bool showlink)
         if(itemsbuf[items.spr(i)->id].family == itype_fairy && itemsbuf[items.spr(i)->id].misc3)
             items.spr(i)->draw(framebuf);
             
-    //8. Blit framebuf onto temp_buf
+    //8. Blit framebuf onto tmp_scr
     
-    masked_blit(framebuf, temp_buf, 0, 0, 0, 0, 256, 224);
+    masked_blit(framebuf, tmp_scr, 0, 0, 0, 0, 256, 224);
     
-    //9. Draw some layers onto temp_buf and scrollbuf
+    //9. Draw some layers onto tmp_scr and scrollbuf
     
     set_clip_rect(framebuf,draw_screen_clip_rect_x1,draw_screen_clip_rect_y1,draw_screen_clip_rect_x2,draw_screen_clip_rect_y2);
     
-    do_layer(temp_buf,4, this_screen, 0, 0, 2, false, true);
+    do_layer(tmp_scr,4, this_screen, 0, 0, 2, false, true);
     do_layer(scrollbuf, 4, this_screen, 0, 0, 2);
     
     for(pcounter=0; pcounter<particles.Count(); pcounter++)
     {
         if(((particle*)particles.spr(pcounter))->layer==4)
         {
-            particles.spr(pcounter)->draw(temp_buf);
+            particles.spr(pcounter)->draw(tmp_scr);
         }
     }
     
-    do_layer(temp_buf,-4, this_screen, 0, 0, 2); // overhead freeform combos!
+    do_layer(tmp_scr,-4, this_screen, 0, 0, 2); // overhead freeform combos!
     do_layer(scrollbuf, -4, this_screen, 0, 0, 2);
     
-    do_layer(temp_buf,5, this_screen, 0, 0, 2, false, true);
+    do_layer(tmp_scr,5, this_screen, 0, 0, 2, false, true);
     do_layer(scrollbuf, 5, this_screen, 0, 0, 2);
     
     for(pcounter=0; pcounter<particles.Count(); pcounter++)
     {
         if(((particle*)particles.spr(pcounter))->layer==5)
         {
-            particles.spr(pcounter)->draw(temp_buf);
+            particles.spr(pcounter)->draw(tmp_scr);
         }
     }
     
-    //10. Blit temp_buf onto framebuf with clipping
+    //10. Blit tmp_scr onto framebuf with clipping
     
     set_clip_rect(framebuf,draw_screen_clip_rect_x1,draw_screen_clip_rect_y1,draw_screen_clip_rect_x2,draw_screen_clip_rect_y2);
-    blit(temp_buf, framebuf, 0, 0, 0, 0, 256, 224);
+    blit(tmp_scr, framebuf, 0, 0, 0, 0, 256, 224);
     
     
     //11. Draw some text on framebuf
@@ -3016,6 +3016,7 @@ void draw_screen(mapscr* this_screen, bool showlink)
     }
     
     set_clip_rect(scrollbuf, 0, 0, scrollbuf->w, scrollbuf->h);
+    set_clip_rect(tmp_scr, 0, 0, tmp_scr->w, tmp_scr->h);
 }
 
 void put_door(BITMAP *dest,int t,int pos,int side,int type,bool redraw,bool even_walls)
