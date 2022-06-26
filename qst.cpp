@@ -335,7 +335,6 @@ int get_qst_buffers()
     for(int i(0); i<MAPSCRS; i++)
         TheMaps[i].zero_memory();
         
-    //memset(TheMaps, 0, sizeof(mapscr)*MAPSCRS); //shouldn't need this anymore
     Z_message("OK\n"); // Allocating map buffer...
     
     memrequested+=(sizeof(zcmap)*MAXMAPS2);
@@ -346,21 +345,8 @@ int get_qst_buffers()
         
     Z_message("OK\n");
     
-    // Allocating space for all 65535 strings uses up 10.62MB...
-    // The vast majority of finished quests (and I presume this will be consistent for all time) use < 1000 strings in total.
-    // (Shoelace's "Hero of Dreams" uses 1415.)
-    // So let's be a bit generous and allow 4096 initially.
-    // In the rare event that a quest overshoots this mark, we'll reallocate to the full 65535 later.
-    // I tested it and it worked without flaw on 6/6/11. - L.
-    msg_strings_size = 4096;
-    memrequested+=(sizeof(MsgStr)*msg_strings_size);
-    Z_message("Allocating string buffer (%s)... ", byte_conversion(sizeof(MsgStr)*msg_strings_size,memrequested,-1,-1));
-    
-    if((MsgStrings=(MsgStr*)malloc(sizeof(MsgStr)*msg_strings_size))==NULL)
-        return 0;
-        
-    memset(MsgStrings, 0, sizeof(MsgStr)*msg_strings_size);
-    Z_message("OK\n");                                        // Allocating string buffer...
+    /* We allocate the needed mem for the messages at load time when we know the exact qty required */
+    MsgStrings=NULL;
     
     memrequested+=(sizeof(DoorComboSet)*MAXDOORCOMBOSETS);
     Z_message("Allocating door combo buffer (%s)... ", byte_conversion(sizeof(DoorComboSet)*MAXDOORCOMBOSETS,memrequested,-1,-1));
@@ -1627,19 +1613,13 @@ int readstrings(PACKFILE *f, zquestheader *Header, bool keepdata)
         if((Header->zelda_version < 0x192)||
                 ((Header->zelda_version == 0x192)&&(Header->build<31)))
         {
-            strings_to_read=128;
-            temp_msg_count=Header->old_str_count;
-            
-            // Some sort of string count corruption seems to be common in old quests
-            if(temp_msg_count>128)
-            {
-                temp_msg_count=128;
-            }
+            /* Some sort of string count corruption seems to be common 
+               in old quests so we set the value manually */
+            strings_to_read=128; /* Header->old_str_count*/
         }
         else if((Header->zelda_version == 0x192)&&(Header->build<140))
         {
-            strings_to_read=255;
-            temp_msg_count=Header->old_str_count;
+            strings_to_read=255; /* Header->old_str_count; */
         }
         else
         {
@@ -1649,18 +1629,16 @@ int readstrings(PACKFILE *f, zquestheader *Header, bool keepdata)
             }
             
             strings_to_read=temp_msg_count;
-            
-            if(temp_msg_count >= msg_strings_size)
-            {
-                Z_message("Reallocating string buffer...\n");
-                
-                if((MsgStrings=(MsgStr*)_al_sane_realloc(MsgStrings,sizeof(MsgStr)*MAXMSGS))==NULL)
-                    return qe_nomem;
-                    
-                memset(MsgStrings, 0, sizeof(MsgStr)*MAXMSGS);
-                msg_strings_size = MAXMSGS;
-            }
         }
+
+        /* Allocate the exact memory needed for the strings */
+        Z_message("Reallocating string buffer...\n");
+        
+        msg_strings_size = strings_to_read;
+        if((MsgStrings=(MsgStr*)malloc(sizeof(MsgStr)*msg_strings_size))==NULL)
+            return qe_nomem;
+            
+        memset(MsgStrings, 0, sizeof(MsgStr)*msg_strings_size);
         
         //reset the message strings
         if(keepdata)
@@ -1762,16 +1740,14 @@ int readstrings(PACKFILE *f, zquestheader *Header, bool keepdata)
             return qe_invalid;
         }
         
-        if(temp_msg_count >= msg_strings_size)
-        {
-            Z_message("Reallocating string buffer...\n");
+        /* Allocate the exact memory needed for the strings */
+        Z_message("Reallocating string buffer...\n");
+        
+        msg_strings_size = temp_msg_count;
+        if((MsgStrings=(MsgStr*)malloc(sizeof(MsgStr)*msg_strings_size))==NULL)
+            return qe_nomem;
             
-            if((MsgStrings=(MsgStr*)_al_sane_realloc(MsgStrings,sizeof(MsgStr)*MAXMSGS))==NULL)
-                return qe_nomem;
-                
-            memset(MsgStrings, 0, sizeof(MsgStr)*MAXMSGS);
-            msg_strings_size = MAXMSGS;
-        }
+        memset(MsgStrings, 0, sizeof(MsgStr)*msg_strings_size);
         
         //reset the message strings
         if(keepdata)

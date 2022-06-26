@@ -297,7 +297,7 @@ byte                midi_flags[MIDIFLAGS_SIZE];
 byte                music_flags[MUSICFLAGS_SIZE];
 word                map_count;
 MsgStr              *MsgStrings;
-int					msg_strings_size;
+int                 msg_strings_size;
 DoorComboSet        *DoorComboSets;
 dmap                *DMaps;
 miscQdata           QMisc;
@@ -2669,10 +2669,6 @@ void quit_game()
     if(fontsdata) unload_datafile(fontsdata);
     if(sfxdata) unload_datafile(sfxdata);
     
-    //if(mididata) unload_datafile(mididata);
-    //  if(mappic)
-    //    destroy_bitmap(mappic);
-    
     Z_message("Bitmaps... \n");
     destroy_bitmap(framebuf);
     destroy_bitmap(scrollbuf);
@@ -2709,7 +2705,6 @@ void quit_game()
         
         if(customsfxdata[i].data!=NULL)
         {
-//      delete [] customsfxdata[i].data;
             free(customsfxdata[i].data);
         }
     }

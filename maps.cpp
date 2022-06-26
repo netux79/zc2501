@@ -4210,7 +4210,6 @@ void map_bkgsfx(bool on)
 
 /****  View Map  ****/
 
-//BITMAP *mappic = NULL;
 int mapres = 0;
 
 bool displayOnMap(int x, int y)

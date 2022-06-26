@@ -278,7 +278,6 @@ extern bool fake_pack_writing;
 #define TEMPLATE2       132
 
 #define MAXQTS           256
-#define MAXMSGS          65535
 #define MAXDOORCOMBOSETS 256
 #define MAXDMAPS         512                                 //this and
 #define MAXLEVELS        512								 //this should be the same number (was 32)
