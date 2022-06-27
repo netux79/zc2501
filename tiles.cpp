@@ -369,27 +369,6 @@ void reset_tile(tiledata *buf, int t, int format=1)
     {
         buf[t].data[i]=0;
     }
-    
-    /*if(zctiles)
-    {
-    if(tilebuf[t] != NULL) destroy_bitmap(tilebuf[t]);
-    tilebuf = create_bitmap_ex(8,16,16);
-    if(buf[t].format == tf4Bit)
-    {
-      for(int i=0; i<128; i++)
-      {
-        tilebuf[t]->line[i/8][(i%8)*2] = buf[t].data[i]>>4;
-    	tilebuf[t]->line[i/8][(i%8)*2+1] = buf[t].data[i]&0xF;
-      }
-    }
-    else
-    {
-      for(int i=0; i<256; i++)
-      {
-        tilebuf[t]->line[i/16][i%16] = buf[t].data[i];
-      }
-    }
-    }*/
 }
 
 //clears the tile buffer

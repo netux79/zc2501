@@ -2238,7 +2238,7 @@ int main(int argc, char* argv[])
         break;
         
     case 0:
-        Z_message("Zelda Classic %s (Build %d)",VerStr(ZELDA_VERSION), VERSION_BUILD);
+        Z_message("Zelda Classic %s (Build %d)\n",VerStr(ZELDA_VERSION), VERSION_BUILD);
     }
     
     // Before anything else, let's register our custom trace handler:
@@ -2246,7 +2246,7 @@ int main(int argc, char* argv[])
 
     set_uformat(U_ASCII);
 
-    Z_message("Initializing Allegro...");
+    Z_message("Initializing Allegro...\n");
     if(allegro_init() != 0)
     {
         Z_error("Failed Init!");
@@ -2257,7 +2257,7 @@ int main(int argc, char* argv[])
 
     // Allocate quest path buffer
     memrequested += 2048;
-    Z_message("Allocating quest path buffers (%s)...", byte_conversion(2048,memrequested,-1,-1));
+    Z_message("Allocating quest path buffer (%s)...", byte_conversion(2048,memrequested,-1,-1));
     quest_path = (char*)malloc(2048);
     memset(quest_path, 0, 2048);
 
@@ -2732,20 +2732,10 @@ void quit_game()
 
     delete zscriptDrawingRenderTarget;
     
-    //for(int i=0; i<map_count*MAPSCRS; i++)
-    //{
-    //if(TheMaps[i].data != NULL) delete [] TheMaps[i].data;
-    //if(TheMaps[i].sflag != NULL) delete [] TheMaps[i].sflag;
-    //if(TheMaps[i].cset != NULL) delete [] TheMaps[i].cset;
-    //}
-    
     Z_message("Deleting quest buffers... \n");
     del_qst_buffers();
     
     if(quest_path) free(quest_path);
-    
-    //if(TheMaps != NULL) free(TheMaps);
-    //if(ZCMaps != NULL) free(ZCMaps);
 }
 
 /*** end of zelda.cc ***/

@@ -6282,7 +6282,6 @@ bool eStalfos::animate(int index)
         if(dmisc9==e9tROPE && dmisc2==e2tBOMBCHU && !fired && hp<=0 && hp>-1000 && wpn>wEnemyWeapons)
         {
             hp=-1000;
-//        weapon *ew=new weapon(x,y,z, ewBomb, 0, d->wdp, dir);
             weapon *ew=new weapon(x,y,z, wpn, 0, wdp, dir,-1,getUID(),false);
             Ewpns.add(ew);
             

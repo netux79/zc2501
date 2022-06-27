@@ -26,11 +26,6 @@
 #include "zc_custom.h"
 #include "sfx.h"
 
-#ifndef _AL_MALLOC
-#define _AL_MALLOC(a) _al_malloc(a)
-#define _AL_FREE(a) _al_free(a)
-#endif
-
 using std::string;
 using std::pair;
 
@@ -328,15 +323,8 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
 
 int get_qst_buffers()
 {
-    memrequested+=(sizeof(mapscr)*MAPSCRS);
-    Z_message("Allocating map buffer (%s)... ", byte_conversion(sizeof(mapscr)*MAPSCRS,memrequested,-1, -1));
-    TheMaps.resize(MAPSCRS);
-    
-    for(int i(0); i<MAPSCRS; i++)
-        TheMaps[i].zero_memory();
-        
-    Z_message("OK\n"); // Allocating map buffer...
-    
+    /* TheMaps is allocated at quest load time */
+
     memrequested+=(sizeof(zcmap)*MAXMAPS2);
     Z_message("Allocating combo buffer (%s)... ", byte_conversion(sizeof(zcmap)*MAXMAPS2,memrequested,-1,-1));
     
@@ -488,7 +476,7 @@ static void *read_block(PACKFILE *f, int size, int alloc_size, bool keepdata)
 {
     void *p;
     
-    p = _AL_MALLOC(MAX(size, alloc_size));
+    p = malloc(MAX(size, alloc_size));
     
     if(!p)
     {
@@ -497,13 +485,13 @@ static void *read_block(PACKFILE *f, int size, int alloc_size, bool keepdata)
     
     if(!pfread(p,size,f,keepdata))
     {
-        _AL_FREE(p);
+        free(p);
         return NULL;
     }
     
     if(pack_ferror(f))
     {
-        _AL_FREE(p);
+        free(p);
         return NULL;
     }
     
@@ -522,7 +510,7 @@ static MIDI *read_midi(PACKFILE *f, bool)
     short divisions=0;
     int len=0;
     
-    m = (MIDI*)_AL_MALLOC(sizeof(MIDI));
+    m = (MIDI*)malloc(sizeof(MIDI));
     
     if(!m)
     {
@@ -597,12 +585,6 @@ void reset_tunes(zctune *tune)
         tune[i].reset();
     }
 }
-
-/*  For reference:
-
-  enum { qe_OK, qe_notfound, qe_invalid, qe_version, qe_obsolete,
-  qe_missing, qe_internal, qe_pwd, qe_match, qe_minver };
-  */
 
 int operator ==(DoorComboSet a, DoorComboSet b)
 {
@@ -2204,8 +2186,6 @@ void clear_screen(mapscr *temp_scr)
         temp_scr->ffheight[j] = 15;
         temp_scr->scriptData[j].a[0] = 10000;
         temp_scr->scriptData[j].a[1] = 10000;
-        //temp_scr->a[j][0] = 10000;
-        //temp_scr->a[j][1] = 10000;
     }
 }
 
@@ -6609,7 +6589,7 @@ int readffscript(PACKFILE *f, zquestheader *Header, bool keepdata)
             
             for(int i=0; i<numitembindings; i++)
             {
-                word id;
+                word id=0;
                 p_igetw(&id, f, true);
                 p_igetl(&bufsize, f, true);
                 buf = new char[bufsize+1];
@@ -9583,9 +9563,6 @@ int readmaps(PACKFILE *f, zquestheader *Header, bool keepdata)
     {
         const int _mapsSize = MAPSCRS*temp_map_count;
         TheMaps.resize(_mapsSize);
-        
-        for(int i(0); i<_mapsSize; i++)
-            TheMaps[i].zero_memory();
     }
     
     if(keepdata==true)
@@ -9593,72 +9570,9 @@ int readmaps(PACKFILE *f, zquestheader *Header, bool keepdata)
         memset(ZCMaps, 0, sizeof(zcmap)*MAXMAPS2);
     }
     
-    temp_mapscr.zero_memory();
-    
     for(int i=0; i<temp_map_count && i<MAXMAPS2; i++)
     {
         memset(&temp_map, 0, sizeof(zcmap));
-        /*if(version>12)
-        {
-            if(!p_getc(&(temp_map.tileWidth),f,true))
-            {
-              return qe_invalid;
-            }
-          if(!p_getc(&(temp_map.tileHeight),f,true))
-            {
-              return qe_invalid;
-            }
-          if(!p_igetw(&(temp_map.subaWidth),f,true))
-            {
-              return qe_invalid;
-            }
-          if(!p_igetw(&(temp_map.subaHeight),f,true))
-            {
-              return qe_invalid;
-            }
-          if(!p_igetw(&(temp_map.subpWidth),f,true))
-            {
-              return qe_invalid;
-            }
-          if(!p_igetw(&(temp_map.subpHeight),f,true))
-            {
-              return qe_invalid;
-            }
-          if(!p_igetw(&(temp_map.scrResWidth),f,true))
-            {
-              return qe_invalid;
-            }
-          if(!p_igetw(&(temp_map.scrResHeight),f,true))
-            {
-              return qe_invalid;
-            }
-          if(!p_igetw(&(temp_map.viewWidth),f,true))
-            {
-              return qe_invalid;
-            }
-          if(!p_igetw(&(temp_map.viewHeight),f,true))
-            {
-              return qe_invalid;
-            }
-          if(!p_igetw(&(temp_map.viewX),f,true))
-            {
-              return qe_invalid;
-            }
-          if(!p_igetw(&(temp_map.viewY),f,true))
-            {
-              return qe_invalid;
-            }
-          if(!p_getc(&(temp_map.subaTrans),f,true))
-            {
-              return qe_invalid;
-            }
-          if(!p_getc(&(temp_map.subpTrans),f,true))
-            {
-              return qe_invalid;
-            }
-        }
-        else
-        {*/
         temp_map.scrResWidth = 256;
         temp_map.scrResHeight = 224;
         temp_map.tileWidth = 16;
@@ -9674,7 +9588,6 @@ int readmaps(PACKFILE *f, zquestheader *Header, bool keepdata)
         temp_map.subpHeight = 56;
         temp_map.subpTrans = false;
         
-        //}
         for(int j=0; j<screens_to_read; j++)
         {
             scr=i*MAPSCRS+j;
@@ -9683,10 +9596,7 @@ int readmaps(PACKFILE *f, zquestheader *Header, bool keepdata)
             
             if(keepdata==true)
             {
-            
-//		delete_theMaps_data( scr );
                 TheMaps[scr] = temp_mapscr;
-                
             }
         }
         
@@ -9699,7 +9609,6 @@ int readmaps(PACKFILE *f, zquestheader *Header, bool keepdata)
                 int index = (i*MAPSCRS+132);
                 //.....hmmm. todo: test this. >_>
                 
-//		delete_theMaps_data(index);
                 TheMaps[index]=TheMaps[index-1];
                 
                 const int _mapsSize = (temp_map.tileWidth)*(temp_map.tileHeight);
@@ -9747,7 +9656,6 @@ int readmaps(PACKFILE *f, zquestheader *Header, bool keepdata)
         }
     }
     
-    clear_screen(&temp_mapscr);
     return 0;
 }
 
