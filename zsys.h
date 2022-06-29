@@ -13,15 +13,9 @@
 
 #include "zdefs.h"
 
-#define FILENAME8_3   0
-#define FILENAME8__   1
-#define FILENAMEALL   2
-
 char *time_str_short(dword time);
 char *time_str_med(dword time);
 
-void extract_name(char *path,char *name,int type);
-void temp_name(char temporaryname[]);
 int  vbound(int x,int low,int high);
 float vbound(float x,float low,float high);
 bool isinRect(int x,int y,int rx1,int ry1,int rx2,int ry2);

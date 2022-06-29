@@ -27,8 +27,8 @@
           break;        \
           default:      \
           pack_fclose(f);\
-          if(!oldquest) \
-            delete_file(tmpfilename);\
+          if(deletefilename[0] && exists(deletefilename))\
+          delete_file(deletefilename);\
           return ret;   \
           break;        \
         }
@@ -65,7 +65,6 @@ extern int favorite_combos[MAXFAVORITECOMBOS];
 extern int favorite_comboaliases[MAXFAVORITECOMBOALIASES];
 
 char *VerStr(int version);
-char *ordinal(int num);
 
 PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefilename, bool compressed, bool encrypted);
 
@@ -77,8 +76,6 @@ void fix_maps(mapscr *buf,int cnt);
 int get_qst_buffers();
 void del_qst_buffers();
 int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctune *tunes);
-
-char *byte_conversion(int number1, int number2, int format1, int format2);
 
 void update_guy_1(guydata *tempguy);
 void initMsgStr(MsgStr *str);
@@ -120,7 +117,6 @@ int setupsubscreens();
 void setupsfx();
 void reset_itembuf(itemdata *item, int id);
 void reset_itemname(int id);
-void reset_weaponname(int i);
 void init_guys(int guyversion);
 void init_item_drop_sets();
 void init_favorites();

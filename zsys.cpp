@@ -44,68 +44,6 @@ char *time_str_short(dword time)
     return s;
 }
 
-void extract_name(char *path,char *name,int type)
-{
-    int l=(int)strlen(path);
-    int i=l;
-    
-    while(i>0 && path[i-1]!='/' && path[i-1]!='\\')
-        --i;
-        
-    int n=0;
-    
-    if(type==FILENAME8__)
-    {
-        while(i<l && n<8 && path[i]!='.')
-            name[n++]=path[i++];
-    }
-    else if(type==FILENAME8_3)
-    {
-        while(i<l && n<12)
-            name[n++]=path[i++];
-    }
-    else
-    {
-        while(i<l)
-            name[n++]=path[i++];
-    }
-    
-    name[n]=0;
-}
-
-void temp_name(char temporaryname[])
-{
-    int tempnum;
-    
-    for(int i=0; i<1000; ++i)
-    {
-        sprintf(temporaryname, "%s", "00000000.tmp");
-        
-        for(int j=0; j<8; ++j)
-        {
-            tempnum=rand()%62;
-            
-            if(tempnum<26)
-            {
-                temporaryname[j]='A'+tempnum;
-            }
-            else if(tempnum<52)
-            {
-                temporaryname[j]='a'+tempnum-26;
-            }
-            else
-            {
-                temporaryname[j]='0'+tempnum-52;
-            }
-        }
-        
-        if(!exists(temporaryname))
-        {
-            return;
-        }
-    }
-}
-
 int bound(int &x,int low,int high)
 {
     if(x<low) x=low;

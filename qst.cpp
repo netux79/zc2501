@@ -45,10 +45,7 @@ extern comboclass          *combo_class_buf;
 extern guydata             *guysbuf;
 extern ZCHEATS             zcheats;
 extern zinitdata           zinit;
-//extern char                palnames[MAXLEVELS][17];
-extern int                 memrequested;
-extern char                *byte_conversion(int number1, int number2, int format1, int format2);
-string				             zScript;
+string                     zScript;
 std::map<int, pair<string,string> > ffcmap;
 std::map<int, pair<string,string> > globalmap;
 std::map<int, pair<string,string> > itemmap;
@@ -104,7 +101,6 @@ void delete_combo_aliases()
     
 }
 
-
 char *VerStr(int version)
 {
     static char ver_str[16];
@@ -112,124 +108,9 @@ char *VerStr(int version)
     return ver_str;
 }
 
-char *byte_conversion(int number1, int number2, int format1, int format2)
-{
-    static char num_str1[40];
-    static char num_str2[40];
-    static char num_str[80];
-    
-    if(format1==-1)                                           //auto
-    {
-        format1=1;                                              //bytes
-        
-        if(number1>1024)
-        {
-            format1=2;                                            //kilobytes
-        }
-        
-        if(number1>1024*1024)
-        {
-            format1=3;                                            //megabytes
-        }
-        
-        if(number1>1024*1024*1024)
-        {
-            format1=4;                                            //gigabytes (dude, what are you doing?)
-        }
-    }
-    
-    if(format2==-1)                                           //auto
-    {
-        format2=1;                                              //bytes
-        
-        if(number2>1024)
-        {
-            format2=2;                                            //kilobytes
-        }
-        
-        if(number2>1024*1024)
-        {
-            format2=3;                                            //megabytes
-        }
-        
-        if(number2>1024*1024*1024)
-        {
-            format2=4;                                            //gigabytes (dude, what are you doing?)
-        }
-    }
-    
-    switch(format1)
-    {
-    case 1:                                                 //bytes
-        sprintf(num_str1,"%db",number1);
-        break;
-        
-    case 2:                                                 //kilobytes
-        sprintf(num_str1,"%.2fk",float(number1)/1024);
-        break;
-        
-    case 3:                                                 //megabytes
-        sprintf(num_str1,"%.2fM",float(number1)/(1024*1024));
-        break;
-        
-    case 4:                                                 //gigabytes
-        sprintf(num_str1,"%.2fG",float(number1)/(1024*1024*1024));
-        break;
-        
-    default:
-        exit(1);
-        break;
-    }
-    
-    switch(format2)
-    {
-    case 1:                                                 //bytes
-        sprintf(num_str2,"%db",number2);
-        break;
-        
-    case 2:                                                 //kilobytes
-        sprintf(num_str2,"%.2fk",float(number2)/1024);
-        break;
-        
-    case 3:                                                 //megabytes
-        sprintf(num_str2,"%.2fM",float(number2)/(1024*1024));
-        break;
-        
-    case 4:                                                 //gigabytes
-        sprintf(num_str2,"%.2fG",float(number2)/(1024*1024*1024));
-        break;
-        
-    default:
-        exit(1);
-        break;
-    }
-    
-    sprintf(num_str, "%s/%s", num_str1, num_str2);
-    return num_str;
-}
-
-char *ordinal(int num)
-{
-    static const char *ending[4] = {"st","nd","rd","th"};
-    static char ord_str[8];
-    
-    char *end;
-    int t=(num%100)/10;
-    int n=num%10;
-    
-    if(n>=1 && n<4 && t!=1)
-        end = (char *)ending[n-1];
-    else
-        end = (char *)ending[3];
-        
-    sprintf(ord_str,"%d%s",num%10000,end);
-    return ord_str;
-}
-
 PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefilename, bool compressed,bool encrypted)
 {
-    char tmpfilename[32];
-    temp_name(tmpfilename);
+    const char *tmpfilename = "tmp007";
     int current_method=0;
     PACKFILE *f;
     
@@ -323,103 +204,52 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
 
 int get_qst_buffers()
 {
-    /* TheMaps is allocated at quest load time */
+    /* TheMaps: is allocated at quest load time */
 
-    memrequested+=(sizeof(zcmap)*MAXMAPS2);
-    Z_message("Allocating combo buffer (%s)... ", byte_conversion(sizeof(zcmap)*MAXMAPS2,memrequested,-1,-1));
-    
     if((ZCMaps=(zcmap*)malloc(sizeof(zcmap)*MAXMAPS2))==NULL)
         return 0;
-        
-    Z_message("OK\n");
-    
-    /* We allocate the needed mem for the messages at load time when we know the exact qty required */
-    MsgStrings=NULL;
-    
-    memrequested+=(sizeof(DoorComboSet)*MAXDOORCOMBOSETS);
-    Z_message("Allocating door combo buffer (%s)... ", byte_conversion(sizeof(DoorComboSet)*MAXDOORCOMBOSETS,memrequested,-1,-1));
+
+    /* MsgStrings: We allocate the needed mem for the messages at load time when we know the exact qty required */
     
     if((DoorComboSets=(DoorComboSet*)malloc(sizeof(DoorComboSet)*MAXDOORCOMBOSETS))==NULL)
         return 0;
         
-    Z_message("OK\n");                                        // Allocating door combo buffer...
-    
-    memrequested+=(sizeof(dmap)*MAXDMAPS);
-    Z_message("Allocating dmap buffer (%s)... ", byte_conversion(sizeof(dmap)*MAXDMAPS,memrequested,-1,-1));
-    
     if((DMaps=(dmap*)malloc(sizeof(dmap)*MAXDMAPS))==NULL)
         return 0;
-        
     memset(DMaps, 0, sizeof(dmap)*MAXDMAPS);
-    Z_message("OK\n");                                        // Allocating dmap buffer...
-    
-    memrequested+=(sizeof(newcombo)*MAXCOMBOS);
-    Z_message("Allocating combo buffer (%s)... ", byte_conversion(sizeof(newcombo)*MAXCOMBOS,memrequested,-1,-1));
     
     if((combobuf=(newcombo*)malloc(sizeof(newcombo)*MAXCOMBOS))==NULL)
         return 0;
-        
     memset(combobuf, 0, sizeof(newcombo)*MAXCOMBOS);
-    Z_message("OK\n");                                        // Allocating combo buffer...
-    
-    memrequested+=(newerpsTOTAL);
-    Z_message("Allocating color data buffer (%s)... ", byte_conversion(newerpsTOTAL,memrequested,-1,-1));
     
     if((colordata=(byte*)malloc(newerpsTOTAL))==NULL)
         return 0;
         
-    Z_message("OK\n");                                        // Allocating color data buffer...
-    
-    memrequested+=(NEWMAXTILES*(sizeof(tiledata)+tilesize(tf4Bit)));
-    Z_message("Allocating tile buffer (%s)... ", byte_conversion(NEWMAXTILES*(sizeof(tiledata)+tilesize(tf4Bit)),memrequested,-1,-1));
-    
     if((newtilebuf=(tiledata*)malloc(NEWMAXTILES*sizeof(tiledata)))==NULL)
         return 0;
-        
     memset(newtilebuf, 0, NEWMAXTILES*sizeof(tiledata));
     clear_tiles(newtilebuf);
-    Z_message("OK\n");                                        // Allocating tile buffer...
     
     // Big, ugly band-aid here. Perhaps the most common cause of random crashes
     // has been inadvertently accessing itemsbuf[-1]. All such crashes should be
     // fixed by ensuring there's actually itemdata there.
     // If you change this, be sure to update del_qst_buffers, too.
     
-    memrequested+=(sizeof(itemdata)*(MAXITEMS+1));
-    Z_message("Allocating item buffer (%s)... ", byte_conversion(sizeof(itemdata)*(MAXITEMS+1),memrequested,-1,-1));
-    
     if((itemsbuf=(itemdata*)malloc(sizeof(itemdata)*(MAXITEMS+1)))==NULL)
         return 0;
-        
     memset(itemsbuf,0,sizeof(itemdata)*(MAXITEMS+1));
     itemsbuf++;
-    Z_message("OK\n");                                        // Allocating item buffer...
-    
-    memrequested+=(sizeof(wpndata)*MAXWPNS);
-    Z_message("Allocating weapon buffer (%s)... ", byte_conversion(sizeof(wpndata)*MAXWPNS,memrequested,-1,-1));
-    
+
     if((wpnsbuf=(wpndata*)malloc(sizeof(wpndata)*MAXWPNS))==NULL)
         return 0;
-        
     memset(wpnsbuf,0,sizeof(wpndata)*MAXWPNS);
-    Z_message("OK\n");                                        // Allocating weapon buffer...
-    
-    memrequested+=(sizeof(guydata)*MAXGUYS);
-    Z_message("Allocating guy buffer (%s)... ", byte_conversion(sizeof(guydata)*MAXGUYS,memrequested,-1,-1));
     
     if((guysbuf=(guydata*)malloc(sizeof(guydata)*MAXGUYS))==NULL)
         return 0;
-        
     memset(guysbuf,0,sizeof(guydata)*MAXGUYS);
-    Z_message("OK\n");                                        // Allocating guy buffer...
-    
-    memrequested+=(sizeof(comboclass)*cMAX);
-    Z_message("Allocating combo class buffer (%s)... ", byte_conversion(sizeof(comboclass)*cMAX,memrequested,-1,-1));
     
     if((combo_class_buf=(comboclass*)malloc(sizeof(comboclass)*cMAX))==NULL)
         return 0;
-        
-    Z_message("OK\n");										// Allocating combo class buffer...
     
     return 1;
 }
@@ -3434,8 +3264,6 @@ int readmisc(PACKFILE *f, zquestheader *Header, miscQdata *Misc, bool keepdata)
 
 extern char *item_string[ITEMCNT];
 extern const char *old_item_string[iLast];
-extern char *weapon_string[WPNCNT];
-extern const char *old_weapon_string[wLast];
 
 int readitems(PACKFILE *f, word version, word build, bool keepdata, bool zgpmode)
 {
@@ -4698,42 +4526,8 @@ int readweapons(PACKFILE *f, zquestheader *Header, bool keepdata)
                 return qe_invalid;
             }
             
-            if(keepdata)
-            {
-                strcpy(weapon_string[i], tempname);
-            }
+            /* Do not keep weapon_string data for this port */
         }
-        
-        if(s_version<4)
-        {
-            if(keepdata)
-            {
-                strcpy(weapon_string[iwHover],old_weapon_string[iwHover]);
-                strcpy(weapon_string[wFIREMAGIC],old_weapon_string[wFIREMAGIC]);
-            }
-        }
-        
-        if(s_version<5)
-        {
-            if(keepdata)
-            {
-                strcpy(weapon_string[iwQuarterHearts],old_weapon_string[iwQuarterHearts]);
-            }
-        }
-        
-        /*
-            if (s_version<6)
-            {
-              strcpy(weapon_string[iwSideRaft],old_weapon_string[iwSideRaft]);
-              strcpy(weapon_string[iwSideLadder],old_weapon_string[iwSideLadder]);
-            }
-        */
-    }
-    else
-    {
-        if(keepdata)
-            for(int i=0; i<WPNCNT; i++)
-                reset_weaponname(i);
     }
     
     for(int i=0; i<weapons_to_read; i++)
@@ -4905,16 +4699,6 @@ void init_guys(int guyversion)
             guysbuf[i].misc3 = (i==eFGELTRIB ? eFZOL : eZOL);
         }
     }
-}
-
-void reset_weaponname(int i)
-{
-    if(i<wLast)
-    {
-        strcpy(weapon_string[i],old_weapon_string[i]);
-    }
-    else
-        sprintf(weapon_string[i],"zz%03d",i);
 }
 
 void init_item_drop_sets()
@@ -6774,25 +6558,8 @@ int read_one_ffscript(PACKFILE *f, zquestheader *, bool keepdata, int , word s_v
 }
 
 extern SAMPLE customsfxdata[WAV_COUNT];
-extern unsigned char customsfxflag[WAV_COUNT>>3];
 extern int sfxdat;
 extern DATAFILE *sfxdata;
-const char *old_sfx_string[Z35] =
-{
-    "Arrow", "Sword beam", "Bomb blast", "Boomerang",  "Subscreen cursor",
-    "Shield is hit", "Item chime",  "Roar (Dodongo, Gohma)", "Shutter", "Enemy dies",
-    "Enemy is hit", "Low hearts warning", "Fire", "Ganon's fanfare", "Boss is hit", "Hammer",
-    "Hookshot", "Message", "Link is hit", "Item fanfare", "Bomb placed", "Item pickup",
-    "Refill", "Roar (Aquamentus, Gleeok, Ganon)", "Item pickup 2", "Ocean ambience",
-    "Secret chime", "Link dies", "Stairs", "Sword", "Roar (Manhandla, Digdogger, Patra)",
-    "Wand magic", "Whistle", "Zelda's fanfare", "Charging weapon", "Charging weapon 2",
-    "Din's Fire", "Enemy falls from ceiling", "Farore's Wind", "Fireball", "Tall Grass slashed",
-    "Pound pounded", "Hover Boots", "Ice magic", "Jump", "Lens of Truth off", "Lens of Truth on",
-    "Nayru's Love shield", "Nayru's Love shield 2", "Push block", "Rock", "Spell rocket down",
-    "Spell rocket up", "Sword spin attack", "Splash", "Summon magic", "Sword tapping",
-    "Sword tapping (secret)", "Whistle whirlwind", "Cane of Byrna orbit"
-};
-char *sfx_string[WAV_COUNT];
 
 int readsfx(PACKFILE *f, zquestheader *Header, bool keepdata)
 {
@@ -6858,21 +6625,16 @@ int readsfx(PACKFILE *f, zquestheader *Header, bool keepdata)
         
     }
     
-    if(keepdata)
-        memcpy(customsfxflag, tempflag, WAV_COUNT>>3);
+    /*  data is not being kept in this port since
+        sfx names are not used: customsfxflag */
         
     if(s_version>4)
     {
         for(int i=1; i<WAV_COUNT; i++)
         {
-            if(keepdata)
-            {
-                sprintf(sfx_string[i],"s%03d",i);
-                
-                if((i<Z35))
-                    strcpy(sfx_string[i], old_sfx_string[i-1]);
-            }
-            
+            /*  data is not being kept in this port since
+                sfx names are not used */
+
             if((get_bit(tempflag, i-1) == 0) || i>=wavcount)
                 continue;
                 
@@ -6883,24 +6645,14 @@ int readsfx(PACKFILE *f, zquestheader *Header, bool keepdata)
                 return qe_invalid;
             }
             
-            if(keepdata)
-            {
-                strcpy(sfx_string[i], tempname);
-            }
+            /*  data is not being kept in this port since
+                sfx names are not used */
         }
     }
     else
     {
-        if(keepdata)
-        {
-            for(int i=1; i<WAV_COUNT; i++)
-            {
-                sprintf(sfx_string[i],"s%03d",i);
-                
-                if(i<Z35)
-                    strcpy(sfx_string[i], old_sfx_string[i-1]);
-            }
-        }
+        /*  data is not being kept in this port since
+            sfx names are not used */
     }
     
     //finally...  section data
@@ -7002,11 +6754,9 @@ int readsfx(PACKFILE *f, zquestheader *Header, bool keepdata)
         {
             if(customsfxdata[i].data!=NULL)
             {
-//        delete [] customsfxdata[i].data;
                 free(customsfxdata[i].data);
             }
             
-//      customsfxdata[i].data = new byte[(temp_sample.bits==8?1:2)*temp_sample.len];
             int len2 = (temp_sample.bits==8?1:2)*(temp_sample.stereo==0?1:2)*temp_sample.len;
             customsfxdata[i].data = calloc(len2,1);
             customsfxdata[i].bits = temp_sample.bits;
@@ -7041,15 +6791,6 @@ void setupsfx()
 {
     for(int i=1; i<WAV_COUNT; i++)
     {
-        sprintf(sfx_string[i],"s%03d",i);
-        
-        if(i<Z35)
-        {
-            strcpy(sfx_string[i], old_sfx_string[i-1]);
-        }
-        
-        memset(customsfxflag, 0, WAV_COUNT>>3);
-        
         int j=i;
         
         if(i>Z35)
@@ -7061,11 +6802,9 @@ void setupsfx()
         
         if(customsfxdata[j].data!=NULL)
         {
-//    delete [] customsfxdata[j].data;
             free(customsfxdata[j].data);
         }
         
-//    customsfxdata[j].data = new byte[(temp_sample->bits==8?1:2)*temp_sample->len];
         customsfxdata[j].data = calloc((temp_sample->bits==8?1:2)*(temp_sample->stereo == 0 ? 1 : 2)*temp_sample->len,1);
         customsfxdata[j].bits = temp_sample->bits;
         customsfxdata[j].stereo = temp_sample->stereo;
@@ -12094,42 +11833,12 @@ int readfavorites(PACKFILE *f, int, word, bool keepdata)
     return 0;
 }
 
-/*
-  switch (ret) {
-  case 0:
-  break;
-
-  case qe_invalid:
-  goto invalid;
-  break;
-  default:
-  pack_fclose(f);
-  if(!oldquest)
-  delete_file(tmpfilename);
-  return ret;
-  break;
-  }
-  */
-
-const char *skip_text[skip_max]=
-{
-    "skip_header", "skip_rules", "skip_strings", "skip_misc",
-    "skip_tiles", "skip_combos", "skip_comboaliases", "skip_csets",
-    "skip_maps", "skip_dmaps", "skip_doors", "skip_items",
-    "skip_weapons", "skip_colors", "skip_icons", "skip_initdata",
-    "skip_guys", "skip_linksprites", "skip_subscreens", "skip_ffscript",
-    "skip_sfx", "skip_midis", "skip_cheats", "skip_itemdropsets",
-    "skip_favorites"
-};
-
 int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctune *tunes)
 {
     combosread=false;
     mapsread=false;
     fixffcs=false;
     
-    char tmpfilename[32];
-    temp_name(tmpfilename);
     bool catchup=false;
     byte tempbyte;
     
@@ -12147,7 +11856,6 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
         globalmap[i] = pair<string,string>("","");
     }
     
-    //globalmap[3] = pair<string,string>("Slot 4: ~Continue", "~Continue");
     for(int i=0; i<NUMSCRIPTITEM-1; i++)
     {
         itemmap[i] = pair<string,string>("","");
@@ -12156,8 +11864,6 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
     zquestheader tempheader;
     memset(&tempheader, 0, sizeof(zquestheader));
     
-    // oldquest flag is set when an unencrypted qst file is suspected.
-    bool oldquest = false;
     int open_error=0;
     char deletefilename[1024];
     PACKFILE *f=open_quest_file(&open_error, filename, deletefilename, true, true);
@@ -12644,14 +12350,6 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
         pack_fclose(f);
     }
     
-    if(!oldquest)
-    {
-        if(exists(tmpfilename))
-        {
-            delete_file(tmpfilename);
-        }
-    }
-    
     if(fixffcs && combosread && mapsread)
     {
         for(int i=0; i<map_count; i++)
@@ -12690,21 +12388,12 @@ invalid:
         pack_fclose(f);
     }
     
-    if(!oldquest)
+    if(deletefilename[0] && exists(deletefilename))
     {
-        if(exists(tmpfilename))
-        {
-            delete_file(tmpfilename);
-        }
-        
-        if(deletefilename[0] && exists(deletefilename))
-        {
-            delete_file(deletefilename);
-        }
+        delete_file(deletefilename);
     }
     
     return qe_invalid;
-    
 }
 
 /*** end of qst.cc ***/

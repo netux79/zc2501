@@ -252,8 +252,7 @@ extern "C"
             p->type = ZCMF_OGG;
             p->playing = ZCM_STOPPED;
             ZCMUSIC *music=(ZCMUSIC*)p;
-            extract_name(filename, music->filename, FILENAMEALL);
-            music->filename[255]='\0';
+            strncpy(music->filename, get_filename(filename), sizeof(music->filename)-1);
             music->track=0;
             return music;
         }
@@ -280,8 +279,7 @@ extern "C"
             p->type = ZCMF_MP3;
             p->playing = ZCM_STOPPED;
             ZCMUSIC *music=(ZCMUSIC*)p;
-            extract_name(filename, music->filename, FILENAMEALL);
-            music->filename[255]='\0';
+            strncpy(music->filename, get_filename(filename), sizeof(music->filename)-1);
             music->track=0;
             return music;
         }
@@ -330,8 +328,7 @@ extern "C"
                 p->s = d;
                 p->p = NULL;
                 ZCMUSIC *music=(ZCMUSIC*)p;
-                extract_name(filename, music->filename, FILENAMEALL);
-                music->filename[255]='\0';
+                strncpy(music->filename, get_filename(filename), sizeof(music->filename)-1);
                 music->track=0;
                 return music;
             }
@@ -356,8 +353,7 @@ extern "C"
                     p->playing = ZCM_STOPPED;
                     p->emu = emu;
                     ZCMUSIC *music=(ZCMUSIC*)p;
-                    extract_name(filename, music->filename, FILENAMEALL);
-                    music->filename[255]='\0';
+                    strncpy(music->filename, get_filename(filename), sizeof(music->filename)-1);
                     music->track=0;
                     return music;
                 }

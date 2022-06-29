@@ -151,7 +151,6 @@ bool fake_pack_writing=false;
 combo_alias combo_aliases[MAXCOMBOALIASES];  //Temporarily here so ZC can compile. All memory from this is freed after loading the quest file.
 
 SAMPLE customsfxdata[WAV_COUNT];
-unsigned char customsfxflag[WAV_COUNT>>3];
 int sfxdat=1;
 
 int fullscreen;
@@ -165,7 +164,7 @@ int hs_startx, hs_starty, hs_xdist, hs_ydist, clockclk, clock_zoras[eMAXGUYS];
 int cheat_goto_dmap=0, cheat_goto_screen=0, currcset;
 int gfc, gfc2, pitx, pity, refill_what, refill_why, heart_beep_timer=0, new_enemy_tile_start=1580;
 int nets=1580, magicitem=-1,nayruitem=-1, magiccastclk, quakeclk=0, wavy=0, castx, casty, df_x, df_y, nl1_x, nl1_y, nl2_x, nl2_y;
-int magicdrainclk=0, conveyclk=3, memrequested=0;
+int magicdrainclk=0, conveyclk=3;
 int checkx, checky;
 int skipcont=0;
 
@@ -518,9 +517,7 @@ bool bad_version(int version)
     return false;
 }
 
-extern char *weapon_string[];
 extern char *item_string[];
-extern char *sfx_string[];
 extern char *guy_string[];
 
 
@@ -2255,9 +2252,6 @@ int main(int argc, char* argv[])
     
     three_finger_flag=false;
 
-    // Allocate quest path buffer
-    memrequested += 2048;
-    Z_message("Allocating quest path buffer (%s)...", byte_conversion(2048,memrequested,-1,-1));
     quest_path = (char*)malloc(2048);
     memset(quest_path, 0, 2048);
 
@@ -2461,17 +2455,6 @@ int main(int argc, char* argv[])
     for(int i=0; i<WAV_COUNT; i++)
     {
         customsfxdata[i].data=NULL;
-        sfx_string[i] = new char[36];
-    }
-    
-    for(int i=0; i<WAV_COUNT>>3; i++)
-    {
-        customsfxflag[i] = 0;
-    }
-    
-    for(int i=0; i<WPNCNT; i++)
-    {
-        weapon_string[i] = new char[64];
     }
     
     for(int i=0; i<ITEMCNT; i++)
@@ -2529,9 +2512,7 @@ int main(int argc, char* argv[])
     int ret = loadquest(quest_path,&QHeader,&QMisc,tunes+ZC_MIDI_COUNT);
     if (ret)
     {
-        Z_message("FAIL (Error loading:  %s: %s)\n", get_filename(quest_path),
-                qst_error[ret]);
-        printf("Error loading: %s, %s\n", get_filename(quest_path), qst_error[ret]);
+        Z_message("FAIL (Error loading:  %s: %s)\n", quest_path, qst_error[ret]);
         exit(-1);
     }
 
@@ -2701,8 +2682,6 @@ void quit_game()
     
     for(int i=0; i<WAV_COUNT; i++)
     {
-        delete [] sfx_string[i];
-        
         if(customsfxdata[i].data!=NULL)
         {
             free(customsfxdata[i].data);
@@ -2710,11 +2689,6 @@ void quit_game()
     }
     
     Z_message("Misc... \n");
-    
-    for(int i=0; i<WPNCNT; i++)
-    {
-        delete [] weapon_string[i];
-    }
     
     for(int i=0; i<ITEMCNT; i++)
     {

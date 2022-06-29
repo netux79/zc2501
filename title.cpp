@@ -576,8 +576,7 @@ int load_savedgames()
 {
     int ret;
     PACKFILE *f=NULL;
-    char tmpfilename[32];
-    temp_name(tmpfilename);
+    const char *tmpfilename = "tmpsav";
 
     /* Calculate the savefile name based on the quest filename */
     replace_extension(SAVE_FILE, quest_path, "sav", sizeof(SAVE_FILE));
@@ -891,8 +890,7 @@ int save_savedgames()
     if(saves==NULL)
         return 1;
         
-    char tmpfilename[32];
-    temp_name(tmpfilename);
+    const char *tmpfilename = "tmpsav";
     
     PACKFILE *f = pack_fopen(tmpfilename, F_WRITE_PACKED);
     

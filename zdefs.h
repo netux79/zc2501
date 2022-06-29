@@ -2029,7 +2029,6 @@ public:
     zctune(char _title[36], long32 _start, long32 _loop_start, long32 _loop_end, short _loop,short _volume, void *_data, byte _format)
         : start(_start), loop_start(_loop_start), loop_end(_loop_end), loop(_loop), volume(_volume), data(_data), format(_format)
     {
-        //memcpy(title, _title, 20); //NOT SAFE for short strings
         strncpy(title, _title, 36);
     }
     
@@ -2049,7 +2048,6 @@ public:
         loop = z.loop;
         flags = z.flags;
         volume = z.volume;
-        //memcpy(title, z.title,20); //NOT SAFE for short title strings
         strncpy(title, z.title, 36);
         data = z.data;
     }
