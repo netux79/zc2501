@@ -10,7 +10,6 @@
 
 #include "zsys.h"
 #include "zcmusic.h"
-#include "pthread.h"
 
 #include "gme/Nsf_Emu.h"
 #include "gme/Gbs_Emu.h"
@@ -26,8 +25,6 @@
 
 int zcmusic_bufsz = 64;
 static int zcmusic_bufsz_private = 64;
-
-pthread_mutex_t playlistmutex;
 
 typedef struct DUHFILE : public ZCMUSICBASE
 {
@@ -88,11 +85,6 @@ int gme_play(GMEFILE *gme, int vol);
 extern "C"
 {
 
-    void zcmusic_autopoll()
-    {
-        zcmusic_poll();
-    }
-    
     bool zcmusic_init(int flags)                              /* = -1 */
     {
         zcmusic_bufsz_private = zcmusic_bufsz;
@@ -119,17 +111,11 @@ extern "C"
             libflags |= ZCMF_GME;
         }
         
-        pthread_mutex_init(&playlistmutex,NULL);
-        
-        install_int_ex(zcmusic_autopoll, MSEC_TO_TIMER(25));
         return true;
     }
     
     bool zcmusic_poll(int flags)                              /* = -1 */
     {
-        //lock mutex
-        pthread_mutex_lock(&playlistmutex);
-        //do all kinds of gymnastics to get around Allegro stupidity
         std::vector<ZCMUSIC*>::iterator b = playlist.begin();
         
         while(b != playlist.end())
@@ -172,14 +158,11 @@ extern "C"
             }
         }
         
-        pthread_mutex_unlock(&playlistmutex);
         return true;
     }
     
     void zcmusic_exit()
     {
-        //lock mutex
-        pthread_mutex_lock(&playlistmutex);
         std::vector<ZCMUSIC*>::iterator b = playlist.begin();
         
         while(b != playlist.end())
@@ -189,7 +172,6 @@ extern "C"
         }
         
         playlist.clear();
-        pthread_mutex_unlock(&playlistmutex);
         
         if(libflags & ZCMF_DUH)
         {
@@ -473,9 +455,7 @@ error:
             {
                 zcm->position=0;
                 zcm->playing = ZCM_PLAYING;
-                pthread_mutex_lock(&playlistmutex);
                 playlist.push_back(zcm);
-                pthread_mutex_unlock(&playlistmutex);
             }
         }
         
@@ -489,8 +469,6 @@ error:
         // -1 (or if the default argument is invoked) will
         // toggle the current state; passing 1 will pause.
         if(zcm == NULL) return FALSE;
-        
-        pthread_mutex_lock(&playlistmutex);
         
         if(zcm->playing != ZCM_STOPPED)
         {
@@ -563,7 +541,6 @@ error:
             }
         }
         
-        pthread_mutex_unlock(&playlistmutex);
         return TRUE;
     }
     
@@ -572,8 +549,6 @@ error:
         // this function will stop playback of 'zcm' and reset
         // the stream position to the beginning.
         if(zcm == NULL) return FALSE;
-        
-        pthread_mutex_lock(&playlistmutex);
         
         switch(zcm->type & libflags)
         {
@@ -607,7 +582,6 @@ error:
             
         }
         
-        pthread_mutex_unlock(&playlistmutex);
         return TRUE;
     }
     
@@ -623,7 +597,6 @@ error:
         // don't want to leave an soon-to-be invalid pointers
         // lying around to cause crashes.
         {
-            pthread_mutex_lock(&playlistmutex);
             std::vector<ZCMUSIC*>::iterator b = playlist.begin();
             
             while(b != playlist.end())
@@ -637,8 +610,6 @@ error:
                     b++;
                 }
             }
-            
-            pthread_mutex_unlock(&playlistmutex);
         }
         
         switch(zcm->type & libflags)
@@ -720,7 +691,6 @@ error:
         case ZCMF_GME:
             if(((GMEFILE*)zcm)->emu != NULL)
             {
-                pthread_mutex_lock(&playlistmutex);
                 int t=((GMEFILE*)zcm)->emu->track_count();
                 
                 if(tracknum<0 || tracknum>=t)
@@ -730,7 +700,6 @@ error:
                 
                 ((GMEFILE*)zcm)->emu->start_track(tracknum);
                 zcm->track=tracknum;
-                pthread_mutex_unlock(&playlistmutex);
                 return tracknum;
             }
             else
