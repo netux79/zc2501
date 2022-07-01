@@ -126,7 +126,6 @@ int  init_game();
 int  cont_game();
 void restart_level();
 void load_game(gamedata *g);
-void show_ffscript_names();
 
 int get_currdmap();
 int get_dlevel();
@@ -144,8 +143,6 @@ INLINE void sfx(int index,int pan)
 {
     sfx(index,vbound(pan, 0, 255) ,false);
 }
-
-//INLINE void SCRFIX() { putpixel(screen,0,0,getpixel(screen,0,0)); }
 
 /**********************************/
 /******** Global Variables ********/
@@ -178,17 +175,6 @@ extern guydata  *guysbuf;
 extern item_drop_object    item_drop_sets[MAXITEMDROPSETS];
 extern ZCHEATS  zcheats;
 
-/*
-extern newcombo *combobuf;
-extern word animated_combo_table[MAXCOMBOS][2];             //[0]=position in act2, [1]=original tile
-extern word animated_combo_table4[MAXCOMBOS][2];            //[0]=combo, [1]=clock
-extern word animated_combos;
-extern word animated_combo_table2[MAXCOMBOS][2];             //[0]=position in act2, [1]=original tile
-extern word animated_combo_table24[MAXCOMBOS][2];            //[0]=combo, [1]=clock
-extern word animated_combos2;
-extern bool blank_tile_table[NEWMAXTILES];                  //keeps track of blank tiles
-extern bool blank_tile_quarters_table[NEWMAXTILES*4];       //keeps track of blank tiles
-*/
 extern bool ewind_restart;
 extern word     msgclk, msgstr, msgpos, msgptr, msgcolour, msgspeed,msg_w,
        msg_h,
@@ -218,7 +204,7 @@ extern int homescr,currscr,frame,currmap,dlevel,warpscr,worldscr;
 extern int newscr_clk,opendoors,currdmap,fadeclk,currgame,listpos;
 extern int lastentrance,lastentrance_dmap, prices[3],loadside, Bwpn, Awpn;
 extern int digi_volume,midi_volume,sfx_volume,emusic_volume,currmidi,hasitem,whistleclk,pan_style;
-extern int joystick_index,Akey,Bkey,Skey,Lkey,Rkey,Pkey,Exkey1,Exkey2,Exkey3,Exkey4,Abtn,Bbtn,Sbtn,Mbtn,Lbtn,Rbtn,Pbtn,Exbtn1,Exbtn2,Exbtn3,Exbtn4,Quit;
+extern int Akey,Bkey,Skey,Lkey,Rkey,Pkey,Exkey1,Exkey2,Exkey3,Exkey4,Quit;
 extern int DUkey, DDkey, DLkey, DRkey;
 extern int hs_startx, hs_starty, hs_xdist, hs_ydist, clockclk, clock_zoras[eMAXGUYS];
 extern int swordhearts[4], currcset, gfc, gfc2, pitx, pity, refill_what, refill_why;
@@ -226,10 +212,10 @@ extern int heart_beep_timer, new_enemy_tile_start, nets, magicitem, nayruitem;
 extern int magiccastclk, castx, casty, quakeclk, wavy, df_x, df_y, nl1_x, nl1_y, nl2_x, nl2_y, magicdrainclk, conveyclk;
 
 extern bool blockmoving;
-extern bool Throttlefps, Paused, ShowFPS, Playing, FrameSkip, TransLayers;
+extern bool Throttlefps, ShowFPS, Playing, TransLayers;
 extern bool refreshpal,blockpath,loaded_guys,freeze_guys;
 extern bool loaded_enemies,drawguys,watch;
-extern bool Udown,Ddown,Ldown,Rdown,Adown,Bdown,Sdown,Mdown,LBdown,RBdown,Pdown,Ex1down,Ex2down,Ex3down,Ex4down,AUdown,ADdown,ALdown,ARdown,F12,F11,F5,keyI, keyQ;
+extern bool Udown,Ddown,Ldown,Rdown,Adown,Bdown,Sdown,Mdown,LBdown,RBdown,Pdown,Ex1down,Ex2down,Ex3down,Ex4down,AUdown,ADdown,ALdown,ARdown;
 extern bool NESquit,boughtsomething;
 extern bool fixed_door, darkroom,naturaldark,BSZ;            //,NEWSUBSCR;
 extern bool hookshot_used, hookshot_frozen, pull_link, add_chainlink;
@@ -291,7 +277,6 @@ extern dmap                *DMaps;
 extern miscQdata           QMisc;
 extern std::vector<mapscr> TheMaps;
 extern zcmap               *ZCMaps;
-extern byte                *quest_file;
 
 /**********************************/
 /*********** Misc Data ************/

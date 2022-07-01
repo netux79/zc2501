@@ -14423,7 +14423,6 @@ void LinkClass::gameover()
     
     action=none;
     Playing=false;
-    Paused=false;
     
     game->set_deaths(zc_min(game->get_deaths()+1,999));
     dir=down;
@@ -14819,7 +14818,7 @@ void LinkClass::ganon_intro()
 
 void LinkClass::saved_Zelda()
 {
-    Playing=Paused=false;
+    Playing=false;
     action=won;
     Quit=qWON;
     hclk=0;

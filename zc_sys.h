@@ -30,7 +30,6 @@ void updatescr(bool allowwavy);
 void syskeys();
 void  onQuit();
 
-bool joybtn(int b);
 bool ReadKey(int k);
 void eat_buttons();
 
@@ -105,7 +104,6 @@ bool DrunkrPbtn();
 
 enum {bosCIRCLE=0, bosOVAL, bosTRIANGLE, bosSMAS, bosMAX};
 
-void show_paused(BITMAP *target);
 void show_fps(BITMAP *target);
 void show_saving(BITMAP *target);
 bool game_vid_mode(int mode,int wait);

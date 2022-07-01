@@ -91,7 +91,6 @@
 
 #define ZELDA_VERSION       0x0250                          //version of the program
 #define VERSION_BUILD       28                              //build number of this version
-#define IS_BETA             0                               //is this a beta?
 #define DATE_STR            "October 4, 2014"
 #define DATA_PASSWORD       "longtan"                       /* Password used to encrypt the game datafiles */
 

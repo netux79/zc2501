@@ -1607,7 +1607,7 @@ void titlescreen()
     int q=Quit;
     
     Quit=0;
-    Playing=Paused=false;
+    Playing=false;
     
     if(q==qCONT)
     {

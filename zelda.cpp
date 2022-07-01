@@ -158,7 +158,7 @@ int homescr,currscr,frame=0,currmap=0,dlevel,warpscr,worldscr;
 int newscr_clk=0,opendoors=0,currdmap=0,fadeclk=-1,currgame=0,listpos=0;
 int lastentrance=0,lastentrance_dmap=0,prices[3],loadside, Bwpn, Awpn;
 int digi_volume,midi_volume,sfx_volume,emusic_volume,currmidi,hasitem,whistleclk,pan_style;
-int joystick_index=0,Akey,Bkey,Skey,Lkey,Rkey,Pkey,Exkey1,Exkey2,Exkey3,Exkey4,Abtn,Bbtn,Sbtn,Mbtn,Lbtn,Rbtn,Pbtn,Exbtn1,Exbtn2,Exbtn3,Exbtn4,Quit=0;
+int Akey,Bkey,Skey,Lkey,Rkey,Pkey,Exkey1,Exkey2,Exkey3,Exkey4,Quit=0;
 int DUkey, DDkey, DLkey, DRkey;
 int hs_startx, hs_starty, hs_xdist, hs_ydist, clockclk, clock_zoras[eMAXGUYS];
 int cheat_goto_dmap=0, cheat_goto_screen=0, currcset;
@@ -168,12 +168,12 @@ int magicdrainclk=0, conveyclk=3;
 int checkx, checky;
 int skipcont=0;
 
-bool Throttlefps, Paused=false, ShowFPS;
-bool Playing, FrameSkip=false, TransLayers;
+bool Throttlefps, ShowFPS;
+bool Playing, TransLayers;
 bool refreshpal,blockpath,loaded_guys,freeze_guys,
      loaded_enemies,drawguys,watch;
 bool darkroom=false,naturaldark=false,BSZ;                         //,NEWSUBSCR;
-bool Udown,Ddown,Ldown,Rdown,Adown,Bdown,Sdown,Mdown,LBdown,RBdown,Pdown,Ex1down,Ex2down,Ex3down,Ex4down,AUdown,ADdown,ALdown,ARdown,F12,F11, F5,keyI, keyQ,
+bool Udown,Ddown,Ldown,Rdown,Adown,Bdown,Sdown,Mdown,LBdown,RBdown,Pdown,Ex1down,Ex2down,Ex3down,Ex4down,AUdown,ADdown,ALdown,ARdown,
      NESquit,boughtsomething=false,
      fixed_door=false, hookshot_used=false, hookshot_frozen=false,
      pull_link=false, add_chainlink=false, del_chainlink=false, hs_fix=false,
@@ -302,7 +302,6 @@ dmap                *DMaps;
 miscQdata           QMisc;
 std::vector<mapscr> TheMaps;
 zcmap               *ZCMaps;
-byte                *quest_file;
 dword               quest_map_pos[MAPSCRS*MAXMAPS2];
 
 char     *quest_path=NULL;
@@ -354,8 +353,6 @@ zctune tunes[MAXMIDIS] =
     zctune((char *)"Zelda - Title",       0,  -1,  -1,  0,  168,  NULL, 0),
     zctune((char *)"Zelda - Triforce",    0,  -1,  -1,  0,  168,  NULL, 0)
 };
-
-// emusic enhancedMusic[MAXMUSIC];
 
 FONT *setmsgfont()
 {
@@ -1415,23 +1412,6 @@ void putintro()
             ++intropos;
 }
 
-//static char *dirstr[4] = {"Up","Down","Left","Right"};
-//static char *dirstr[32] = {"U","D","L","R"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "};
-
-void show_ffscript_names()
-{
-    int ypos = 8;
-    
-    for(int i=0; i< MAXFFCS; i++)
-    {
-        if(tmpscr->ffscript[i])
-        {
-            textout_shadowed_ex(framebuf,font, ffcmap[tmpscr->ffscript[i]-1].second.c_str(),2,ypos,WHITE,BLACK,-1);
-            ypos+=12;
-        }
-    }
-}
-
 void do_magic_casting()
 {
     static int tempx, tempy;
@@ -2223,21 +2203,8 @@ char *get_cmd_arg(int argc, char *argv[])
 
 int main(int argc, char* argv[])
 {
-    switch(IS_BETA)
-    {
-    
-    case -1:
-        Z_message("Zelda Classic %s Alpha (Build %d)",VerStr(ZELDA_VERSION), VERSION_BUILD);
-        break;
-        
-    case 1:
-        Z_message("Zelda Classic %s Beta (Build %d)",VerStr(ZELDA_VERSION), VERSION_BUILD);
-        break;
-        
-    case 0:
-        Z_message("Zelda Classic %s (Build %d)\n",VerStr(ZELDA_VERSION), VERSION_BUILD);
-    }
-    
+    Z_message("Zelda Classic %s (Build %d)\n",VerStr(ZELDA_VERSION), VERSION_BUILD);
+
     // Before anything else, let's register our custom trace handler:
     register_trace_handler(zc_trace_handler);
 
@@ -2304,14 +2271,6 @@ int main(int argc, char* argv[])
         Z_error(allegro_error);
         quit_game();
     }
-    
-    if(install_joystick(JOY_TYPE_AUTODETECT) < 0)
-    {
-        Z_error(allegro_error);
-        quit_game();
-    }
-    
-    //set_keyboard_rate(1000,160);
     
     LOCK_VARIABLE(logic_counter);
     LOCK_FUNCTION(update_logic_counter);
@@ -2552,7 +2511,7 @@ int main(int argc, char* argv[])
         }
         
         tmpscr->flags3=0;
-        Playing=Paused=false;
+        Playing=false;
         
         switch(Quit)
         {

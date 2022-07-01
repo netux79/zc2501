@@ -38,12 +38,6 @@ extern LinkClass Link;
 extern sprite_list  guys, items, Ewpns, Lwpns, Sitems, chainlinks, decorations, particles;
 byte use_save_indicator;
 
-bool rF12();
-bool rF5();
-bool rF11();
-bool rI();
-bool rQ();
-
 /**********************************/
 /******** System functions ********/
 /**********************************/
@@ -52,11 +46,6 @@ static char cfg_sect[] = "zeldadx";
 
 void load_game_configs()
 {
-    joystick_index = get_config_int(cfg_sect,"joystick_index",0);
-    
-    if((unsigned int)joystick_index > 4)
-        joystick_index = 0; // 4 is the max number supported by allegro
-        
     Akey = get_config_int(cfg_sect,"key_a",KEY_ALT);
     Bkey = get_config_int(cfg_sect,"key_b",KEY_LCONTROL);
     Skey = get_config_int(cfg_sect,"key_s",KEY_ENTER);
@@ -72,18 +61,6 @@ void load_game_configs()
     DDkey = get_config_int(cfg_sect,"key_down", KEY_DOWN);
     DLkey = get_config_int(cfg_sect,"key_left", KEY_LEFT);
     DRkey = get_config_int(cfg_sect,"key_right",KEY_RIGHT);
-    
-    Abtn = get_config_int(cfg_sect,"btn_a",2);
-    Bbtn = get_config_int(cfg_sect,"btn_b",1);
-    Sbtn = get_config_int(cfg_sect,"btn_s",10);
-    Mbtn = get_config_int(cfg_sect,"btn_m",9);
-    Lbtn = get_config_int(cfg_sect,"btn_l",5);
-    Rbtn = get_config_int(cfg_sect,"btn_r",6);
-    Pbtn = get_config_int(cfg_sect,"btn_p",12);
-    Exbtn1 = get_config_int(cfg_sect,"btn_ex1",7);
-    Exbtn2 = get_config_int(cfg_sect,"btn_ex2",8);
-    Exbtn3 = get_config_int(cfg_sect,"btn_ex3",4);
-    Exbtn4 = get_config_int(cfg_sect,"btn_ex4",3);
     
     digi_volume = get_config_int(cfg_sect,"digi",248);
     midi_volume = get_config_int(cfg_sect,"midi",255);
@@ -111,7 +88,6 @@ void load_game_configs()
 
 void save_game_configs()
 {
-    set_config_int(cfg_sect,"joystick_index",joystick_index);
     set_config_int(cfg_sect,"key_a",Akey);
     set_config_int(cfg_sect,"key_b",Bkey);
     set_config_int(cfg_sect,"key_s",Skey);
@@ -128,18 +104,6 @@ void save_game_configs()
     set_config_int(cfg_sect,"key_left", DLkey);
     set_config_int(cfg_sect,"key_right",DRkey);
     
-    set_config_int(cfg_sect,"btn_a",Abtn);
-    set_config_int(cfg_sect,"btn_b",Bbtn);
-    set_config_int(cfg_sect,"btn_s",Sbtn);
-    set_config_int(cfg_sect,"btn_m",Mbtn);
-    set_config_int(cfg_sect,"btn_l",Lbtn);
-    set_config_int(cfg_sect,"btn_r",Rbtn);
-    set_config_int(cfg_sect,"btn_p",Pbtn);
-    set_config_int(cfg_sect,"btn_ex1",Exbtn1);
-    set_config_int(cfg_sect,"btn_ex2",Exbtn2);
-    set_config_int(cfg_sect,"btn_ex3",Exbtn3);
-    set_config_int(cfg_sect,"btn_ex4",Exbtn4);
-    
     set_config_int(cfg_sect,"digi",digi_volume);
     set_config_int(cfg_sect,"midi",midi_volume);
     set_config_int(cfg_sect,"sfx",sfx_volume);
@@ -153,10 +117,6 @@ void save_game_configs()
     
     set_config_int(cfg_sect,"resx",resx);
     set_config_int(cfg_sect,"resy",resy);
-    
-    //sbig depricated as of 2.5 RC3. handled exclusively by resx, resy now.
-    //set_config_int(cfg_sect,"screen_scale",screen_scale);
-    //set_config_int(cfg_sect,"sbig",sbig);
     
     set_config_int(cfg_sect,"heart_beep",heart_beep);
     set_config_int(cfg_sect,"use_sfx_dat",sfxdat);
@@ -196,7 +156,7 @@ int Z_init_timers()
     
     if(install_int_ex(fps_callback,SECS_TO_TIMER(1)))
         return 0;
-        
+
     return 1;
 }
 
@@ -206,24 +166,6 @@ void Z_remove_timers()
 }
 
 //----------------------------------------------------------------
-
-void show_paused(BITMAP *target)
-{
-    //  return;
-    char buf[7] = "PAUSED";
-    
-    for(int i=0; buf[i]!=0; i++)
-        buf[i]+=0x60;
-        
-    if(sbig)
-    {
-        int x = scrx+40-((screen_scale-1)*120);
-        int y = scry+224+((screen_scale-1)*104);
-        textout_ex(target,zfont,buf,x,y,-1,-1);
-    }
-    else
-        textout_ex(target,zfont,buf,scrx+40,scry+224,-1,-1);
-}
 
 void show_fps(BITMAP *target)
 {
@@ -2718,20 +2660,12 @@ void updatescr(bool allowwavy)
     if(black_opening_count<0) //shape is opening up
     {
         black_opening(framebuf,black_opening_x,black_opening_y,(66+black_opening_count),66);
-        
-        if(!Paused)
-        {
-            ++black_opening_count;
-        }
+        ++black_opening_count;
     }
     else if(black_opening_count>0) //shape is closing
     {
         black_opening(framebuf,black_opening_x,black_opening_y,black_opening_count,66);
-        
-        if(!Paused)
-        {
-            --black_opening_count;
-        }
+        --black_opening_count;
     }
     
     if(refreshpal)
@@ -2765,7 +2699,7 @@ void updatescr(bool allowwavy)
     
     if(clearwavy)
         wavy = 0; // Wavy was set by a DMap flag. Clear it.
-    else if(Playing && !Paused)
+    else if(Playing)
         wavy--; // Wavy was set by a script. Decrement it.
         
     /*if(!(msgdisplaybuf->clip) && Playing && msgpos && !screenscrolling)
@@ -2825,9 +2759,6 @@ void updatescr(bool allowwavy)
     
     if(ShowFPS)
         show_fps(target);
-        
-    if(Paused)
-        show_paused(target);
         
     ++framecnt;
 }
@@ -2890,8 +2821,6 @@ void syskeys()
         f_Quit(qEXIT);
     }
     
-    poll_joystick();
-    
     if(ReadKey(KEY_F1))
     {
         Throttlefps=!Throttlefps;
@@ -2899,10 +2828,6 @@ void syskeys()
     }
     
     if(ReadKey(KEY_F2))    ShowFPS=!ShowFPS;
-    
-    if(ReadKey(KEY_F3) && Playing)    Paused=!Paused;
-    
-    //if(ReadKey(KEY_F6))    if(!get_bit(quest_rules, qr_NOCONTINUE)) f_Quit(qQUIT);
     
     if(ReadKey(KEY_F9))    f_Quit(qRESET);
     
@@ -2912,7 +2837,7 @@ void syskeys()
     if(ReadKey(KEY_M))  game->set_magic(game->get_maxmagic());
     if(ReadKey(KEY_R))  game->set_drupy(999);
     if(ReadKey(KEY_B))  game->set_bombs(game->get_maxbombs());
-    if(rI())
+    if(ReadKey(KEY_C))
     {
         setClock(!getClock());
         cheat_superman=getClock();
@@ -2932,21 +2857,6 @@ void advanceframe(bool allowwavy, bool sfxcleanup)
     if(zcmusic!=NULL)
     {
         zcmusic_poll();
-    }
-    
-    while(Paused && !Quit)
-    {
-        // have to call this, otherwise we'll get an infinite loop
-        syskeys();
-        // to keep fps constant
-        updatescr(allowwavy);
-        throttleFPS();
-        
-        // to keep music playing
-        if(zcmusic!=NULL)
-        {
-            zcmusic_poll();
-        }
     }
     
     if(Quit)
@@ -3741,16 +3651,6 @@ int pan(int x)
 /******* Input Handlers ********/
 /*******************************/
 
-#define MAX_BUTTONS_CHK		13 // button range 0 - 12
-
-bool joybtn(int b)
-{
-    if(b == 0)
-        return false;
-        
-    return joy[joystick_index].button[b-1].b !=0;
-}
-
 static bool rButton(bool(proc)(),bool &flag)
 {
     if(!proc())
@@ -3776,31 +3676,24 @@ bool button_hold[18] = {false, false, false, false, false, false, false, false, 
 
 void load_control_state()
 {
-#define STICK_PRECISION   56 //define your own sensitivity
-
-    control_state[0]=key[DUkey]||joy[joystick_index].stick[0].axis[1].d1||joy[joystick_index].stick[0].axis[1].pos< -STICK_PRECISION;
-    control_state[1]=key[DDkey]||joy[joystick_index].stick[0].axis[1].d2||joy[joystick_index].stick[0].axis[1].pos > STICK_PRECISION;
-    control_state[2]=key[DLkey]||joy[joystick_index].stick[0].axis[0].d1||joy[joystick_index].stick[0].axis[0].pos< -STICK_PRECISION;
-    control_state[3]=key[DRkey]||joy[joystick_index].stick[0].axis[0].d2||joy[joystick_index].stick[0].axis[0].pos > STICK_PRECISION;
-    control_state[4]=key[Akey]||joybtn(Abtn);
-    control_state[5]=key[Bkey]||joybtn(Bbtn);
-    control_state[6]=key[Skey]||joybtn(Sbtn);
-    control_state[7]=key[Lkey]||joybtn(Lbtn);
-    control_state[8]=key[Rkey]||joybtn(Rbtn);
-    control_state[9]=key[Pkey]||joybtn(Pbtn);
-    control_state[10]=key[Exkey1]||joybtn(Exbtn1);
-    control_state[11]=key[Exkey2]||joybtn(Exbtn2);
-    control_state[12]=key[Exkey3]||joybtn(Exbtn3);
-    control_state[13]=key[Exkey4]||joybtn(Exbtn4);
-    
-    if(num_joysticks != 0)
-    {
-        //this is a workaround to a really stupid allegro bug.
-        control_state[14]= joy[joystick_index].stick[1].axis[0].pos - 128 < -STICK_PRECISION;
-        control_state[15]= joy[joystick_index].stick[1].axis[0].pos - 128 > STICK_PRECISION;
-        control_state[16]= joy[joystick_index].stick[0].axis[2].pos < -STICK_PRECISION;
-        control_state[17]= joy[joystick_index].stick[0].axis[2].pos > STICK_PRECISION;
-    }
+    control_state[0]=key[DUkey];
+    control_state[1]=key[DDkey];
+    control_state[2]=key[DLkey];
+    control_state[3]=key[DRkey];
+    control_state[4]=key[Akey];
+    control_state[5]=key[Bkey];
+    control_state[6]=key[Skey];
+    control_state[7]=key[Lkey];
+    control_state[8]=key[Rkey];
+    control_state[9]=key[Pkey];
+    control_state[10]=key[Exkey1];
+    control_state[11]=key[Exkey2];
+    control_state[12]=key[Exkey3];
+    control_state[13]=key[Exkey4];
+    control_state[14]= key[DUkey];
+    control_state[15]= key[DDkey];
+    control_state[16]= key[DLkey];
+    control_state[17]= key[DRkey];
     
     button_press[0]=rButton(Up,button_hold[0]);
     button_press[1]=rButton(Down,button_hold[1]);
@@ -3898,27 +3791,7 @@ bool AxisRight()
 
 bool cMbtn()
 {
-    return key[KEY_ESC]||joybtn(Mbtn);
-}
-bool cF12()
-{
-    return key[KEY_F12] != 0;
-}
-bool cF11()
-{
-    return key[KEY_F11] != 0;
-}
-bool cF5()
-{
-    return key[KEY_F5]  != 0;
-}
-bool cQ()
-{
-    return key[KEY_Q]   != 0;
-}
-bool cI()
-{
-    return key[KEY_I]   != 0;
+    return key[KEY_ESC] != 0;
 }
 
 bool rUp()
@@ -3996,27 +3869,6 @@ bool rAxisLeft()
 bool rAxisRight()
 {
     return rButton(AxisRight,ARdown);
-}
-
-bool rF12()
-{
-    return rButton(cF12, F12);
-}
-bool rF11()
-{
-    return rButton(cF11, F11);
-}
-bool rF5()
-{
-    return rButton(cF5, F5);
-}
-bool rQ()
-{
-    return rButton(cQ,  keyQ);
-}
-bool rI()
-{
-    return rButton(cI,  keyI);
 }
 
 bool drunk()
