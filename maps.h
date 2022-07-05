@@ -1,13 +1,3 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  maps.cc
-//
-//  Map and screen scrolling stuff for zelda.cc
-//
-//--------------------------------------------------------
-
 #ifndef _MAPS_H_
 #define _MAPS_H_
 #include "zdefs.h"
@@ -24,10 +14,8 @@ int MAPFFCOMBOFLAG(int x,int y);
 int COMBOTYPE(int x,int y);
 int FFCOMBOTYPE(int x, int y);
 int MAPCOMBO2(int layer,int x,int y);
-int MAPCSET2(int layer,int x,int y);
 int MAPFLAG2(int layer,int x,int y);
 int MAPCOMBOFLAG2(int layer,int x,int y);
-int COMBOTYPE2(int layer,int x,int y);
 int getFFCAt(int x, int y);
 void eventlog_mapflags();
 void setmapflag(int mi2, int flag);
@@ -42,7 +30,6 @@ bool iswater_type(int type);
 bool isGrassType(int type);
 bool isFlowersType(int type);
 bool isBushType(int type);
-bool isSlashType(int type);
 bool isCuttableNextType(int type);
 bool isTouchyType(int type);
 bool isCuttableType(int type);
@@ -61,24 +48,12 @@ void hidden_entrance(int tmp,bool refresh, bool high16only=false,int single=-1);
 void update_freeform_combos();
 bool findentrance(int x, int y, int flag, bool setflag);
 bool hitcombo(int x, int y, int combotype);
-bool hitflag(int x, int y, int flagtype);
 int nextscr(int dir);
 void bombdoor(int x,int y);
 void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool scrolling, int tempscreen);
 void do_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, int tempscreen, bool scrolling = false, bool drawprimitives=false);
 void do_primitives(BITMAP *bmp, int type, mapscr *layer, int x, int y);
 void draw_screen(mapscr* this_screen, bool showlink=true);
-/*
-  INLINE void do_scrolling_layer(int type, mapscr* layer, int x, int y, bool scrolling, int tempscreen)
-  {
-  do_scrolling_layer(framebuf, type, layer, x, y, scrolling, tempscreen);
-  }
-
-  INLINE void do_layer(int type, mapscr* layer, int x, int y, int tempscreen)
-  {
-  do_layer(framebuf, type, layer, x, y, tempscreen);
-  }
-  */
 void put_door(BITMAP *dest,int t,int pos,int side,int type,bool redraw,bool even_walls=false);
 void over_door(BITMAP *dest,int t, int pos,int side);
 void putdoor(BITMAP *dest,int t,int side,int door,bool redraw=true,bool even_walls=false);
@@ -92,15 +67,10 @@ bool water_walkflag(int x,int y,int cnt);
 bool hit_walkflag(int x,int y,int cnt);
 void map_bkgsfx(bool on);
 
-//extern FONT *lfont;
 /****  View Map  ****/
 extern int mapres;
 bool displayOnMap(int x, int y);
 void ViewMap();
 void onViewMap();
 
-//extern bool FuckIAlreadyDrewThatAlready[ 7 ];
 #endif
-
-/*** end of maps.cc ***/
-

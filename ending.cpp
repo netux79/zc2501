@@ -1,19 +1,8 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  ending.cc
-//
-//  Ending code for Zelda Classic.
-//
-//--------------------------------------------------------
-
 #include <string.h>
 #include <stdio.h>
 
 #include "ending.h"
 #include "zelda.h"
-#include "zsys.h"
 #include "sprite.h"
 #include "items.h"
 #include "pal.h"
@@ -28,8 +17,6 @@ extern int draw_screen_clip_rect_x1;
 extern int draw_screen_clip_rect_x2;
 extern int draw_screen_clip_rect_y1;
 extern int draw_screen_clip_rect_y2;
-//extern bool draw_screen_clip_rect_show_link;
-//extern bool draw_screen_clip_rect_show_guys;
 
 namespace
 {
@@ -102,8 +89,6 @@ namespace
     };
 }
 
-void noproc() {}
-
 void put_triforce()
 {
     if(get_bit(quest_rules,qr_HOLDITEMANIMATION))
@@ -134,7 +119,8 @@ void putendmsg(const char *s,int x,int y,int speed,void(proc)())
             ++i;
         }
         
-        proc();
+        if (proc) proc();
+
         advanceframe(true);
     }
 }
@@ -210,8 +196,6 @@ void ending()
     draw_screen_clip_rect_x2=255;
     draw_screen_clip_rect_y1=0;
     draw_screen_clip_rect_y2=223;
-    //draw_screen_clip_rect_show_link=true;
-    //draw_screen_clip_rect_show_guys=false;
     
     for(int f=0; f<365; f++)
     {
@@ -270,14 +254,14 @@ void ending()
     
     if(QMisc.endstring==0)
     {
-        putendmsg("THANKS LINK,YOU'RE",32,96,6,noproc);
-        putendmsg("THE HERO OF HYRULE.",32,112,6,noproc);
+        putendmsg("THANKS LINK,YOU'RE",32,96,6,NULL);
+        putendmsg("THE HERO OF HYRULE.",32,112,6,NULL);
     }
     else
     {
-        putendmsg(tmpmsg[0],32,80,6,noproc);
-        putendmsg(tmpmsg[1],32,96,6,noproc);
-        putendmsg(tmpmsg[2],32,112,6,noproc);
+        putendmsg(tmpmsg[0],32,80,6,NULL);
+        putendmsg(tmpmsg[1],32,96,6,NULL);
+        putendmsg(tmpmsg[2],32,112,6,NULL);
     }
     
     BITMAP *tmp_bmp = create_bitmap_ex(8, 32, 32);
@@ -373,9 +357,9 @@ void ending()
     }
     else
     {
-        putendmsg(tmpmsg[3],32,160,6,noproc);
-        putendmsg(tmpmsg[4],32,176,6,noproc);
-        putendmsg(tmpmsg[5],32,200,6,noproc);
+        putendmsg(tmpmsg[3],32,160,6,NULL);
+        putendmsg(tmpmsg[4],32,176,6,NULL);
+        putendmsg(tmpmsg[5],32,200,6,NULL);
     }
     
     for(int f=1336; f<1492; f++)

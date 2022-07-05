@@ -1,16 +1,5 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  zc_sys.h
-//
-//  System functions, input handlers, GUI stuff, etc.
-//  for Zelda Classic.
-//
-//--------------------------------------------------------
-
-#ifndef _ZC_SYS_H_
-#define _ZC_SYS_H_
+#ifndef _ZCSYS_H_
+#define _ZCSYS_H_
 
 #include "zdefs.h"
 
@@ -136,7 +125,6 @@ int dmap_tile_mod();
 
 bool try_zcmusic(char *filename, int track, int midi);
 void jukebox(int index);
-void jukebox(int index,int loop);
 void play_DmapMusic();
 void music_pause();
 void music_resume();
@@ -159,5 +147,25 @@ void stop_item_sfx(int family);
 void kill_sfx();
 int  pan(int x);
 
-#endif                                                      // _ZC_SYS_H_
+char *time_str_short(dword time);
+char *time_str_med(dword time);
 
+int  vbound(int x,int low,int high);
+float vbound(float x,float low,float high);
+bool isinRect(int x,int y,int rx1,int ry1,int rx2,int ry2);
+
+int encode_file_007(const char *srcfile, const char *destfile, int key, const char *header, int method);
+int decode_file_007(const char *srcfile, const char *destfile, const char *header, int method);
+
+int  get_bit(byte *bitstr,int bit);
+void set_bit(byte *bitstr,int bit,byte val);
+
+void Z_error(const char *format,...);
+void Z_message(const char *format,...);
+
+int anim_3_4(int clk, int speed);
+
+int zc_trace_handler(const char *);
+void zc_trace_clear();
+
+#endif                                                      // _ZCSYS_H_

@@ -1,6 +1,5 @@
-
-#ifndef _zc_script_drawing_h
-#define _zc_script_drawing_h
+#ifndef _SCRIPTDRAW_H
+#define _SCRIPTDRAW_H
 
 #include <vector>
 #include <string>
@@ -9,6 +8,71 @@
 #define MAX_SCRIPT_DRAWING_COMMANDS 1000
 #define SCRIPT_DRAWING_COMMAND_VARIABLES 20
 
+class ZScriptDrawingRenderTarget
+{
+public:
+    static const int MaxBuffers = 7;
+    
+    //These aren't allocated unless requested by the user,
+    //so we can handle sizes up to 512x512 with script drawing.
+    static const int BitmapWidth = 512;
+    static const int BitmapHeight = 512;
+    
+protected:
+    BITMAP* _bitmap[ MaxBuffers ];
+    int _current_target;
+    
+public:
+    ZScriptDrawingRenderTarget() : _current_target(-1)
+    {
+        for(int i(0); i < MaxBuffers; ++i)
+        {
+            _bitmap[i] = 0;
+        }
+    }
+    
+    ~ZScriptDrawingRenderTarget()
+    {
+        for(int i(0); i < MaxBuffers; ++i)
+        {
+            if(_bitmap[i])
+                destroy_bitmap(_bitmap[i]);
+        }
+    }
+    
+    inline void SetCurrentRenderTarget(int target)
+    {
+        _current_target = target;
+    }
+    
+    inline int GetCurrentRenderTarget()
+    {
+        return _current_target;
+    }
+    
+    inline BITMAP* GetTargetBitmap(int target)
+    {
+        if(target < 0 || target >= MaxBuffers)
+            return 0;
+            
+        if(!_bitmap[target])
+            _bitmap[target] = create_bitmap_ex(8, BitmapWidth, BitmapHeight);
+            
+        return _bitmap[target];
+    }
+    
+    BITMAP* GetBitmapPtr(int target)
+    {
+        if(target < 0 || target >= MaxBuffers)
+            return 0;
+            
+        return _bitmap[target];
+    }
+    
+private:
+    ZScriptDrawingRenderTarget(const ZScriptDrawingRenderTarget&);
+    ZScriptDrawingRenderTarget &operator =(const ZScriptDrawingRenderTarget&);
+};
 
 // For Quad and Triangle. *allegro Bug-Fix* -Gleeok
 class SmallBitmapTextureCache
@@ -394,8 +458,4 @@ private:
 
 extern CScriptDrawingCommands script_drawing_commands;
 
-
-
-
 #endif
-

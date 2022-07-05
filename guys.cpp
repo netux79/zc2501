@@ -1,18 +1,7 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  guys.cc
-//
-//  "Guys" code (and other related stuff) for zelda.cc
-//
-//--------------------------------------------------------
-
 #include <string.h>
 #include <stdio.h>
 #include "guys.h"
 #include "zelda.h"
-#include "zsys.h"
 #include "maps.h"
 #include "link.h"
 #include "subscr.h"
@@ -1097,30 +1086,11 @@ int enemy::takehit(weapon *w)
         case wBeam:
         case wRefBeam:
             // Mirror shielded enemies!
-#if 0
-            if(false /*flags2&guy_mirror*/ && !get_bit(quest_rules,qr_SWORDMIRROR))
-            {
-                if(wpnId>wEnemyWeapons)
-                    return 0;
-                    
-                sfx(WAV_CHINK,pan(int(x)));
-                return 1;
-            }
-            
-#endif
             
             //fallthrough
         case wRefRock:
         case wRefFireball:
         case wMagic:
-#if 0
-            if(false /*flags2&guy_mirror*/ && (wpnId!=wRefRock || get_bit(quest_rules,qr_REFLECTROCKS)))
-            {
-                sfx(WAV_CHINK,pan(int(x)));
-                return 3;
-            }
-            
-#endif
             
             if(wpnId>wEnemyWeapons)
                 return 0;
@@ -1150,15 +1120,7 @@ int enemy::takehit(weapon *w)
             return 0;
             
         case wFire:
-#if 0
-            if(false /*flags2&guy_mirror*/)
-            {
-                sfx(WAV_CHINK,pan(int(x)));
-                return 1;
-            }
-            
-#endif
-            ;
+            break;
         }
     }
     
@@ -8625,7 +8587,6 @@ bool eGanon::animate(int index)
             if(getmapflag())
             {
                 game->lvlitems[dlevel]|=liBOSS;
-                //play_DmapMusic();
                 playLevelMusic();
                 return true;
             }
@@ -8809,7 +8770,6 @@ void getBigTri(int id2)
         advanceframe(true);
     }
     
-    //play_DmapMusic();
     playLevelMusic();
     
     if(itemsbuf[id2].flags & ITEM_FLAG1 && currscr < 128)
@@ -12244,74 +12204,6 @@ int next_side_pos(bool random)
     return dir;
 }
 
-bool can_side_load(int id)
-{
-    switch(guysbuf[id].family) //id&0x0FFF)
-    {
-        //case eTEK1:
-        //case eTEK2:
-        //case eTEK3:
-        //case eLEV1:
-        //case eLEV2:
-        //case eLEV3:
-        //case eRAQUAM:
-        //case eLAQUAM:
-        //case eDODONGO:
-        //case eMANHAN:
-        //case eGLEEOK1:
-        //case eGLEEOK2:
-        //case eGLEEOK3:
-        //case eGLEEOK4:
-        //case eDIG1:
-        //case eDIG3:
-        //case eGOHMA1:
-        //case eGOHMA2:
-        //case eCENT1:
-        //case eCENT2:
-        //case ePATRA1:
-        //case ePATRA2:
-        //case eGANON:
-        //case eMANHAN2:
-        //case eCEILINGM: later
-        //case eFLOORM: later
-        //case ePATRABS:
-        //case ePATRAL2:
-        //case ePATRAL3:
-        //case eGLEEOK1F:
-        //case eGLEEOK2F:
-        //case eGLEEOK3F:
-        //case eGLEEOK4F:
-        //case eDODONGOBS:
-        //case eDODONGOF:
-        //case eGOHMA3:
-        //case eGOHMA4:
-        //case eSHOOTMAGIC:
-        //case eSHOOTROCK:
-        //case eSHOOTSPEAR:
-        //case eSHOOTSWORD:
-        //case eSHOOTFLAME:
-        //case eSHOOTFLAME2:
-        //case eSHOOTFBALL:
-    case eeTEK:
-    case eeLEV:
-    case eeAQUA:
-    case eeDONGO:
-    case eeMANHAN:
-    case eeGLEEOK:
-    case eeDIG:
-    case eeGHOMA:
-    case eeLANM:
-    case eePATRA:
-    case eeGANON:
-    case eePROJECTILE:
-        return false;
-        break;
-    }
-    
-    return true;
-}
-
-
 void side_load_enemies()
 {
     if(sle_clk==0)
@@ -13166,85 +13058,7 @@ bool parsemsgcode()
         (void)grab_next_argument();
         return true;
     }
-    
-#if 0
-    
-    case MSGC_GOTOIFYN:
-    {
-        bool done=false;
-        int pos = 0;
-        set_clip_state(msgdisplaybuf, 0);
-        
-        do // Copied from title.cpp...
-        {
-            int f=-1;
-            bool done2=false;
-            // TODO: Lower Y value limit
-            textout_ex(msgdisplaybuf, msgfont,"YES",112,MsgStrings[msgstr].y+36,msgcolour,-1);
-            textout_ex(msgdisplaybuf, msgfont,"NO",112,MsgStrings[msgstr].y+48,msgcolour,-1);
-            
-            do
-            {
-                load_control_state();
-                
-                if(f==-1)
-                {
-                    if(rUp())
-                    {
-                        sfx(WAV_CHINK);
-                        pos=0;
-                    }
-                    
-                    if(rDown())
-                    {
-                        sfx(WAV_CHINK);
-                        pos=1;
-                    }
-                    
-                    if(rSbtn()) ++f;
-                }
-                
-                if(f>=0)
-                {
-                    if(++f == 65)
-                        done2=true;
-                        
-                    if(!(f&3))
-                    {
-                        int c = (f&4) ? msgcolour : QMisc.colors.caption;
-                        
-                        switch(pos)
-                        {
-                        case 0:
-                            textout_ex(msgdisplaybuf, msgfont,"YES",112,MsgStrings[msgstr].y+36,c,-1);
-                            break;
-                            
-                        case 1:
-                            textout_ex(msgdisplaybuf, msgfont,"NO",112,MsgStrings[msgstr].y+48,c,-1);
-                            break;
-                        }
-                    }
-                }
-                
-                rectfill(msgdisplaybuf,96,MsgStrings[msgstr].y+36,136,MsgStrings[msgstr].y+60,0);
-                overtile8(msgdisplaybuf,2,96,(pos*16)+MsgStrings[msgstr].y+36,1,0);
-                advanceframe(true);
-            }
-            while(!Quit && !done2);
-            
-            clear_bitmap(msgdisplaybuf);
-            done=true;
-        }
-        while(!Quit && !done);
-        
-        if(pos==0)
-            goto switched;
-            
-        ++msgptr;
-        return true;
-    }
-    
-#endif
+
 switched:
     int lev = (int)(grab_next_argument());
     donewmsg(lev);
@@ -13913,6 +13727,3 @@ const char *old_guy_string[OLDMAXGUYS] =
     // 175
     "Grappler Bug (HP) ", "Grappler Bug (MP) "
 };
-
-/*** end of guys.cc ***/
-

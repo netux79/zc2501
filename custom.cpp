@@ -1,18 +1,7 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  zc_custom.cc
-//
-//  Custom item, enemy, etc. for Zelda.
-//
-//--------------------------------------------------------
-
-#include "zc_custom.h"
+#include "custom.h"
 #include "zelda.h"
 #include "zdefs.h"
 
-//extern itemdata   *itemsbuf;
 extern wpndata    *wpnsbuf;
 
 int old_floatspr, old_slashspr, linkspr;
@@ -27,7 +16,6 @@ int jumpspr[4][3];                                   //dir,                    t
 int chargespr[4][3];                                 //dir,                    tile/flip/extend
 int castingspr[3];                                   //                        tile/flip/extend
 int holdspr[2][2][3];                                //     land/water, hands. tile/flip/extend
-//int fallspr[3];                                     //     		       tile/flip/extend
 
 void linktile(int *tile, int *flip, int *extend, int state, int dir, int style)
 {

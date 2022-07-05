@@ -34,4 +34,3 @@
 #define FONT_Z3SMALL                     28       /* FONT */
 #define FONT_ZORAN                       29       /* FONT */
 #define FONT_ZTIME                       30       /* FONT */
-

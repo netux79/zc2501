@@ -1,4 +1,3 @@
-
 #include "zscriptversion.h"
 #include "zelda.h"
 #include "link.h"

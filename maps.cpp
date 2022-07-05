@@ -1,34 +1,18 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  maps.cc
-//
-//  Map and screen scrolling stuff for zelda.cc
-//
-//--------------------------------------------------------
-
 #include <string.h>
-#include <assert.h>
 #include <math.h>
 #include <vector>
-#include <deque>
 #include <string>
 
 #include "maps.h"
 #include "zelda.h"
 #include "tiles.h"
 #include "sprite.h"
-#include "zsys.h"
 #include "subscr.h"
-#include "zc_subscr.h"
 #include "link.h"
 #include "guys.h"
 #include "ffscript.h"
 #include "particles.h"
 
-#define EPSILON 0.01 // Define your own tolerance
-#define FLOAT_EQ(x,v) (((v - EPSILON) < x) && (x <( v + EPSILON)))
 #define DegtoFix(d)     ((d)*0.71111111)
 
 
@@ -202,22 +186,6 @@ int MAPCOMBO2(int layer,int x,int y)
     return tmpscr2[layer].data[combo];                        // entire combo code
 }
 
-int MAPCSET2(int layer,int x,int y)
-{
-    if(layer==-1) return MAPCSET(x,y);
-    
-    if(tmpscr2[layer].cset.empty()) return 0;
-    
-    if(tmpscr2[layer].valid==0) return 0;
-    
-    int combo = COMBOPOS(x,y);
-    
-    if(combo>175 || combo < 0)
-        return 0;
-        
-    return tmpscr2[layer].cset[combo];                        // entire combo code
-}
-
 int MAPFLAG2(int layer,int x,int y)
 {
     if(layer==-1) return MAPFLAG(x,y);
@@ -232,18 +200,6 @@ int MAPFLAG2(int layer,int x,int y)
         return 0;
         
     return tmpscr2[layer].sflag[combo];                       // flag
-}
-
-int COMBOTYPE2(int layer,int x,int y)
-{
-    if(layer==-1) return COMBOTYPE(x,y);
-    
-    if(tmpscr2[layer].valid==0)
-    {
-        return 0;
-    }
-    
-    return combobuf[MAPCOMBO2(layer,x,y)].type;
 }
 
 int MAPCOMBOFLAG2(int layer,int x,int y)
@@ -1907,11 +1863,6 @@ bool hitcombo(int x, int y, int combotype)
     return (COMBOTYPE(x,y)==combotype);
 }
 
-bool hitflag(int x, int y, int flagtype)
-{
-    return (MAPFLAG(x,y)==flagtype||MAPCOMBOFLAG(x,y)==flagtype);
-}
-
 int nextscr(int dir)
 {
     int m = currmap;
@@ -2528,7 +2479,6 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
         break;
     }
 }
-
 
 void do_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, int tempscreen, bool scrolling, bool drawprimitives)
 {
@@ -4545,24 +4495,6 @@ bool isBushType(int type)
     return false;
 }
 
-bool isSlashType(int type)
-{
-    switch(type)
-    {
-    case cSLASH:
-    case cSLASHITEM:
-    case cSLASHTOUCHY:
-    case cSLASHITEMTOUCHY:
-    case cSLASHNEXT:
-    case cSLASHNEXTITEM:
-    case cSLASHNEXTTOUCHY:
-    case cSLASHNEXTITEMTOUCHY:
-        return true;
-    }
-    
-    return false;
-}
-
 bool isCuttableNextType(int type)
 {
     switch(type)
@@ -4649,7 +4581,3 @@ bool isCuttableItemType(int type)
     
     return false;
 }
-
-
-/*** end of maps.cc ***/
-

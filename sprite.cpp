@@ -1,19 +1,7 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  sprite.cc
-//
-//  Sprite classes:
-//   - sprite:      base class for the guys and enemies in zelda.cc
-//   - movingblock: the moving block class
-//   - sprite_list: main container class for different groups of sprites
-//   - item:        items class
-//
-//--------------------------------------------------------
-
 #include "zdefs.h"
 #include "sprite.h"
+#include "zelda.h"
+#include "maps.h"
 #include "tiles.h"
 
 /**********************************/
@@ -34,14 +22,6 @@ sprite::sprite()
     angular=canfreeze=false;
     drawstyle=0;
     extend=0;
-    
-    /*ewpnclass=0;
-    lwpnclass=0;
-    guyclass=0;*/ //Not implemented
-    //ewpnref=0;
-    //lwpnref=0;
-    //guyref=0;
-    //itemref=0;
     lasthitclk=0;
     lasthit=0;
     angle=0;
@@ -55,18 +35,6 @@ sprite::sprite()
         dummy_bool[i]=0;
     }
     
-    /*for(int i=0;i<8;i++)
-    {
-      if(i<2) a[i]=0;
-      d[i]=0;
-    }
-    scriptflag=0;
-    pc=0;
-    sp=0;
-    itemclass=0;
-    ffcref=0; */
-    //scriptData.Clear(); //when we have npc scripts we'll need this again, for now not.
-    //doscript=1;
     for(int i=0; i<16; i++) miscellaneous[i] = 0;
     
     scriptcoldet = 1;
@@ -103,20 +71,6 @@ sprite::sprite(sprite const & other):
     lasthitclk(other.lasthitclk),
     drawstyle(other.drawstyle),
     extend(other.extend)
-    //scriptData(other.scriptData),
-/*ffcref(other.ffcref),
-itemref(other.itemref),
-guyref(other.guyref),
-lwpnref(other.lwpnref),
-ewpnref(other.ewpnref),
-sp(other.sp),
-pc(other.pc),
-scriptflag(other.scriptflag),
-doscript(other.doscript),
-itemclass(other.itemclass)
-guyclass(other.guyclass),
-lwpnclass(other.lwpnclass),
-ewpnclass(other.ewpnclass)*/
 {
     uid = getNextUID();
     
@@ -128,14 +82,6 @@ ewpnclass(other.ewpnclass)*/
         dummy_bool[i]=other.dummy_bool[i];
     }
     
-    /*for (int i=0; i<8; ++i)
-    {
-      d[i]=other.d[i];
-    }
-    for (int i=0; i<2; ++i)
-    {
-      a[i]=other.a[i];
-    }*/
     for(int i=0; i<16; i++) miscellaneous[i] = other.miscellaneous[i];
     
     scriptcoldet = other.scriptcoldet;
@@ -154,29 +100,10 @@ sprite::sprite(fix X,fix Y,int T,int CS,int F,int Clk,int Yofs):
     angular=canfreeze=false;
     extend=0;
     
-    /*for(int i=0;i<8;i++)
-    {
-      if(i<2) a[i]=0;
-      d[i]=0;
-    }
-    scriptflag=0;
-    pc=0;
-    sp=0;
-    ffcref=0;
-    doscript=1;*/
-    //itemclass=0;
     for(int i=0; i<16; i++) miscellaneous[i] = 0;
     
     scriptcoldet = 1;
     
-    //scriptData.Clear();
-    /*ewpnclass=0;
-    lwpnclass=0;
-    guyclass=0;*/ //Not implemented
-    /*ewpnref=0;
-    lwpnref=0;
-    guyref=0;
-    itemref=0;*/
     drawstyle=0;
     lasthitclk=0;
     lasthit=0;
@@ -1032,5 +959,188 @@ void movingblock::draw(BITMAP *dest)
     }
 }
 
-/*** end of sprite.cc ***/
+void sprite::check_conveyor()
+{
+    int deltax=0;
+    int deltay=0;
+    
+    if(conveyclk<=0 && (z==0 || (tmpscr->flags2&fAIRCOMBOS)))
+    {
+        int ctype=(combobuf[MAPCOMBO(x+8,y+8)].type);
+        deltax=combo_class_buf[ctype].conveyor_x_speed;
+        deltay=combo_class_buf[ctype].conveyor_y_speed;
+        
+        if(deltax!=0||deltay!=0)
+        {
+            if(deltay<0&&!_walkflag(x,y+8-2,2))
+            {
+                y=y-abs(deltay);
+            }
+            else if(deltay>0&&!_walkflag(x,y+15+2,2))
+            {
+                y=y+abs(deltay);
+            }
+            
+            if(deltax<0&&!_walkflag(x-2,y+8,1))
+            {
+                x=x-abs(deltax);
+            }
+            else if(deltax>0&&!_walkflag(x+15+2,y+8,1))
+            {
+                x=x+abs(deltax);
+            }
+        }
+    }
+}
 
+void movingblock::push(fix bx,fix by,int d2,int f)
+{
+    trigger=false;
+    endx=x=bx;
+    endy=y=by;
+    dir=d2;
+    oldflag=f;
+    word *di = &(tmpscr->data[(int(y)&0xF0)+(int(x)>>4)]);
+    byte *ci = &(tmpscr->cset[(int(y)&0xF0)+(int(x)>>4)]);
+    bcombo =  tmpscr->data[(int(y)&0xF0)+(int(x)>>4)];
+    oldcset = tmpscr->cset[(int(y)&0xF0)+(int(x)>>4)];
+    cs     = (isdungeon() && !get_bit(quest_rules, qr_PUSHBLOCKCSETFIX)) ? 9 : oldcset;
+    tile = combobuf[bcombo].tile;
+    flip = combobuf[bcombo].flip;
+    *di = tmpscr->undercombo;
+    *ci = tmpscr->undercset;
+    putcombo(scrollbuf,x,y,*di,*ci);
+    clk=32;
+    blockmoving=true;
+}
+
+bool movingblock::animate(int index)
+{
+    //these are here to bypass compiler warnings about unused arguments
+    index=index;
+    
+    if(clk<=0)
+        return false;
+        
+    move((fix)0.5);
+    
+    if(--clk==0)
+    {
+        bool bhole=false;
+        blockmoving=false;
+        int f1 = tmpscr->sflag[(int(y)&0xF0)+(int(x)>>4)];
+        int f2 = MAPCOMBOFLAG(x,y);
+        
+        tmpscr->data[(int(y)&0xF0)+(int(x)>>4)]=bcombo;
+        tmpscr->cset[(int(y)&0xF0)+(int(x)>>4)]=oldcset;
+        
+        if((f1==mfBLOCKTRIGGER)||f2==mfBLOCKTRIGGER)
+        {
+            trigger=true;
+            tmpscr->sflag[(int(y)&0xF0)+(int(x)>>4)]=mfPUSHED;
+            //the above line used to be in the following if statement.
+            //However, it caused inherent-flag pushblocks to not lock into
+            //block trigger combos unless the block trigger is also an
+            //inherent flag
+            /*
+            if(f2==mfBLOCKTRIGGER)
+            {
+              tmpscr->sflag[(int(y)&0xF0)+(int(x)>>4)]=mfPUSHED;
+            }
+            */
+        }
+        
+        if((f1==mfBLOCKHOLE)||f2==mfBLOCKHOLE)
+        {
+            tmpscr->data[(int(y)&0xF0)+(int(x)>>4)]+=1;
+            bhole=true;
+        }
+        
+        if(bhole)
+        {
+            tmpscr->sflag[(int(y)&0xF0)+(int(x)>>4)]=mfNONE;
+        }
+        else
+        {
+            f2 = MAPCOMBOFLAG(x,y);
+            
+            if(!((f2==mfPUSHUDINS && dir<=down) ||
+                    (f2==mfPUSHLRINS && dir>=left) ||
+                    (f2==mfPUSHUINS && dir==up) ||
+                    (f2==mfPUSHDINS && dir==down) ||
+                    (f2==mfPUSHLINS && dir==left) ||
+                    (f2==mfPUSHRINS && dir==right) ||
+                    (f2==mfPUSH4INS)))
+            {
+                tmpscr->sflag[(int(y)&0xF0)+(int(x)>>4)]=mfPUSHED;
+            }
+        }
+        
+        if(oldflag>=mfPUSHUDINS&&oldflag&&!trigger&&!bhole)
+        {
+            tmpscr->sflag[(int(y)&0xF0)+(int(x)>>4)]=oldflag;
+        }
+        
+        for(int i=0; i<176; i++)
+        {
+            if(tmpscr->sflag[i]==mfBLOCKTRIGGER||combobuf[tmpscr->data[i]].flag==mfBLOCKTRIGGER)
+            {
+                trigger=false;
+            }
+        }
+        
+        //triggers a secret
+        f2 = MAPCOMBOFLAG(x,y);
+        
+        if((oldflag==mfPUSH4 ||
+            (oldflag==mfPUSHUD && dir<=down) ||
+            (oldflag==mfPUSHLR && dir>=left) ||
+            (oldflag==mfPUSHU && dir==up) ||
+            (oldflag==mfPUSHD && dir==down) ||
+            (oldflag==mfPUSHL && dir==left) ||
+            (oldflag==mfPUSHR && dir==right) ||
+            f2==mfPUSH4 ||
+            (f2==mfPUSHUD && dir<=down) ||
+            (f2==mfPUSHLR && dir>=left) ||
+            (f2==mfPUSHU && dir==up) ||
+            (f2==mfPUSHD && dir==down) ||
+            (f2==mfPUSHL && dir==left) ||
+            (f2==mfPUSHR && dir==right)) ||
+           trigger)
+        {
+            if(hiddenstair(0,true))
+            {
+                sfx(tmpscr->secretsfx);
+            }
+            else
+            {
+                hidden_entrance(0,true,true);
+                
+                if((combobuf[bcombo].type == cPUSH_WAIT) ||
+                        (combobuf[bcombo].type == cPUSH_HW) ||
+                        (combobuf[bcombo].type == cPUSH_HW2) || trigger)
+                {
+                    sfx(tmpscr->secretsfx);
+                }
+            }
+            
+            if(isdungeon() && tmpscr->flags&fSHUTTERS)
+            {
+                opendoors=8;
+            }
+            
+            if(!isdungeon())
+            {
+                if(combobuf[bcombo].type==cPUSH_HEAVY || combobuf[bcombo].type==cPUSH_HW
+                        || combobuf[bcombo].type==cPUSH_HEAVY2 || combobuf[bcombo].type==cPUSH_HW2)
+                {
+                    if(!(tmpscr->flags5&fTEMPSECRETS)) setmapflag(mSECRET);
+                }
+            }
+        }
+        
+        putcombo(scrollbuf,x,y,bcombo,cs);
+    }
+    
+    return false;
+}

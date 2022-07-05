@@ -1,26 +1,16 @@
-#include <deque>
 #include <string>
-#include <sstream>
 #include <math.h>
 #include <cstdio>
 
-#include "zc_array.h"
+#include "zcarray.h"
 #include "ffscript.h"
 #include "zelda.h"
 #include "link.h"
 #include "guys.h"
-#include "zsys.h"
 #include "title.h"
 #include "zscriptversion.h"
-#include "rendertarget.h"
 
 #define zc_max(a,b)  ((a)>(b)?(a):(b))
-/*template <typename T>
-T zc_max(T a, T b)
-{
-	return (a > b) ? a : b;
-}*/
-
 #define zc_min(a,b)  ((a)<(b)?(a):(b))
 
 using std::string;
@@ -6161,9 +6151,9 @@ void do_tracetobase()
         break;
         
     default:
-        std::stringstream ss;
-        ss << " (Base " << base << ')';
-        s2 += ss.str();
+        char tmp[32];
+        sprintf(tmp, " (Base %d)", base);
+        s2 += tmp;
         break;
     }
     
@@ -7411,6 +7401,3 @@ int ffscript_engine(const bool preload)
     
     return 0;
 }
-
-
-///----------------------------------------------------------------------------------------------------

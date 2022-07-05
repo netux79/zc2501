@@ -1,13 +1,10 @@
+#include <stdio.h>
 
-
-#include <allegro.h>
-#include "rendertarget.h"
 #include "maps.h"
 #include "tiles.h"
 #include "zelda.h"
 #include "ffscript.h"
-#include "script_drawing.h"
-#include <stdio.h>
+#include "scriptdraw.h"
 
 #define DegtoFix(d)     ((d)*0.7111111111111)
 #define RadtoFix(d)     ((d)*40.743665431525)
@@ -1610,19 +1607,6 @@ void do_drawtriangler(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
 
 void do_drawbitmapr(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
 {
-    //sdci[1]=layer
-    //sdci[2]=bitmap
-    //sdci[3]=sourcex
-    //sdci[4]=sourcey
-    //sdci[5]=sourcew
-    //sdci[6]=sourceh
-    //sdci[7]=destx
-    //sdci[8]=desty
-    //sdci[9]=destw
-    //sdci[10]=desth
-    //sdci[11]=rotation
-    //sdci[12]=mask
-    
     int bitmapIndex = sdci[2]/10000;
     int sx = sdci[3]/10000;
     int sy = sdci[4]/10000;

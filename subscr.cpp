@@ -1,22 +1,13 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  subscr.cc
-//
-//  Subscreen code for zelda.cc
-//
-//--------------------------------------------------------
+#include <stdio.h>
+#include <string.h>
 
 #include "subscr.h"
 #include "zelda.h"
 #include "tiles.h"
-#include "zsys.h"
 #include "guys.h"
 #include "link.h"
 #include "items.h"
-#include <stdio.h>
-#include <string.h>
+#include "text.h"
 
 bool show_subscreen_dmap_dots=true;
 bool show_subscreen_numbers=true;
@@ -2144,10 +2135,6 @@ void draw_textbox(BITMAP *dest, int x, int y, int w, int h, FONT *tempfont, char
     }
 }
 
-
-
-//void frame2x2(BITMAP *dest,miscQdata *misc,int x,int y,int xsize,int ysize,int t,int c)
-//draw_block_flip(dest,x,y,css->objects[i].d1,subscreen_cset(misc, css->objects[i].colortype1, css->objects[i].color1),css->objects[i].w,css->objects[i].h,css->objects[i].d2,css->objects[i].d3,css->objects[i].d4);
 void frame2x2(BITMAP *dest,miscQdata *misc,int x,int y,int tile,int cset,int w,int h,int /*flip*/,bool overlay,bool trans)
 {
     /*
@@ -2623,8 +2610,6 @@ void drawdmap(BITMAP *dest, miscQdata *misc, int x, int y, bool showmap, int sho
     }
 }
 
-
-
 void lifemeter(BITMAP *dest,int x,int y,int tile,bool bs_style)
 {
     if(!show_subscreen_life)
@@ -2890,13 +2875,6 @@ void putxnum(BITMAP *dest,int x,int y,int num,FONT *tempfont,int color,int shado
     }
 }
 
-/*
-  INLINE void putdot(BITMAP *dest,int x,int y,int c)
-  {
-  rectfill(dest,x,y,x+2,y+2,c);
-  }
-  */
-
 /****  Subscr items code  ****/
 
 item *Bitem = NULL, *Aitem = NULL;
@@ -2918,7 +2896,6 @@ void reset_subscr_items()
     
     Aid = Bid = 0;
 }
-
 
 void update_subscr_items()
 {
@@ -3202,8 +3179,6 @@ int subscreen_color(miscQdata *misc, int c1, int c2)
     return ret;
 }
 
-
-
 int subscreen_cset(miscQdata *misc,int c1, int c2)
 {
     int ret=c1;
@@ -3376,7 +3351,6 @@ void delete_selectors()
     }
 }
 
-
 void animate_selectors()
 {
     if(new_sel)
@@ -3407,18 +3381,6 @@ void show_custom_subscreen(BITMAP *dest, miscQdata *misc, subscreen_group *css, 
     set_trans_blender(0, 0, 0, 128);
     
     //doing animation here leads to 2x speed when drawing both active and passive subscreen -DD
-    /*static item sel_a((fix)0,(fix)0,(fix)0,iSelectA,0,0);
-    static item sel_b((fix)0,(fix)0,(fix)0,iSelectB,0,0);
-    if (new_sel)
-    {
-      sel_a=item((fix)0,(fix)0,(fix)0,iSelectA,0,0);
-      sel_b=item((fix)0,(fix)0,(fix)0,iSelectB,0,0);
-      new_sel=false;
-    }
-    sel_a.yofs=0;
-    sel_a.animate(0);
-    sel_b.yofs=0;
-    sel_b.animate(0);*/
     if(!sel_a || !sel_b)
         animate_selectors();
         
@@ -3567,7 +3529,6 @@ void show_custom_subscreen(BITMAP *dest, miscQdata *misc, subscreen_group *css, 
             
             case ssoMINIMAP:
             {
-                //drawdmap(dest, misc, x, y, showmap,                 showlink,           showcompass,        linkcolor,                                                                 lccolor,                                                                   dccolor)
                 drawdmap(dest, misc, x, y, css->objects[i].d1 != 0, css->objects[i].d2 && !(TheMaps[(DMaps[get_currdmap()].map*MAPSCRS)+get_homescr()].flags7&fNOLINKMARK),
                          css->objects[i].d3 && !(DMaps[get_currdmap()].flags&dmfNOCOMPASS), subscreen_color(misc, css->objects[i].colortype1, css->objects[i].color1), subscreen_color(misc, css->objects[i].colortype2, css->objects[i].color2), subscreen_color(misc, css->objects[i].colortype3, css->objects[i].color3));
             }
@@ -3597,9 +3558,7 @@ void show_custom_subscreen(BITMAP *dest, miscQdata *misc, subscreen_group *css, 
             
             case ssoTEXTBOX:
             {
-                //draw_textbox(dest, x, y, w,                 h,                 tempfont, thetext,                     wword,                 tabsize,            alignment,          textstyle,          color,                                                                     shadowcolor,                                                               backcolor)
                 draw_textbox(dest, x, y, css->objects[i].w, css->objects[i].h, tempfont, (char *)css->objects[i].dp1, css->objects[i].d4!=0, css->objects[i].d5, css->objects[i].d2, css->objects[i].d3, subscreen_color(misc, css->objects[i].colortype1, css->objects[i].color1), subscreen_color(misc, css->objects[i].colortype2, css->objects[i].color2), subscreen_color(misc, css->objects[i].colortype3, css->objects[i].color3));
-//          draw_textbox(dest, 0, 0, 200, 50, sfont, "This is a test", 1, 4, 0, 0, subscreen_color(misc, css->objects[i].colortype1, css->objects[i].color1), subscreen_color(misc, css->objects[i].colortype2, css->objects[i].color2), subscreen_color(misc, css->objects[i].colortype3, css->objects[i].color3));
             }
             break;
             
@@ -3644,13 +3603,11 @@ void show_custom_subscreen(BITMAP *dest, miscQdata *misc, subscreen_group *css, 
                 }
                 
                 draw_textbox(dest, x, y, css->objects[i].w, css->objects[i].h, tempfont, itemname, css->objects[i].d4!=0, css->objects[i].d5, css->objects[i].d2, css->objects[i].d3, subscreen_color(misc, css->objects[i].colortype1, css->objects[i].color1), subscreen_color(misc, css->objects[i].colortype2, css->objects[i].color2), subscreen_color(misc, css->objects[i].colortype3, css->objects[i].color3));
-                // draw_textbox(dest, x, y, w,                 h,                 tempfont, thetext,  wword,                 tabsize,            alignment,          textstyle,          color,                                             shadowcolor,                                       backcolor);
             }
             break;
             
             case ssoTRIFRAME:
             {
-//        puttriframe(dest, misc, x, y, triframecolor,                                                             numbercolor,                                                               triframetile,       triframecset,       triforcetile,       triforcecset,       showframe,             showpieces,            largepieces)
                 puttriframe(dest, misc, x, y, subscreen_color(misc, css->objects[i].colortype1, css->objects[i].color1), subscreen_color(misc, css->objects[i].colortype2, css->objects[i].color2), css->objects[i].d1, css->objects[i].d2, css->objects[i].d3, css->objects[i].d4, css->objects[i].d5!=0, css->objects[i].d6!=0, css->objects[i].d7!=0);
             }
             break;
@@ -3769,9 +3726,7 @@ void show_custom_subscreen(BITMAP *dest, miscQdata *misc, subscreen_group *css, 
             
             case ssoMAGICGAUGE:
             {
-                //          void magicgauge(BITMAP *dest,int x,int y, int container, int notlast_tile, int notlast_cset, bool notlast_mod, int last_tile, int last_cset, bool last_mod,
-                //                          int cap_tile, int cap_cset, bool cap_mod, int aftercap_tile, int aftercap_cset, bool aftercap_mod, int frames, int speed, int delay, bool unique_last,
-                //                          int show)
+
                 magicgauge(dest,x,y, css->objects[i].d1, css->objects[i].d2, css->objects[i].colortype1, ((css->objects[i].d10&1)?1:0), css->objects[i].d3, css->objects[i].color1, ((css->objects[i].d10&2)?1:0),
                            css->objects[i].d4, css->objects[i].colortype2, ((css->objects[i].d10&4)?1:0), css->objects[i].d5, css->objects[i].color2, ((css->objects[i].d10&8)?1:0), css->objects[i].d6, css->objects[i].d7, css->objects[i].d8, ((css->objects[i].d10&16)?1:0),
                            css->objects[i].d9);
@@ -3962,22 +3917,7 @@ void counter(BITMAP *dest, int x, int y, FONT *tempfont, int color, int shadowco
     }
     
     int itemtype;
-    /*
-    for (int i=0; i<3; ++i)
-    {
-      switch (i)
-      {
-        case 0:
-          itemtype=itemtype1;
-          break;
-        case 1:
-          itemtype=itemtype2;
-          break;
-        case 2:
-          itemtype=itemtype3;
-          break;
-      }
-    */
+
     itemtype=itemtype1;
     /* commented out until I find out what it does - it's messing up custom subscreens now as
     itemtype2 and 3 are zero - so link's life gets added to the counters */
@@ -4105,8 +4045,6 @@ void counter(BITMAP *dest, int x, int y, FONT *tempfont, int color, int shadowco
     }
     
     textout_styled_aligned_ex(dest,tempfont,valstring,x,y,textstyle,alignment,color,shadowcolor,bgcolor);
-    
-    //  putxnum(dest,x+8,y,game->get_rupies(),tempfont,color,shadowcolor,bgcolor,shadowed,usex,digits,0,idigit);
 }
 
 void minimaptitle(BITMAP *dest, int x, int y, FONT *tempfont, int color, int shadowcolor, int bgcolor, int alignment, int textstyle)
@@ -4158,14 +4096,6 @@ void put_passive_subscr(BITMAP *dest,miscQdata *misc,int x,int y,bool showtime,i
     show_custom_subscreen(subscr, misc, current_subscreen_passive, 0, 0, showtime, pos2);
     destroy_bitmap(subscr);
 }
-
-/*
-  const byte tripiece[8*3] =
-  {
-  112,112,0, 128,112,1, 96,128,0, 144,128,1,
-  112,128,2, 112,128,1, 128,128,3, 128,128,0
-  };
-  */
 
 void puttriframe(BITMAP *dest, miscQdata *misc, int x, int y, int triframecolor, int numbercolor, int triframetile, int triframecset, int triforcetile, int triforcecset, bool showframe, bool showpieces, bool largepieces)
 {
@@ -4363,21 +4293,6 @@ void puttriforce(BITMAP *dest, miscQdata *misc, int x, int y, int tile, int cset
         }
     }
 }
-
-/*
-  const byte bmap[16*2] = {
-  0,0,1,0,0,1,0,0,1,0,0,0,1,0,0,0,
-  0,3,0,0,0,3,0,0,0,0,3,0,0,0,3,0 };
-
-  const int fringe[8] = { 6,2,4,7,6,8,7,5 };
-
-  const byte bmaptiles[8*5] = {
-  0, 1, 2, 3, 2, 3, 3, 4,
-  20,21,22,23,22,23,23,24,
-  20,21,22,23,22,23,23,24,
-  20,21,22,23,22,23,23,24,
-  40,41,42,43,42,43,43,44 };
-  */
 
 void draw_block(BITMAP *dest,int x,int y,int tile,int cset,int w,int h);
 void putBmap(BITMAP *dest, miscQdata *misc, int x, int y,bool showmap, bool showrooms, bool showlink, int roomcolor, int linkcolor, bool large)
@@ -4632,624 +4547,277 @@ void purge_blank_subscreen_objects(subscreen_group *tempss)
     }
 }
 
+extern int directItem;
+extern int directItemA;
+extern int directItemB;
 
-
-int get_alignment(subscreen_object *tempsso)
+void put_active_subscr(miscQdata *misc, int y, int pos)
 {
-    switch(tempsso->type)
-    {
-    case ssoTEXT:
-        return tempsso->d2;
-        break;
-        
-    case ssoBSTIME:
-        return sstaLEFT;
-        break;
-        
-    case ssoTIME:
-        return sstaRIGHT;
-        break;
-        
-    case ssoSSTIME:
-        return sstaRIGHT;
-        break;
-        
-    case ssoCOUNTER:
-        return tempsso->d2;
-        break;
-        
-    case ssoMINIMAPTITLE:
-        return tempsso->d2;
-        break;
-        
-    case ssoCURRENTITEMTEXT:
-    case ssoCURRENTITEMNAME:
-    case ssoSELECTEDITEMNAME:
-    case ssoCURRENTITEMCLASSTEXT:
-    case ssoCURRENTITEMCLASSNAME:
-    case ssoSELECTEDITEMCLASSNAME:
-        return sstaLEFT;
-        break;
-        
-    case ssoNONE:
-    case sso2X2FRAME:
-    case ssoLINE:
-    case ssoRECT:
-    case ssoMAGICMETER:
-    case ssoLIFEMETER:
-    case ssoBUTTONITEM:
-    case ssoICON:
-    case ssoCOUNTERS:
-    case ssoMINIMAP:
-    case ssoLARGEMAP:
-    case ssoCLEAR:
-    case ssoCURRENTITEM:
-    case ssoITEM:
-    case ssoTRIFRAME:
-    case ssoTRIFORCE:
-    case ssoTILEBLOCK:
-    case ssoMINITILE:
-    case ssoSELECTOR1:
-    case ssoSELECTOR2:
-    case ssoMAGICGAUGE:
-    case ssoLIFEGAUGE:
-    case ssoTEXTBOX:
-    case ssoCURRENTITEMTILE:
-    case ssoSELECTEDITEMTILE:
-    default:
-        return sstaLEFT;
-        break;
-    }
-    
-//  return false;//UNREACHABLE
+    //Don't call Sitems.animate() - that gets called somewhere else, somehow. -L
+    animate_selectors();
+    bool showtime = game->get_timevalid() && get_bit(quest_rules,qr_TIME);
+    show_custom_subscreen(framebuf, misc, current_subscreen_active, 0, 6-y, showtime, pos);
 }
 
-//enum { sstsNORMAL, sstsSHADOW, sstsSHADOWU, sstsOUTLINE8, sstsOUTLINEPLUS, sstsOUTLINEX, sstsSHADOWED, sstsSHADOWEDU, sstsOUTLINED8, sstsOUTLINEDPLUS, sstsOUTLINEDX, sstsMAX };
-//       "None",     "Shadow",   "Shadow (U)","Shadow (O)", "Shadow (+)",    "Shadow (X)", "Shadowed",   "Shadowed (U)","Shadowed (O)","Shadowed (+)",   "Shadowed (X)"
-//x-1
-//sstsSHADOWU, sstsOUTLINE8, sstsOUTLINEPLUS, sstsOUTLINEX, sstsSHADOWEDU, sstsOUTLINED8, sstsOUTLINEDPLUS, sstsOUTLINEDX
-//w+1
-//sstsSHADOW, sstsSHADOWU, sstsOUTLINE8, sstsOUTLINEPLUS, sstsOUTLINEX, sstsSHADOWED, sstsSHADOWEDU, sstsOUTLINED8, sstsOUTLINEDPLUS, sstsOUTLINEDX
-//y-1
-//sstsOUTLINE8, sstsOUTLINEPLUS, sstsOUTLINEX, sstsOUTLINED8, sstsOUTLINEDPLUS, sstsOUTLINEDX
-//h+1
-//sstsSHADOW, sstsSHADOWU, sstsOUTLINE8, sstsOUTLINEPLUS, sstsOUTLINEX, sstsSHADOWED, sstsSHADOWEDU, sstsOUTLINED8, sstsOUTLINEDPLUS, sstsOUTLINEDX
-
-int sso_y(subscreen_object *tempsso)
+void dosubscr(miscQdata *misc)
 {
-    int y=0;
+    PALETTE temppal;
     
-    switch(tempsso->type)
+    if(tmpscr->flags3&fNOSUBSCR)
     {
-    case ssoLIFEMETER:
-        y=tempsso->y+(tempsso->d2?0:(tempsso->d3?8:16));
-        break;
-        
-    case ssoNONE:
-    case sso2X2FRAME:
-    case ssoTEXT:
-    case ssoLINE:
-    case ssoRECT:
-    case ssoBSTIME:
-    case ssoTIME:
-    case ssoSSTIME:
-    case ssoMAGICMETER:
-    case ssoBUTTONITEM:
-    case ssoICON:
-    case ssoCOUNTER:
-    case ssoCOUNTERS:
-    case ssoMINIMAPTITLE:
-    case ssoMINIMAP:
-    case ssoLARGEMAP:
-    case ssoCLEAR:
-    case ssoCURRENTITEM:
-    case ssoITEM:
-    case ssoTRIFRAME:
-    case ssoTRIFORCE:
-    case ssoTILEBLOCK:
-    case ssoMINITILE:
-    case ssoSELECTOR1:
-    case ssoSELECTOR2:
-    case ssoMAGICGAUGE:
-    case ssoLIFEGAUGE:
-    case ssoTEXTBOX:
-    case ssoCURRENTITEMTILE:
-    case ssoSELECTEDITEMTILE:
-    case ssoCURRENTITEMTEXT:
-    case ssoCURRENTITEMNAME:
-    case ssoSELECTEDITEMNAME:
-    case ssoCURRENTITEMCLASSTEXT:
-    case ssoCURRENTITEMCLASSNAME:
-    case ssoSELECTEDITEMCLASSNAME:
-        y=tempsso->y;
-        break;
-        
-    default:
-        y=(rand()*1000)%64;
-        break;
+        return;
     }
     
-    switch(tempsso->type)
+    if(usebombpal)
     {
-    case ssoTEXT:
-    case ssoBSTIME:
-    case ssoTIME:
-    case ssoSSTIME:
-    case ssoCOUNTER:
-    case ssoCOUNTERS:
-        switch(tempsso->d3)
+        memcpy(temppal, RAMpal, PAL_SIZE*sizeof(RGB));
+        memcpy(RAMpal, tempbombpal, PAL_SIZE*sizeof(RGB));
+        refreshpal=true;
+    }
+    
+    int miny;
+    bool showtime = game->get_timevalid() && get_bit(quest_rules,qr_TIME);
+    load_Sitems(misc);
+    
+    pause_sfx(WAV_BRANG);
+    
+    if(current_item_id(itype_brang)>=0)
+        pause_sfx(itemsbuf[current_item_id(itype_brang)].usesound);
+        
+    if(current_item_id(itype_hookshot)>=0)
+        pause_sfx(itemsbuf[current_item_id(itype_hookshot)].usesound);
+        
+    adjust_sfx(WAV_ER,128,false);
+    adjust_sfx(WAV_MSG,128,false);
+    
+    set_clip_rect(scrollbuf, 0, 0, scrollbuf->w, scrollbuf->h);
+    set_clip_rect(framebuf, 0, 0, framebuf->w, framebuf->h);
+    
+    //make a copy of the blank playing field on the right side of scrollbuf
+    blit(scrollbuf,scrollbuf,0,playing_field_offset,256,0,256,176);
+    //make a copy of the complete playing field on the bottom of scrollbuf
+    blit(framebuf,scrollbuf,0,playing_field_offset,0,176,256,176);
+    miny = 6;
+    
+    //Set the selector to the correct position before bringing up the subscreen -DD
+    if(get_bit(quest_rules,qr_SELECTAWPN))
+    {
+        if(Bwpn==0 && Awpn!=0)
+            Bpos = zc_max(game->awpn,0);
+        else
+            Bpos = zc_max(game->bwpn,0);
+    }
+    else
+        Bpos = zc_max(game->bwpn,0);
+        
+    for(int y=176-2; y>=6; y-=3)
+    {
+        do_dcounters();
+        Link.refill();
+        //fill in the screen with black to prevent the hall of mirrors effect
+        rectfill(framebuf, 0, 0, 255, 223, 0);
+        
+        if(COOLSCROLL)
         {
-        case sstsOUTLINE8:
-        case sstsOUTLINEPLUS:
-        case sstsOUTLINEX:
-        case sstsOUTLINED8:
-        case sstsOUTLINEDPLUS:
-        case sstsOUTLINEDX:
-            y-=1;
-            break;
+            //copy the playing field back onto the screen
+            blit(scrollbuf,framebuf,0,176,0,passive_subscreen_height,256,176);
+        }
+        else
+        {
+            //scroll the playing field (copy the copy we made)
+            blit(scrollbuf,framebuf,256,0,0,176-2-y+passive_subscreen_height,256,y);
         }
         
-        break;
+        //throw the passive subscreen onto the screen
+        put_passive_subscr(framebuf,misc,0,176-2-y,showtime,sspSCROLLING);
+        //put the active subscreen above the passive subscreen
+        put_active_subscr(misc,y,sspSCROLLING);
+        advanceframe(false);
+        
+        if(Quit)
+            return;
     }
     
-    return y;
+    bool done=false;
+    
+    do
+    {
+        load_control_state();
+        int pos = Bpos;
+        
+        if(rUp())         Bpos = selectWpn_new(SEL_UP, pos);
+        else if(rDown())  Bpos = selectWpn_new(SEL_DOWN, pos);
+        else if(rLeft())  Bpos = selectWpn_new(SEL_LEFT, pos);
+        else if(rRight()) Bpos = selectWpn_new(SEL_RIGHT, pos);
+        else if(rLbtn())  Bpos = selectWpn_new(SEL_LEFT, pos);
+        else if(rRbtn())  Bpos = selectWpn_new(SEL_RIGHT, pos);
+        
+        if(get_bit(quest_rules,qr_SELECTAWPN))
+        {
+            if(rBbtn())
+            {
+                if(Awpn == Bweapon(Bpos))
+                {
+                    Awpn = Bwpn;
+                    game->awpn = game->bwpn;
+                    directItemA = directItemB;
+                }
+                
+                Bwpn = Bweapon(Bpos);
+                sfx(WAV_PLACE);
+                
+                game->bwpn = Bpos;
+                directItemB = directItem;
+            }
+            else if(rAbtn())
+            {
+                if(Bwpn == Bweapon(Bpos))
+                {
+                    Bwpn = Awpn;
+                    game->bwpn = game->awpn;
+                    directItemB = directItemA;
+                }
+                
+                Awpn = Bweapon(Bpos);
+                sfx(WAV_PLACE);
+                game->awpn = Bpos;
+                directItemA = directItem;
+            }
+        }
+        else
+        {
+            Bwpn = Bweapon(Bpos);
+            game->bwpn = Bpos;
+            directItemB = directItem;
+        }
+        
+        if(pos!=Bpos)
+            sfx(WAV_CHIME);
+            
+        do_dcounters();
+        Link.refill();
+        
+        //fill in the screen with black to prevent the hall of mirrors effect
+        rectfill(framebuf, 0, 0, 255, 223, 0);
+        
+        if(COOLSCROLL)
+        {
+            //copy the playing field back onto the screen
+            blit(scrollbuf,framebuf,0,176,0,passive_subscreen_height,256,176);
+        }
+        else
+        {
+            //nothing to do; the playing field has scrolled off the screen
+        }
+        
+        //throw the passive subscreen onto the screen
+        put_passive_subscr(framebuf,misc,0,176-2-miny,showtime,sspDOWN);
+        //put the active subscreen above the passive subscreen
+        put_active_subscr(misc,miny,sspDOWN);
+        
+        advanceframe(false);
+        
+        if(NESquit && Up() && cAbtn() && cBbtn())
+        {
+            Udown=true;
+            Quit=qQUIT;
+        }
+        
+        if(Quit)
+            return;
+            
+        if(rSbtn())
+            done=true;
+    }
+    while(!done);
+    
+    for(int y=6; y<=174; y+=3)
+    {
+        do_dcounters();
+        Link.refill();
+        //fill in the screen with black to prevent the hall of mirrors effect
+        rectfill(framebuf, 0, 0, 255, 223, 0);
+        
+        if(COOLSCROLL)
+        {
+            //copy the playing field back onto the screen
+            blit(scrollbuf,framebuf,0,176,0,passive_subscreen_height,256,176);
+        }
+        else
+        {
+            //scroll the playing field (copy the copy we made)
+            blit(scrollbuf,framebuf,256,0,0,176-2-y+passive_subscreen_height,256,y);
+        }
+        
+        //throw the passive subscreen onto the screen
+        put_passive_subscr(framebuf,misc,0,176-2-y,showtime,sspSCROLLING);
+        //put the active subscreen above the passive subscreen
+        put_active_subscr(misc,y,sspSCROLLING);
+        advanceframe(false);
+        
+        if(Quit)
+            return;
+    }
+    
+    //  Sitems.clear();
+    if(usebombpal)
+    {
+        memcpy(RAMpal, temppal, PAL_SIZE*sizeof(RGB));
+    }
+    
+    resume_sfx(WAV_BRANG);
 }
 
-int sso_x(subscreen_object *tempsso)
+void markBmap(int dir, int sc)
 {
-    int x=0;
-    
-    switch(tempsso->type)
+    /*
+      if((DMaps[get_currdmap()].type&dmfTYPE)==dmOVERW)
+        return;
+    */
+    if(sc>=128)
     {
-    case ssoMAGICMETER:
-        x=tempsso->x-10;
+        return;
+    }
+    
+    byte drow = DMaps[get_currdmap()].grid[sc>>4];
+    byte mask = 1 << (7-((sc&15)-DMaps[get_currdmap()].xoff));
+    int di = ((get_currdmap()-1)<<6) + ((sc>>4)<<3) + ((sc&15)-DMaps[get_currdmap()].xoff);
+    int code = 0;
+    
+    
+    switch((DMaps[get_currdmap()].type&dmfTYPE))
+    {
+    case dmDNGN:
+    
+        // check dmap
+        if((drow&mask)==0)
+            return;
+            
+        // calculate code
+        for(int i=3; i>=0; i--)
+        {
+            code <<= 1;
+            code += tmpscr->door[i]&1;
+        }
+        
+        // mark the map
+        game->bmaps[di] = code|128;
         break;
         
-    case ssoNONE:
-    case sso2X2FRAME:
-    case ssoTEXT:
-    case ssoLINE:
-    case ssoRECT:
-    case ssoBSTIME:
-    case ssoTIME:
-    case ssoSSTIME:
-    case ssoLIFEMETER:
-    case ssoBUTTONITEM:
-    case ssoICON:
-    case ssoCOUNTER:
-    case ssoCOUNTERS:
-    case ssoMINIMAPTITLE:
-    case ssoMINIMAP:
-    case ssoLARGEMAP:
-    case ssoCLEAR:
-    case ssoCURRENTITEM:
-    case ssoITEM:
-    case ssoTRIFRAME:
-    case ssoTRIFORCE:
-    case ssoTILEBLOCK:
-    case ssoMINITILE:
-    case ssoSELECTOR1:
-    case ssoSELECTOR2:
-    case ssoMAGICGAUGE:
-    case ssoLIFEGAUGE:
-    case ssoTEXTBOX:
-    case ssoCURRENTITEMTILE:
-    case ssoSELECTEDITEMTILE:
-    case ssoCURRENTITEMTEXT:
-    case ssoCURRENTITEMNAME:
-    case ssoSELECTEDITEMNAME:
-    case ssoCURRENTITEMCLASSTEXT:
-    case ssoCURRENTITEMCLASSNAME:
-    case ssoSELECTEDITEMCLASSNAME:
-        x=tempsso->x;
+    case dmOVERW:
         break;
         
     default:
-        x=(rand()*1000)%64;
-        break;
-    }
-    
-    switch(tempsso->type)
-    {
-    case ssoTEXT:
-    case ssoBSTIME:
-    case ssoTIME:
-    case ssoSSTIME:
-    case ssoCOUNTER:
-    case ssoCOUNTERS:
-        switch(tempsso->d3)
-        {
-        case sstsSHADOWU:
-        case sstsOUTLINE8:
-        case sstsOUTLINEPLUS:
-        case sstsOUTLINEX:
-        case sstsSHADOWEDU:
-        case sstsOUTLINED8:
-        case sstsOUTLINEDPLUS:
-        case sstsOUTLINEDX:
-            x-=1;
-            break;
-        }
+        game->bmaps[di] |= 128;
         
+        if(dir>=0)
+            game->bmaps[di] |= (1<<dir);
+            
         break;
     }
-    
-    return x;
 }
 
-
-
-int sso_h(subscreen_object *tempsso)
+void markBmap(int dir)
 {
-    int h=0;
-    
-    switch(tempsso->type)
-    {
-    case ssoNONE:
-        h=5;
-        break;
-        
-    case sso2X2FRAME:
-        h=tempsso->h*8;
-        break;
-        
-    case ssoTEXT:
-        h=text_height(ss_font(tempsso->d1));
-        break;
-        
-    case ssoLINE:
-        h=tempsso->h;
-        break;
-        
-    case ssoRECT:
-        h=tempsso->h;
-        break;
-        
-    case ssoBSTIME:
-        h=text_height(ss_font(tempsso->d1));
-        break;
-        
-    case ssoTIME:
-        h=text_height(ss_font(tempsso->d1));
-        break;
-        
-    case ssoSSTIME:
-        h=text_height(ss_font(tempsso->d1));
-        break;
-        
-    case ssoMAGICMETER:
-        h=8;
-        break;
-        
-    case ssoLIFEMETER:
-        h=tempsso->d3?24:16;
-        break;
-        
-    case ssoBUTTONITEM:
-        h=16;
-        break;
-        
-    case ssoICON:
-        h=8;
-        break;
-        
-    case ssoCOUNTER:
-        h=text_height(ss_font(tempsso->d1));
-        break;
-        
-    case ssoCOUNTERS:
-        h=32;
-        break;
-        
-    case ssoMINIMAPTITLE:
-        h=16;
-        break;
-        
-    case ssoMINIMAP:
-        h=48;
-        break;
-        
-    case ssoLARGEMAP:
-        h=80;
-        break;
-        
-    case ssoCLEAR:
-        h=5;
-        break;
-        
-    case ssoCURRENTITEM:
-        h=16;
-        break;
-        
-    case ssoITEM:
-        h=16;
-        break;
-        
-    case ssoTRIFRAME:
-        h=16*((tempsso->d7)?7:3);
-        break;
-        
-    case ssoTRIFORCE:
-        h=16;
-        break;
-        
-    case ssoTILEBLOCK:
-        h=16*(tempsso->h);
-        break;
-        
-    case ssoMINITILE:
-        h=8;
-        break;
-        
-    case ssoSELECTOR1:
-    case ssoSELECTOR2:
-        h=tempsso->d5?32:16;
-        break;
-        
-    case ssoMAGICGAUGE:
-        h=8;
-        break;
-        
-    case ssoLIFEGAUGE:
-        h=8;
-        break;
-        
-    case ssoTEXTBOX:
-        h=tempsso->h;
-        break;
-        
-    case ssoCURRENTITEMTILE:
-        h=16;
-        break;
-        
-    case ssoSELECTEDITEMTILE:
-        h=16;
-        break;
-        
-    case ssoCURRENTITEMTEXT:
-        h=16;
-        break;
-        
-    case ssoCURRENTITEMNAME:
-        h=tempsso->h;
-        break;
-        
-    case ssoSELECTEDITEMNAME:
-        h=tempsso->h;
-        break;
-        
-    case ssoCURRENTITEMCLASSTEXT:
-        h=tempsso->h;
-        break;
-        
-    case ssoCURRENTITEMCLASSNAME:
-        h=tempsso->h;
-        break;
-        
-    case ssoSELECTEDITEMCLASSNAME:
-        h=tempsso->h;
-        break;
-        
-    default:
-        h=(rand()*1000)%64;
-        break;
-    }
-    
-    switch(tempsso->type)
-    {
-    case ssoTEXT:
-    case ssoBSTIME:
-    case ssoTIME:
-    case ssoSSTIME:
-    case ssoCOUNTER:
-    case ssoCOUNTERS:
-        switch(tempsso->d3)
-        {
-        case sstsSHADOW:
-        case sstsSHADOWU:
-        case sstsOUTLINE8:
-        case sstsOUTLINEPLUS:
-        case sstsOUTLINEX:
-        case sstsSHADOWED:
-        case sstsSHADOWEDU:
-        case sstsOUTLINED8:
-        case sstsOUTLINEDPLUS:
-        case sstsOUTLINEDX:
-            h+=1;
-            break;
-        }
-        
-        break;
-    }
-    
-    return h;
+    markBmap(dir, get_currscr());
 }
-
-int sso_w(subscreen_object *tempsso)
-{
-    int w=0;
-    
-    switch(tempsso->type)
-    {
-    case ssoNONE:
-        w=5;
-        break;
-        
-    case sso2X2FRAME:
-        w=tempsso->w*8;
-        break;
-        
-    case ssoTEXT:
-        w=text_length(ss_font(tempsso->d1), (char *)tempsso->dp1);
-        break;
-        
-    case ssoLINE:
-        w=tempsso->w;
-        break;
-        
-    case ssoRECT:
-        w=tempsso->w;
-        break;
-        
-    case ssoBSTIME:
-        w=text_length(ss_font(tempsso->d1), time_str_short(game->get_time()));
-        break;
-        
-    case ssoTIME:
-        w=text_length(ss_font(tempsso->d1), time_str_med(game->get_time()));
-        break;
-        
-    case ssoSSTIME:
-        w=text_length(ss_font(tempsso->d1), time_str_med(game->get_time()));
-        break;
-        
-    case ssoMAGICMETER:
-        w=82;
-        break;
-        
-    case ssoLIFEMETER:
-        w=64;
-        break;
-        
-    case ssoBUTTONITEM:
-        w=16;
-        break;
-        
-    case ssoICON:
-        w=8;
-        break;
-        
-    case ssoCOUNTER:
-        w=text_length(ss_font(tempsso->d1), "0")*tempsso->d4;
-        break;
-        
-    case ssoCOUNTERS:
-        w=32;
-        break;
-        
-    case ssoMINIMAPTITLE:
-        w=80;
-        break;
-        
-    case ssoMINIMAP:
-        w=80;
-        break;
-        
-    case ssoLARGEMAP:
-        w=16*((tempsso->d4)?9:7);
-        break;
-        
-    case ssoCLEAR:
-        w=5;
-        break;
-        
-    case ssoCURRENTITEM:
-        w=16;
-        break;
-        
-    case ssoITEM:
-        w=16;
-        break;
-        
-    case ssoTRIFRAME:
-        w=16*((tempsso->d7)?7:6);
-        break;
-        
-    case ssoTRIFORCE:
-        w=16;
-        break;
-        
-    case ssoTILEBLOCK:
-        w=16*(tempsso->w);
-        break;
-        
-    case ssoMINITILE:
-        w=8;
-        break;
-        
-    case ssoSELECTOR1:
-    case ssoSELECTOR2:
-        w=tempsso->d5?32:16;
-        break;
-        
-    case ssoMAGICGAUGE:
-        w=8;
-        break;
-        
-    case ssoLIFEGAUGE:
-        w=8;
-        break;
-        
-    case ssoTEXTBOX:
-        w=tempsso->w;
-        break;
-        
-    case ssoCURRENTITEMTILE:
-        w=16;
-        break;
-        
-    case ssoSELECTEDITEMTILE:
-        w=16;
-        break;
-        
-    case ssoCURRENTITEMTEXT:
-        w=16;
-        break;
-        
-    case ssoCURRENTITEMNAME:
-        w=tempsso->w;
-        break;
-        
-    case ssoSELECTEDITEMNAME:
-        w=tempsso->w;
-        break;
-        
-    case ssoCURRENTITEMCLASSTEXT:
-        w=tempsso->w;
-        break;
-        
-    case ssoCURRENTITEMCLASSNAME:
-        w=tempsso->w;
-        break;
-        
-    case ssoSELECTEDITEMCLASSNAME:
-        w=tempsso->w;
-        break;
-        
-    default:
-        w=(rand()*1000)%64;
-        break;
-    }
-    
-    switch(tempsso->type)
-    {
-    case ssoTEXT:
-    case ssoBSTIME:
-    case ssoTIME:
-    case ssoSSTIME:
-    case ssoCOUNTER:
-    case ssoCOUNTERS:
-        switch(tempsso->d3)
-        {
-        case sstsSHADOW:
-        case sstsSHADOWU:
-        case sstsOUTLINE8:
-        case sstsOUTLINEPLUS:
-        case sstsOUTLINEX:
-        case sstsSHADOWED:
-        case sstsSHADOWEDU:
-        case sstsOUTLINED8:
-        case sstsOUTLINEDPLUS:
-        case sstsOUTLINEDX:
-            w+=1;
-            break;
-        }
-        
-        break;
-    }
-    
-    return w;
-}
-
-/*** end of subscr.cc ***/
-

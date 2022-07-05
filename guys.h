@@ -1,17 +1,3 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  guys.cc
-//
-//  "Guys" code (and other related stuff) for zelda.cc
-//
-//  Still has some hardcoded stuff that should be moved
-//  out into defdata.cc for customizing the enemies.
-//
-//--------------------------------------------------------
-
-//#include "guys.h"
 #ifndef _GUYS_H_
 #define _GUYS_H_
 #include <list>
@@ -21,7 +7,6 @@
 extern int repaircharge;
 extern bool adjustmagic;
 extern bool learnslash;
-extern int itemindex;
 extern int wallm_load_clk;
 extern int sle_x,sle_y,sle_cnt,sle_clk;
 extern int vhead;
@@ -29,7 +14,6 @@ extern int guycarryingitem;
 
 int random_layer_enemy();
 int count_layer_enemies();
-bool can_do_clock();
 int link_on_wall();
 bool tooclose(int x,int y,int d);
 bool isflier(int id);
@@ -722,14 +706,12 @@ void addfires();
 void loadguys();
 void loaditem();
 void never_return(int index);
-bool hasBoss();
 bool slowguy(int id);
 bool countguy(int id);
 bool ok2add(int id);
 void load_default_enemies();
 void nsp(bool random);
 int next_side_pos(bool random);
-bool can_side_load(int id);
 void side_load_enemies();
 void loadenemies();
 void moneysign();
@@ -747,6 +729,5 @@ void check_collisions();
 void dragging_item();
 void roaming_item();
 int more_carried_items();
-#endif
-/*** end of guys.cc ***/
 
+#endif

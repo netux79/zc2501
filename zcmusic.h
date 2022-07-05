@@ -1,8 +1,3 @@
-/* Zelda Classic Music Library        	*/
-/* ------------------------------------ */
-/* Wrapper for transparently extending	*/
-/* supported music file formats.      	*/
-
 #ifndef _ZCMUSIC_H_
 #define _ZCMUSIC_H_
 #ifdef ZCM_DLL
@@ -59,4 +54,3 @@ ZCM_EXTERN int zcmusic_change_track(ZCMUSIC* zcm, int tracknum);
 
 #undef ZCM_EXTERN
 #endif
-

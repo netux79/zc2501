@@ -1,15 +1,3 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  link.cc
-//
-//  Link's class: LinkClass
-//  Handles a lot of game play stuff as well as Link's
-//  movement, attacking, etc.
-//
-//--------------------------------------------------------
-
 #include <string.h>
 #include <set>
 #include <stdio.h>
@@ -17,9 +5,8 @@
 #include "link.h"
 #include "guys.h"
 #include "subscr.h"
-#include "zc_subscr.h"
 #include "decorations.h"
-#include "zc_custom.h"
+#include "custom.h"
 #include "title.h"
 #include "ffscript.h"
 #include "zscriptversion.h"
@@ -30,7 +17,6 @@ extern int draw_screen_clip_rect_x1;
 extern int draw_screen_clip_rect_x2;
 extern int draw_screen_clip_rect_y1;
 extern int draw_screen_clip_rect_y2;
-//extern bool draw_screen_clip_rect_show_link;
 extern bool global_wait;
 
 int link_count = -1;
@@ -57,6 +43,7 @@ int LinkClass::DrunkClock()
 {
     return drunkclk;
 }
+
 void LinkClass::setDrunkClock(int newdrunkclk)
 {
     drunkclk=newdrunkclk;
@@ -67,7 +54,6 @@ LinkClass::LinkClass() : sprite()
     init();
 }
 
-//void LinkClass::linkstep() { lstep = lstep<(BSZ?27:11) ? lstep+1 : 0; }
 void LinkClass::linkstep()
 {
     lstep = lstep<((zinit.linkanimationstyle==las_bszelda)?27:11) ? lstep+1 : 0;
@@ -5153,9 +5139,6 @@ bool LinkClass::doattack()
     // charging up weapon...
     //
     if(((attack==wSword && attackclk==SWORDCHARGEFRAME && itemid>=0 && isWpnPressed(itype_sword)) ||
-#if 0
-            (attack==wWand && attackclk==WANDCHARGEFRAME && itemid>=0 isWpnPressed(itype_wand)) ||
-#endif
             (attack==wHammer && attackclk==HAMMERCHARGEFRAME && itemid>=0 && isWpnPressed(itype_hammer))) && z==0 && checkmagiccost(itemid))
     {
         // Increase charging while holding down button.
@@ -11512,58 +11495,6 @@ bool LinkClass::nextcombo_solid(int d2)
         {
             return true;
         }
-        
-#if 0
-        
-        // next block (i.e. cnt==2)
-        if(!(cx&8))
-        {
-            b<<=2;
-        }
-        else
-        {
-            c = combobuf[TheMaps[ns].data[++cmb]];
-            dried = iswater_type(c.type) && DRIEDLAKE;
-            swim = iswater_type(c.type) && (current_item(itype_flippers));
-            b=1;
-            
-            if(cy&8)
-            {
-                b<<=1;
-            }
-        }
-        
-        if((c.walk&b) && !dried && !swim)
-        {
-            return true;
-        }
-        
-        cx+=8;
-        
-        if(cx&7)
-        {
-            if(!(cx&8))
-            {
-                b<<=2;
-            }
-            else
-            {
-                c = combobuf[TheMaps[ns].data[++cmb]];
-                dried = iswater_type(c.type) && DRIEDLAKE;
-                swim = iswater_type(c.type) && (current_item(itype_flippers) || action==rafting);
-                b=1;
-                
-                if(cy&8)
-                {
-                    b<<=1;
-                }
-            }
-            
-            if((c.walk&b) && !dried && !swim)
-                return true;
-        }
-        
-#endif
     }
     
     return false;
@@ -14232,8 +14163,6 @@ void LinkClass::getTriforce(int id2)
                 draw_screen_clip_rect_x2=255-curtain_x;
                 draw_screen_clip_rect_y1=0;
                 draw_screen_clip_rect_y2=223;
-                //draw_screen_clip_rect_show_link=true;
-                //draw_screen(tmpscr);
             }
         }
         
@@ -14254,7 +14183,6 @@ void LinkClass::getTriforce(int id2)
     draw_screen_clip_rect_x2=255;
     draw_screen_clip_rect_y1=0;
     draw_screen_clip_rect_y2=223;
-    //draw_screen_clip_rect_show_link=true;
     show_subscreen_items=true;
     
     if(itemsbuf[id2].flags & ITEM_FLAG1 && currscr < 128)
@@ -14529,7 +14457,7 @@ void LinkClass::gameover()
                     if(f==60)
                     {
                         red_shift();
-                        create_rgb_table_range(&rgb_table, RAMpal, 208, 239, NULL);
+                        create_rgb_table_range(&rgb_table, RAMpal, 208, 239);
                         create_zc_trans_table(&trans_table, RAMpal, 128, 128, 128);
                         memcpy(&trans_table2, &trans_table, sizeof(COLOR_MAP));
                         
@@ -14552,7 +14480,7 @@ void LinkClass::gameover()
                     if(f>=139 && f<=169)//fade from red to black
                     {
                         fade_interpolate(RAMpal,black_palette,RAMpal, (f-138)<<1, 224, 255);
-                        create_rgb_table_range(&rgb_table, RAMpal, 208, 239, NULL);
+                        create_rgb_table_range(&rgb_table, RAMpal, 208, 239);
                         create_zc_trans_table(&trans_table, RAMpal, 128, 128, 128);
                         memcpy(&trans_table2, &trans_table, sizeof(COLOR_MAP));
                         
@@ -15183,5 +15111,3 @@ LinkClass::WalkflagInfo LinkClass::WalkflagInfo::operator !()
     ret.flags = flags ^ UNWALKABLE;
     return ret;
 }
-
-/*** end of link.cpp ***/

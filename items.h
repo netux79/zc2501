@@ -1,17 +1,3 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  sprite.cc
-//
-//  Sprite classes:
-//   - sprite:      base class for the guys and enemies in zelda.cc
-//   - movingblock: the moving block class
-//   - sprite_list: main container class for different groups of sprites
-//   - item:        items class
-//
-//--------------------------------------------------------
-
 #ifndef _ITEMS_H_
 #define _ITEMS_H_
 
@@ -48,5 +34,3 @@ public:
 void putitem(BITMAP *dest,int x,int y,int item_id);
 void putitem2(BITMAP *dest,int x,int y,int item_id, int &aclk, int &aframe, int flash);
 #endif
-/*** end of sprite.cc ***/
-

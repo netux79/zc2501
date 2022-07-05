@@ -1,28 +1,14 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  tiles.cc
-//
-//  Tile drawing routines for ZC.
-//
-//  !! Don't use them on "screen"; use memory BITMAPs only.
-//
-//--------------------------------------------------------
-
 #include <string.h>
 
 #include "zdefs.h"
-#include "zsys.h"
 #include "tiles.h"
+#include "zcsys.h"
 
 extern RGB_MAP rgb_table;
 extern COLOR_MAP trans_table;
 extern itemdata   *itemsbuf;
 extern wpndata    *wpnsbuf;
 extern byte        quest_rules[QUESTRULES_SIZE];
-//extern byte *tilebuf;
-//BITMAP* tilebuf[NEWMAXTILES];
 tiledata *newtilebuf;
 newcombo *combobuf;
 word animated_combo_table[MAXCOMBOS][2];                    //[0]=position in act2, [1]=original tile
@@ -32,12 +18,9 @@ word animated_combo_table2[MAXCOMBOS][2];                    //[0]=position in a
 word animated_combo_table24[MAXCOMBOS][2];                   //[0]=combo, [1]=clock
 word animated_combos2;
 bool blank_tile_table[NEWMAXTILES];                         //keeps track of blank tiles
-bool used_tile_table[NEWMAXTILES];                          //keeps track of used tiles
 bool blank_tile_quarters_table[NEWMAXTILES*4];              //keeps track of blank tile quarters
 extern fix  LinkModifiedX();
 extern fix  LinkModifiedY();
-
-bool unused_tile_table[NEWMAXTILES];                  //keeps track of unused tiles
 
 byte unpackbuf[UNPACKSIZE];
 
@@ -58,12 +41,6 @@ bool isblanktile(tiledata *buf, int i)
     
     return true;
 }
-
-
-const char *tileformat_string[tfMax] =
-{
-    "(Invalid)", "4-bit", "8-bit", "16-bit", "24-bit", "32-bit"
-};
 
 void register_blank_tile_quarters(int tile)
 {
@@ -93,57 +70,11 @@ void register_blank_tile_quarters(int tile)
 
 void register_blank_tiles()
 {
-    //int tiles_used=count_tiles(newtilebuf);
     for(int i=0; i<NEWMAXTILES; ++i)
     {
         register_blank_tile_quarters(i);
         blank_tile_table[i]=isblanktile(newtilebuf, i);
     }
-}
-
-//returns the number of tiles
-word count_tiles(tiledata *buf)
-{
-    word tiles_used;
-    
-    //  bool used;
-    //  int x;
-    for(tiles_used=(NEWMAXTILES); tiles_used>0; --tiles_used)
-    {
-        /*
-          used=false;
-          for (x=0; x<128; ++x)
-          {
-          used=used || (tilebuf[(tiles_used-1)*128+x]!=0);
-          }
-          if (used)
-          {
-          break;
-          }
-          */
-        if(!isblanktile(buf, tiles_used-1))
-        {
-            break;
-        }
-    }
-    
-    return tiles_used;
-}
-
-//returns the number of combos
-word count_combos()
-{
-    word combos_used;
-    
-    for(combos_used=MAXCOMBOS; combos_used>0; --combos_used)
-    {
-        if(combobuf[combos_used-1].tile!=0)
-        {
-            break;
-        }
-    }
-    
-    return combos_used;
 }
 
 void setup_combo_animations()
@@ -274,18 +205,6 @@ void animate_combos()
     }
 }
 
-/*
-bool isonline(float x1, float y1, float x2, float y2, float x3, float y3)
-{
-  float slope;
-  float intercept;
-
-  slope = (y2-y1)/(x2-x1);
-  intercept = y1 - (slope*x1);
-  return (y3 == (slope*x3)+intercept) && x3>zc_min(x1,x2) && x3<zc_max(x1,x2) && y3>zc_min(y1,y2) && y3<zc_max(y1,y2) ;
-}
-*/
-
 //pixel-precise version of the above -DD
 bool isonline(long x1, long y1, long x2, long y2, long x3, long y3)
 {
@@ -328,26 +247,6 @@ bool isonline(long x1, long y1, long x2, long y2, long x3, long y3)
     return nondegenq >= 0 && nondegenq <= nondegend;
 }
 
-//clears a tile
-/*
-void clear_tile(tiledata *buf, word tile)
-{
-  buf[tile].format=tf4Bit;
-  if (buf[tile].data!=NULL)
-  {
-    free(buf[tile].data);
-    buf[tile].data = NULL;
-  }
-  buf[tile].data=(byte *)malloc(tilesize(buf[tile].format));
-  if (buf[tile].data==NULL)
-  {
-    Z_error("Unable to initialize tile #%d.\n", tile);
-    exit(1);
-  }
-  memset(buf[tile].data,0,tilesize(buf[tile].format));
-}
-*/
-
 void reset_tile(tiledata *buf, int t, int format=1)
 {
     buf[t].format=format;
@@ -361,7 +260,6 @@ void reset_tile(tiledata *buf, int t, int format=1)
     
     if(buf[t].data==NULL)
     {
-        quit_game();
         Z_error("Unable to initialize tile #%d.\n", t);
     }
     
@@ -703,18 +601,6 @@ void pack_tiledata(byte *dest, byte *src, byte format)
         
         break;
     }
-}
-
-// packs a whole set of tiles from old size to new size
-void pack_tiles(byte *buf)
-{
-    int di = 0;
-    
-    for(int si=0; si<TILEBUF_SIZE; si+=2)
-        buf[di++] = (buf[si]&15) + ((buf[si+1]&15) << 4);
-        
-    for(; di<NEWTILE_SIZE2; ++di)
-        buf[di]=0;
 }
 
 int rotate_table[8]=
@@ -1307,60 +1193,6 @@ void overtilecloaked16(BITMAP* dest,int tile,int x,int y,int flip)
     }
 }
 
-void putblocktranslucent8(BITMAP *dest,int tile,int x,int y,int csets[],int flip,int mask,int opacity)
-{
-    int t[4];
-    
-    for(int i=0; i<4; ++i)
-        t[i]=tile+i;
-        
-    switch(mask)
-    {
-    case 1:
-        puttiletranslucent8(dest,tile,x,y,csets[0],flip,opacity);
-        break;
-        
-    case 3:
-        if(flip&2)
-        {
-            zc_swap(t[0],t[1]);
-        }
-        
-        puttiletranslucent8(dest,t[0],x,y,  csets[0],flip,opacity);
-        puttiletranslucent8(dest,t[1],x,y+8,csets[1],flip,opacity);
-        break;
-        
-    case 5:
-        if(flip&1)
-        {
-            zc_swap(t[0],t[1]);
-        }
-        
-        puttiletranslucent8(dest,t[0],x,  y,csets[0],flip,opacity);
-        puttiletranslucent8(dest,t[1],x+8,y,csets[1],flip,opacity);
-        break;
-        
-    case 15:
-        if(flip&1)
-        {
-            zc_swap(t[0],t[1]);
-            zc_swap(t[2],t[3]);
-        }
-        
-        if(flip&2)
-        {
-            zc_swap(t[0],t[2]);
-            zc_swap(t[1],t[3]);
-        }
-        
-        puttiletranslucent8(dest,t[0],x,  y,  csets[0],flip,opacity);
-        puttiletranslucent8(dest,t[1],x+8,y,  csets[1],flip,opacity);
-        puttiletranslucent8(dest,t[2],x,  y+8,csets[2],flip,opacity);
-        puttiletranslucent8(dest,t[3],x+8,y+8,csets[3],flip,opacity);
-        break;
-    }
-}
-
 void overblocktranslucent8(BITMAP *dest,int tile,int x,int y,int csets[],int flip,int mask,int opacity)
 {
     int t[4];
@@ -1541,28 +1373,6 @@ int combo_tile(int cmbdat, int x, int y)
 {
     const newcombo & c = combobuf[cmbdat];
     return combo_tile(c, x, y);
-}
-
-void putcombotranslucent(BITMAP* dest,int x,int y,int cmbdat,int cset,int opacity)
-{
-    newcombo c = combobuf[cmbdat];
-    int drawtile=combo_tile(c, x, y);
-    
-    if(!(c.csets&0xF0) || !(c.csets&0x0F) || (newtilebuf[drawtile].format>tf4Bit))
-        puttiletranslucent16(dest,drawtile,x,y,cset,c.flip,opacity);
-    else
-    {
-        int csets[4];
-        int cofs = c.csets&15;
-        
-        if(cofs&8)
-            cofs |= ~int(0xF);
-            
-        for(int i=0; i<4; ++i)
-            csets[i] = c.csets&(16<<i) ? cset + cofs : cset;
-            
-        putblocktranslucent8(dest,drawtile<<2,x,y,csets,c.flip,15,opacity);
-    }
 }
 
 void overcombotranslucent(BITMAP* dest,int x,int y,int cmbdat,int cset,int opacity)
@@ -2415,32 +2225,6 @@ void putcombo(BITMAP* dest,int x,int y,int cmbdat,int cset)
         }
         
         putblock8(dest,drawtile<<2,x,y,csets,c.flip,15);
-        //    putblock8(dest,c.drawtile<<2,x,y,csets,c.flip,15);
-    }
-}
-
-void oldputcombo(BITMAP* dest,int x,int y,int cmbdat,int cset)
-{
-    newcombo c = combobuf[cmbdat];
-    int drawtile=combo_tile(c, x, y);
-    
-    if(!(c.csets&0xF0) || !(c.csets&0x0F) || (newtilebuf[drawtile].format>tf4Bit))
-        oldputtile16(dest,drawtile,x,y,cset,c.flip);
-    //    oldputtile16(dest,c.drawtile,x,y,cset,c.flip);
-    else
-    {
-        int csets[4];
-        int cofs = c.csets&15;
-        //    if(cofs&8)
-        //      cofs |= ~int(0xF);
-        
-        for(int i=0; i<4; ++i)
-        {
-            csets[i] = c.csets&(16<<i) ? cset + cofs : cset;
-        }
-        
-        oldputblock8(dest,drawtile<<2,x,y,csets,c.flip,15);
-        //    oldputblock8(dest,c.drawtile<<2,x,y,csets,c.flip,15);
     }
 }
 
@@ -2492,22 +2276,6 @@ void overcombo2(BITMAP* dest,int x,int y,int cmbdat,int cset)
     }
 }
 
-bool is_valid_format(byte format)
-{
-    switch(format)
-    {
-    case tf32Bit:
-    case tf24Bit:
-    case tf16Bit:
-    case tf8Bit:
-    case tf4Bit:
-        return true;
-        
-    default:
-        return false;
-    }
-}
-
 int tilesize(byte format)
 {
     switch(format)
@@ -2544,6 +2312,3 @@ int comboa_lmasktotal(byte layermask)
     result+=(layermask&32) >> 5;
     return result;
 }
-
-/* end of tiles.cc */
-

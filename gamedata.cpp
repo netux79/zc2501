@@ -1,14 +1,3 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  zelda.cc
-//
-//  Main code for Zelda Classic. Originally written in
-//  SPHINX C--, now rewritten in DJGPP with Allegro.
-//
-//--------------------------------------------------------
-
 #include <stdio.h>
 #include "zdefs.h"
 #include "zelda.h"
@@ -746,6 +735,3 @@ void gamedata::set_item_no_flush(int id, bool value)
         
     item[id]=value;
 }
-
-/*** end of gamedata.cpp ***/
-

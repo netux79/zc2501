@@ -1,21 +1,16 @@
-/* Zelda Classic Music Library         */
-/* ------------------------------------*/
-/* Wrapper for transparently extending */
-/* supported music file formats.       */
-
 #include <string.h>
 #include <aldumb.h>
 #include <alogg.h>
 #include <almp3.h>
+#include <vector>
+#include <gme/Nsf_Emu.h>
+#include <gme/Gbs_Emu.h>
+#include <gme/Spc_Emu.h>
+#include <gme/Vgm_Emu.h>
+#include <gme/Gym_Emu.h>
 
-#include "zsys.h"
+#include "zcsys.h"
 #include "zcmusic.h"
-
-#include "gme/Nsf_Emu.h"
-#include "gme/Gbs_Emu.h"
-#include "gme/Spc_Emu.h"
-#include "gme/Vgm_Emu.h"
-#include "gme/Gym_Emu.h"
 
 // might consider replacing the following with user defined values from the
 // 'sound' dialog in the player. This way, each person could tune it as needed.
@@ -55,7 +50,6 @@ typedef struct GMEFILE : public ZCMUSICBASE
     int samples;
 } GMEFILE;
 
-#include <vector>
 static std::vector<ZCMUSIC*> playlist;                      //yeah, I'm too lazy to do it myself
 static int libflags = 0;
 
@@ -1222,4 +1216,3 @@ int unload_gme_file(GMEFILE* gme)
     
     return true;
 }
-

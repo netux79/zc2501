@@ -34,8 +34,8 @@ ArrayIterator<*>{
 
 #include "zdefs.h"
 
-#ifndef __zc_array_h_
-#define __zc_array_h_
+#ifndef __ZCARRAY_H_
+#define __ZCARRAY_H_
 
 extern void Z_message(const char *format,...);
 
@@ -581,4 +581,3 @@ private:
 };
 
 #endif
-

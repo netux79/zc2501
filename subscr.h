@@ -1,19 +1,10 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  subscr.cc
-//
-//  Subscreen code for zelda.cc
-//
-//--------------------------------------------------------
-
 #ifndef _SUBSCR_H_
 #define _SUBSCR_H_
 
+#include <stdio.h>
+
 #include "sprite.h"
 #include "items.h"
-#include <stdio.h>
 
 #define ssflagSHOWGRID 1
 
@@ -119,15 +110,6 @@ enum { sstaLEFT, sstaCENTER, sstaRIGHT };
 #define sspDOWN 2
 #define sspSCROLLING 4
 
-struct sso_struct
-{
-    char *s;
-    int i;
-};
-
-extern sso_struct bisso[ssoMAX];
-
-
 struct subscreen_object
 {
     byte  type;
@@ -171,8 +153,6 @@ struct subscreen_group
 /****  Subscr items code  ****/
 extern subscreen_object default_subscreen_active[ssdtMAX][2][66];
 extern subscreen_object default_subscreen_passive[ssdtMAX][2][21];
-//extern subscreen_object z3_active[200];
-//extern subscreen_object z3_passive[200];
 extern subscreen_object z3_active_a[80];
 extern subscreen_object z3_passive_a[66];
 extern subscreen_object z3_active_ab[82];
@@ -221,14 +201,6 @@ const byte bmap_bs[2][12] =
     {0,3,0,0,3,0,0,3,0,3,0,0}
 };
 const int fringe[8] = { 6,2,4,7,6,8,7,5 };
-const byte bmaptiles_old[8*5] =
-{
-    0, 1, 2, 3, 2, 3, 3, 4,
-    20,21,22,23,22,23,23,24,
-    20,21,22,23,22,23,23,24,
-    20,21,22,23,22,23,23,24,
-    40,41,42,43,42,43,43,44
-};
 
 const byte bmaptiles_original[5][8] =
 {
@@ -268,13 +240,8 @@ int ss_objects(subscreen_group *tempss);
 void purge_blank_subscreen_objects(subscreen_group *tempss);
 int subscreen_cset(miscQdata *misc,int c1, int c2);
 
-int sso_x(subscreen_object *tempsso);
-int sso_y(subscreen_object *tempsso);
-int sso_h(subscreen_object *tempsso);
-int sso_w(subscreen_object *tempsso);
-int get_alignment(subscreen_object *tempsso);
+void dosubscr(miscQdata *misc);
+void markBmap(int dir, int sc);
+void markBmap(int dir);
 
 #endif
-
-/*** end of subscr.cc ***/
-

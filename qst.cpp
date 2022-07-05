@@ -1,29 +1,16 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  qst.cc
-//
-//  Code for loading '.qst' files in ZC and ZQuest.
-//
-//--------------------------------------------------------
-
 #include <stdio.h>
 #include <string.h>
 #include <string>
 #include <map>
 #include <vector>
-#include <assert.h>
 
-#include "zdefs.h"
-#include "colors.h"
-#include "tiles.h"
-#include "zsys.h"
-#include "qst.h"
 #include "zelda.h"
+#include "tiles.h"
+#include "pal.h"
+#include "qst.h"
 #include "defdata.h"
 #include "subscr.h"
-#include "zc_custom.h"
+#include "custom.h"
 #include "sfx.h"
 
 using std::string;
@@ -43,7 +30,6 @@ extern itemdata            *itemsbuf;
 extern wpndata             *wpnsbuf;
 extern comboclass          *combo_class_buf;
 extern guydata             *guysbuf;
-extern ZCHEATS             zcheats;
 extern zinitdata           zinit;
 string                     zScript;
 std::map<int, pair<string,string> > ffcmap;
@@ -120,7 +106,7 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
     
     if(encrypted)
     {
-        ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_MAX-1, strstr(filename, ".dat#")!=NULL);
+        ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_MAX-1);
         
         if(ret)
         {
@@ -139,25 +125,25 @@ PACKFILE *open_quest_file(int *open_error, const char *filename, char *deletefil
             if(ret==5)                                              //old encryption?
             {
                 current_method++;
-                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_211B9, strstr(filename, ".dat#")!=NULL);
+                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_211B9);
             }
             
             if(ret==5)                                              //old encryption?
             {
                 current_method++;
-                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B185, strstr(filename, ".dat#")!=NULL);
+                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B185);
             }
             
             if(ret==5)                                              //old encryption?
             {
                 current_method++;
-                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B105, strstr(filename, ".dat#")!=NULL);
+                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B105);
             }
             
             if(ret==5)                                              //old encryption?
             {
                 current_method++;
-                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B104, strstr(filename, ".dat#")!=NULL);
+                ret = decode_file_007(filename, tmpfilename, ENC_STR, ENC_METHOD_192B104);
             }
             
             if(ret)
@@ -10220,7 +10206,6 @@ int readtunes(PACKFILE *f, zquestheader *Header, zctune *tunes /*zcmidi_ *midis*
     
     if(Header->zelda_version < 0x193)
     {
-        //    mf=Header->data_flags+ZQ_MIDIS2;
         if((Header->zelda_version < 0x192)||((Header->zelda_version == 0x192)&&(Header->build<178)))
         {
             tunes_to_read=MAXCUSTOMMIDIS192b177;
@@ -10433,7 +10418,6 @@ int readcheatcodes(PACKFILE *f, zquestheader *Header, bool keepdata)
     
     if(keepdata==true)
     {
-        memcpy(&zcheats, &tempzcheats, sizeof(tempzcheats));
         Header->data_flags[ZQ_CHEATS2]=temp_use_cheats;
     }
     
@@ -12395,6 +12379,3 @@ invalid:
     
     return qe_invalid;
 }
-
-/*** end of qst.cc ***/
-

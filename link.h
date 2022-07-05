@@ -1,15 +1,3 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  link.cc
-//
-//  Link's class: LinkClass
-//  Handles a lot of game play stuff as well as Link's
-//  movement, attacking, etc.
-//
-//--------------------------------------------------------
-
 #ifndef _LINK_H_
 #define _LINK_H_
 
@@ -18,13 +6,11 @@
 #include "zelda.h"
 #include "maps.h"
 #include "tiles.h"
-#include "colors.h"
 #include "pal.h"
-#include "zsys.h"
 #include "qst.h"
 #include "weapons.h"
 #include "sprite.h"
-#include "zc_custom.h"
+#include "custom.h"
 #include "subscr.h"
 
 extern movingblock mblock2;                                 //mblock[4]?
@@ -44,18 +30,9 @@ enum actiontype
     ischarging, isspinning, isdiving
 };
 
-typedef struct tilesequence
-{
-    word tile;
-    byte frames;                                              // animation frame count
-    byte speed;                                               // animation speed
-    byte exp;                                                 // not used
-} tilesequence;
-
 #define SWORDCHARGEFRAME 20
 #define SWORDTAPFRAME SWORDCHARGEFRAME-8
 #define HAMMERCHARGEFRAME 11
-#define WANDCHARGEFRAME 12
 
 // Values for specialcave
 #define ITEMCELLAR 1
@@ -398,7 +375,6 @@ void do_lens();
 int touchcombo(int x,int y);
 extern bool did_secret;
 int selectWlevel(int d);
-void computeMaxArrows();
 
 /************************************/
 /********  More Items Code  *********/
@@ -433,4 +409,3 @@ void takeitem(int id);
 void red_shift();
 void slide_in_color(int color);
 #endif
-/*** end of link.cc ***/

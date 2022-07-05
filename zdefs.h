@@ -1,93 +1,13 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  zdefs.h
-//
-//  Data formats, definitions, and a few small functions
-//  for zelda.cc and zquest.cc
-//
-//--------------------------------------------------------
-
 #ifndef _ZDEFS_H_
 #define _ZDEFS_H_
-
-//Conditional Debugging Compilation
-//Script related
-
-//Other
-
-/*
-  //DOS Graphics Modes
-  GFX_TEXT
-  GFX_AUTODETECT
-  GFX_AUTODETECT_FULLSCREEN
-  GFX_AUTODETECT_WINDOWED
-  GFX_SAFE
-  GFX_VGA
-  GFX_MODEX
-  GFX_VESA1
-  GFX_VESA2B
-  GFX_VESA2L
-  GFX_VESA3
-  GFX_VBEAF
-
-  //Windows Graphics Modes
-  GFX_TEXT
-  GFX_AUTODETECT
-  GFX_AUTODETECT_FULLSCREEN
-  GFX_AUTODETECT_WINDOWED
-  GFX_SAFE
-  GFX_DIRECTX
-  GFX_DIRECTX_ACCEL
-  GFX_DIRECTX_SOFT
-  GFX_DIRECTX_SAFE
-  GFX_DIRECTX_WIN
-  GFX_DIRECTX_OVL
-  GFX_GDI
-
-  //Linux Graphics Modes
-  GFX_TEXT
-  GFX_AUTODETECT
-  GFX_AUTODETECT_FULLSCREEN
-  GFX_AUTODETECT_WINDOWED
-  GFX_SAFE
-  GFX_FBCON
-  GFX_VBEAF
-  GFX_SVGALIB
-  GFX_VGA
-  GFX_MODEX
-
-  //X-Window Graphics Modes
-  GFX_TEXT
-  GFX_AUTODETECT
-  GFX_AUTODETECT_FULLSCREEN
-  GFX_AUTODETECT_WINDOWED
-  GFX_SAFE
-  GFX_XWINDOWS
-  GFX_XWINDOWS_FULLSCREEN
-  GFX_XDGA2
-  GFX_XDGA2_SOFT
-
-  //MacOS X Drivers
-  GFX_TEXT
-  GFX_AUTODETECT
-  GFX_AUTODETECT_FULLSCREEN
-  GFX_AUTODETECT_WINDOWED
-  GFX_SAFE
-  GFX_QUARTZ_FULLSCREEN
-  GFX_QUARTZ_WINDOW
-  */
 
 #include <math.h>
 #include <string.h>
 #include <vector>
-#include <set>
-#include <assert.h>
 #include <allegro.h>
 #include <allegro/internal/aintern.h>
 
-#include "zc_array.h"
+#include "zcarray.h"
 
 #define ZELDA_VERSION       0x0250                          //version of the program
 #define VERSION_BUILD       28                              //build number of this version
@@ -253,8 +173,7 @@ extern bool fake_pack_writing;
 
 // quest stuff
 #define ZQ_TILES        0
-#define ZQ_MIDIS2       1                                   //4 bytes
-#define ZQ_CHEATS2       5
+#define ZQ_CHEATS2      5
 #define ZQ_MAXDATA      20
 #define WAV_COUNT       256
 
@@ -265,18 +184,14 @@ extern bool fake_pack_writing;
 #define MAXCUSTOMTUNES        252
 
 #define MAXMUSIC              256                                 // uses bit string for music flags, so 32 bytes
-#define MUSICFLAGS_SIZE       MAXMUSIC>>3
 
 #define MAXMAPS2        255                                 // 4 times the old number
-//#define MAXMAPS         16
 #define MAPSCRSNORMAL   128
 #define MAPSCRS192b136  132
 #define MAPSCRS         136
-#define TEMPLATES         8
 #define TEMPLATE        131
 #define TEMPLATE2       132
 
-#define MAXQTS           256
 #define MAXDOORCOMBOSETS 256
 #define MAXDMAPS         512                                 //this and
 #define MAXLEVELS        512								 //this should be the same number (was 32)
@@ -870,20 +785,6 @@ enum { e9tNORMAL, e9tROPE, e9tVIRE, e9tPOLSVOICE, e9tARMOS,
        e9tLEEVER, e9tZ3LEEVER, e9tZ3WALK, e9tZ3STALFOS, e9tLAST
      };
 
-/*
-// Floater
-enum { e9tPEAHAT=1, e9tGHINI };
-// Teleporter
-enum { e9tBATROBE=1, e9tZ3WIZZROBE };
-// Traps
-enum { e9tAUTOTRAP=1 };
-// Moldorm
-enum {  e9tMOLDORM=1, e9tVLANMOLA, e9tVMOLDORM, e9tZ3MOLDORM, //restricted to walkable combos
-	e9tTAIL, //only tail is vulnerable
-	e9tMINIMOLD, //doesn't segment
-	e9tBIGTAIL //doesn't segment, only tail is vulnerable
-     };
-*/
 enum
 {
     edefBRANG, edefBOMB, edefSBOMB, edefARROW, edefFIRE, edefWAND,
@@ -922,16 +823,6 @@ enum { pRANDOM, pSIDES, pSIDESR, pCEILING, pCEILINGR, pRANDOMR };
 
 enum { tfInvalid=0, tf4Bit, tf8Bit, tf16Bit, tf24Bit, tf32Bit, tfMax };
 
-struct size_and_pos
-{
-    int x;
-    int y;
-    int w;
-    int h;
-};
-
-//#define OLDITEMCNT i90
-//#define OLDWPNCNT  w84
 #define ITEMCNT   iMax
 #define WPNCNT    wMAX
 
@@ -1010,19 +901,10 @@ struct wpndata
     byte frames;                                              // animation frame count
     byte speed;                                               // animation speed
     byte type;                                                // used by certain weapons
-//  byte wpn_type;
     word script;
-//  byte exp;                                                 // not used
 };
 
-#define		WF_BEHIND			0x10	//Weapon renders behind other sprites
-
-struct quest_template
-{
-    char name[31];
-    char path[2048];
-    //311 bytes
-};
+#define WF_BEHIND   0x10    //Weapon renders behind other sprites
 
 struct item_drop_object
 {
@@ -1038,39 +920,13 @@ struct item_drop_object
 
 #define guy_fadeflicker 0x00000010
 #define guy_fadeinstant 0x00000020
-/*
-#define inv_bomb        0x00000040
-#define inv_sbomb       0x00000080
 
-#define inv_arrow       0x00000100
-#define inv_L2arrow     0x00000200
-#define inv_fire        0x00000400
-#define inv_wand        0x00000800
-
-#define inv_magic       0x00001000
-#define inv_hookshot    0x00002000
-#define inv_hammer      0x00004000
-#define inv_L3brang     0x00008000
-
-#define inv_L1sword     0x00010000
-#define inv_L3sword     0x00020000
-#define inv_L1beam      0x00040000
-#define inv_L3beam      0x00080000
-
-#define inv_refbeam     0x00100000
-#define inv_refmagic    0x00200000
-#define inv_refball     0x00400000
-#define inv_extra       0x00800000
-*/
 #define inv_front       0x01000000
 #define inv_left        0x02000000
 #define inv_right       0x04000000
 #define inv_back        0x08000000
 
 #define guy_bkshield    0x10000000 // Shield can't be broken
-//#define guy_mirror      0x20000000 // Shield is mirrored
-//#define weak_L3brang    0x40000000
-
 #define lens_only       0x80000000
 
 #define guy_flashing    0x00000001
@@ -1623,12 +1479,6 @@ struct newcombo
 #define AF_FRESH 1
 #define	AF_CYCLE 2
 
-struct tiletype
-{
-    byte bitplanes;
-    byte *data;
-};
-
 struct ZCHEATS
 {
     dword flags;
@@ -2076,30 +1926,6 @@ public:
     
 };
 
-/*typedef struct zcmidi_ // midi or other sound format (nsf ...)
-{
-  char title[20];
-  //20
-  long32 start;
-  long32 loop_start;
-  long32 loop_end;
-  //32
-  short loop;
-  short volume;
-  //36
-  byte format;
-  MIDI *midi;
-  //41
-} zcmidi_;
-*/
-
-/*typedef struct emusic
-{
-  char title[20];
-  char filename[256];
-} emusic;
-*/
-
 enum // used for gamedata ITEMS
 {
     // 0
@@ -2177,8 +2003,6 @@ enum {i_bomba=1, i_4bomba, i_8bomba, i_30bomba, imax_bomba};
 enum {i_bomb = 1, imax_bomb};
 enum {i_sbomb = 1, imax_sbomb};
 enum {i_bombbag1=1, i_bombbag2, i_bombbag3, i_bombbag4, imax_bombbag};
-
-//enum {i_clock=1, imax_clock};
 
 struct gamedata
 {
@@ -2511,30 +2335,12 @@ INLINE T sign(T a)
     return T(a < 0 ? -1: 1);
 }
 
-//#ifndef NOZSWAP
 template <class T>
 static INLINE void zc_swap(T &a,T &b)
 {
     T c = a;
     a = b;
     b = c;
-}
-//#endif
-
-template <class T>
-static INLINE bool is_between(T a, T b, T c, bool inclusive)
-{
-    if(a>b&&a<c)
-    {
-        return true;
-    }
-    
-    if(inclusive&&(a==b||a==c))
-    {
-        return true;
-    }
-    
-    return false;
 }
 
 INLINE fix abs(fix f)
@@ -2839,15 +2645,6 @@ INLINE bool isinRect(int x,int y,int rx1,int ry1,int rx2,int ry2)
 {
     return x>=rx1 && x<=rx2 && y>=ry1 && y<=ry2;
 }
-
-INLINE void SCRFIX()
-{
-    putpixel(screen,0,0,getpixel(screen,0,0));
-}
-
-// ack no, inline doesn't work this way -DD
-//INLINE int new_return(int x) { fake_pack_writing=false; return x; }
-#define new_return(x) {assert(x == 0); fake_pack_writing = false; return x; }
 
 //some methods for dealing with items
 int getItemFamily(itemdata *items, int item);

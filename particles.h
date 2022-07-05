@@ -1,17 +1,3 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  sprite.cc
-//
-//  Sprite classes:
-//   - sprite:      base class for the guys and enemies in zelda.cc
-//   - movingblock: the moving block class
-//   - sprite_list: main container class for different groups of sprites
-//   - item:        items class
-//
-//--------------------------------------------------------
-
 #ifndef _PARTICLES_H_
 #define _PARTICLES_H_
 
@@ -48,9 +34,4 @@ public:
     virtual bool animate(int index);
 };
 
-
-
-
 #endif
-/*** end of sprite.cc ***/
-

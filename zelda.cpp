@@ -1,18 +1,6 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  zelda.cc
-//
-//  Main code for Zelda Classic. Originally written in
-//  SPHINX C--, now rewritten in DJGPP with Allegro.
-//
-//--------------------------------------------------------
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <string>
 #include <map>
 #include <vector>
@@ -22,15 +10,26 @@
 #include "zdefs.h"
 #include "zelda.h"
 #include "tiles.h"
-#include "colors.h"
 #include "pal.h"
-#include "zsys.h"
 #include "qst.h"
 #include "fontsdat.h"
 #include "particles.h"
 #include "ffscript.h"
-#include "zc_array.h"
-#include "rendertarget.h"
+#include "zcarray.h"
+#include "sprite.h"
+#include "custom.h"
+#include "link.h"
+#include "maps.h"
+#include "subscr.h"
+#include "guys.h"
+#include "title.h"
+#include "ending.h"
+#include "zcsys.h"
+
+bool blockmoving;
+movingblock mblock2;                                        //mblock[4]?
+sprite_list  guys, items, Ewpns, Lwpns, Sitems, chainlinks, decorations, particles;
+LinkClass   Link;
 
 ZCMUSIC *zcmusic = NULL;
 zinitdata zinit;
@@ -98,25 +97,12 @@ FONT       *nfont, *zfont, *z3font, *z3smallfont, *deffont, *lfont, *lfont_l, *p
            *goronfont, *zoranfont, *hylian1font, *hylian2font, *hylian3font, *hylian4font, *gboraclefont, *gboraclepfont, *dsphantomfont, *dsphantompfont;
 PALETTE    RAMpal;
 byte       *colordata;
-//byte       *tilebuf;
 itemdata   *itemsbuf;
 wpndata    *wpnsbuf;
 comboclass *combo_class_buf;
 guydata    *guysbuf;
 item_drop_object    item_drop_sets[MAXITEMDROPSETS];
-ZCHEATS    zcheats;
-/*char       palnames[MAXLEVELS][PALNAMESIZE];*/
-/*
-newcombo   *combobuf;
-word animated_combo_table[MAXCOMBOS][2];                    //[0]=position in act2, [1]=original tile
-word animated_combo_table4[MAXCOMBOS][2];                   //[0]=combo, [1]=clock
-word animated_combos;
-word animated_combo_table2[MAXCOMBOS][2];                    //[0]=position in act2, [1]=original tile
-word animated_combo_table24[MAXCOMBOS][2];                   //[0]=combo, [1]=clock
-word animated_combos2;
-bool blank_tile_table[NEWMAXTILES];                         //keeps track of blank tiles
-bool blank_tile_quarters_table[NEWMAXTILES*4];              //keeps track of blank tiles
-*/
+
 bool ewind_restart=false;
 
 word     msgclk, msgstr,
@@ -293,7 +279,6 @@ int screen_scale = 2; //default = 2 (640x480)
 zquestheader QHeader;
 byte                quest_rules[QUESTRULES_SIZE];
 byte                midi_flags[MIDIFLAGS_SIZE];
-byte                music_flags[MUSICFLAGS_SIZE];
 word                map_count;
 MsgStr              *MsgStrings;
 int                 msg_strings_size;
@@ -555,24 +540,6 @@ void Z_scripterrlog(const char * const format,...)
         al_trace("%s",buf);
     }
 }
-
-
-bool blockmoving;
-#include "sprite.h"
-movingblock mblock2;                                        //mblock[4]?
-
-sprite_list  guys, items, Ewpns, Lwpns, Sitems, chainlinks, decorations, particles;
-
-#include "zc_custom.h"
-#include "link.h"
-LinkClass   Link;
-
-#include "maps.h"
-#include "subscr.h"
-#include "guys.h"
-#include "title.h"
-#include "ending.h"
-#include "zc_sys.h"
 
 void ALLOFF(bool messagesToo, bool decorationsToo)
 {
@@ -965,18 +932,8 @@ int init_game()
         lens_hint_weapon[x][1]=0;
     }
     
-    
-//Confuse the cheaters by moving the game data to a random location
-    if(game != NULL)
-        delete game;
-        
-    char *dummy = (char *) malloc((rand()%(RAND_MAX/2))+32);
-    game = new gamedata;
     game->Clear();
-    
-    free(dummy);
-    
-//Copy saved data to RAM data (but not global arrays)
+    //Copy saved data to RAM data (but not global arrays)
     game->Copy(saves[currgame]);
     flushItemCache();
     
@@ -1277,7 +1234,6 @@ int cont_game()
     
     if(!Quit)
     {
-        //play_DmapMusic();
         playLevelMusic();
         
         if(isdungeon())
@@ -1347,7 +1303,6 @@ void restart_level()
     
     if(!Quit)
     {
-        //play_DmapMusic();
         playLevelMusic();
         
         if(isdungeon())
@@ -2151,7 +2106,7 @@ void game_loop()
             playing_field_offset=56;
         }
         
-        // Other effects in zc_sys.cpp
+        // Other effects in zcsys.cpp
     }
     
     //  putpixel(framebuf, walkflagx, walkflagy+playing_field_offset, vc(int(rand()%16)));
@@ -2497,8 +2452,6 @@ int main(int argc, char* argv[])
     
     while(Quit!=qEXIT)
     {
-        // this is here to continually fix the keyboard repeat
-        set_keyboard_rate(250,33);
         titlescreen();
         
         setup_combo_animations();
@@ -2670,5 +2623,3 @@ void quit_game()
     
     if(quest_path) free(quest_path);
 }
-
-/*** end of zelda.cc ***/

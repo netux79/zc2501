@@ -1,24 +1,9 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  title.cc
-//
-//  Title screen and intro for zelda.cc
-//  Also has game loading and select screen code.
-//
-//--------------------------------------------------------
-
 #include <stdio.h>
-#include <ctype.h>
 #include <string.h>
 
-#include "zdefs.h"
 #include "zelda.h"
-#include "zsys.h"
 #include "qst.h"
 #include "tiles.h"
-#include "colors.h"
 #include "pal.h"
 #include "sprite.h"
 #include "subscr.h"
@@ -38,13 +23,11 @@ static char SAVE_FILE[1048] = {'\0'};
 
 int readsaves(gamedata *savedata, PACKFILE *f)
 {
-    //word item_count;
     word qstpath_len;
     word save_count;
     char name[9];
     byte tempbyte;
     short tempshort;
-    //  long templong;
     word tempword;
     dword tempdword;
     int section_id=0;
@@ -608,7 +591,7 @@ int load_savedgames()
     }
     
     // decode to temp file
-    ret = decode_file_007(SAVE_FILE, tmpfilename, SAVE_HEADER, ENC_METHOD_MAX-1, strstr(SAVE_FILE, ".dat#")!=NULL);
+    ret = decode_file_007(SAVE_FILE, tmpfilename, SAVE_HEADER, ENC_METHOD_MAX-1);
     
     if(ret)
     {
@@ -1661,7 +1644,6 @@ void game_over(int type)
         
     int pos = 0;
     int f=-1;
-    //  int htile = QHeader.old_dat_flags[ZQ_TILES] ? 2 : 0;
     int htile = 2;
     bool done=false;
     
@@ -1778,11 +1760,9 @@ void save_game(bool savepoint)
 bool save_game(bool savepoint, int type)
 {
     kill_sfx();
-    //music_stop();
     clear_to_color(screen,BLACK);
     loadfullpal();
     
-    //  int htile = QHeader.old_dat_flags[ZQ_TILES] ? 2 : 0;
     int htile = 2;
     bool done=false;
     bool saved=false;
@@ -1944,7 +1924,6 @@ bool save_game(bool savepoint, int type)
                             case 1:
                                 textout_ex(framebuf,zfont,"NO",88,120,c,-1);
                                 break;
-                                //case 2: textout_ex(framebuf,zfont,"QUIT",88,120,c,-1);   break;
                             }
                         }
                     }
@@ -1986,5 +1965,3 @@ bool save_game(bool savepoint, int type)
     
     return saved;
 }
-
-/*** end of title.cc ***/

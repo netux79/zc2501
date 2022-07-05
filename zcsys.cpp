@@ -1,28 +1,15 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  zc_sys.cc
-//
-//  System functions, input handlers, GUI stuff, etc.
-//  for Zelda Classic.
-//
-//--------------------------------------------------------
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <map>
 #include <ctype.h>
-#include "zdefs.h"
+
 #include "zelda.h"
 #include "tiles.h"
-#include "colors.h"
 #include "pal.h"
-#include "zsys.h"
 #include "qst.h"
-#include "zc_sys.h"
+#include "zcsys.h"
 #include "subscr.h"
 #include "maps.h"
 #include "sprite.h"
@@ -2974,7 +2961,6 @@ void wavyout(bool showlink)
         syskeys();
         advanceframe(true);
         
-        //    animate_combos();
         if(Quit)
             break;
     }
@@ -3043,7 +3029,6 @@ void wavyin()
         
         syskeys();
         advanceframe(true);
-        //    animate_combos();
         
         if(Quit)
             break;
@@ -3146,19 +3131,6 @@ int TriforceCount()
     return c;
 }
 
-/*
-int midi_dp[3] = {0,147,104};
-int digi_dp[3] = {1,147,120};
-int pan_dp[3]  = {0,147,136};
-int buf_dp[3]  = {0,147,152};
-*/
-int midi_dp[3] = {0,0,0};
-int digi_dp[3] = {1,0,0};
-int emus_dp[3] = {2,0,0};
-int buf_dp[3]  = {0,0,0};
-int sfx_dp[3]  = {3,0,0};
-int pan_dp[3]  = {0,0,0};
-
 void onQuit()
 {
     if(Playing)
@@ -3219,22 +3191,10 @@ bool try_zcmusic(char *filename, int track, int midi)
 {
     ZCMUSIC *newzcmusic = NULL;
     
-    // Try the ZC directory first
-    {
-        char exepath[2048];
-        char musicpath[2048];
-        get_executable_name(exepath, 2048);
-        replace_filename(musicpath, exepath, filename, 2048);
-        newzcmusic=(ZCMUSIC*)zcmusic_load_file(musicpath);
-    }
-    
-    // Not in ZC directory, try the quest directory
-    if(newzcmusic==NULL)
-    {
-        char musicpath[2048];
-        replace_filename(musicpath, quest_path, filename, 2048);
-        newzcmusic=(ZCMUSIC*)zcmusic_load_file(musicpath);
-    }
+    // try the quest directory
+    char musicpath[2048];
+    replace_filename(musicpath, quest_path, filename, 2048);
+    newzcmusic=(ZCMUSIC*)zcmusic_load_file(musicpath);
     
     // Found it
     if(newzcmusic!=NULL)
@@ -3259,14 +3219,20 @@ bool try_zcmusic(char *filename, int track, int midi)
     return false;
 }
 
-void jukebox(int index,int loop)
+void jukebox(int index)
 {
     music_stop();
     
-    if(index<0)         index=MAXMIDIS-1;
+    if(index<0) index=MAXMIDIS-1;
     
     if(index>=MAXMIDIS) index=0;
-    
+
+    // do nothing if it's already playing
+    if(index==currmidi && midi_pos>=0)
+    {
+        return;
+    }
+
     music_stop();
     
     // Allegro's DIGMID driver (the one normally used on on Linux) gets
@@ -3275,7 +3241,7 @@ void jukebox(int index,int loop)
         set_volume(0, 0);
         
     set_volume(-1, mixvol(tunes[index].volume,midi_volume>>1));
-    play_midi((MIDI*)tunes[index].data,loop);
+    play_midi((MIDI*)tunes[index].data,tunes[index].loop);
     
     if(tunes[index].start>0)
         midi_seek(tunes[index].start);
@@ -3287,24 +3253,8 @@ void jukebox(int index,int loop)
     master_volume(digi_volume,midi_volume);
 }
 
-void jukebox(int index)
-{
-    if(index<0)         index=MAXMIDIS-1;
-    
-    if(index>=MAXMIDIS) index=0;
-    
-    // do nothing if it's already playing
-    if(index==currmidi && midi_pos>=0)
-    {
-        return;
-    }
-    
-    jukebox(index,tunes[index].loop);
-}
-
 void play_DmapMusic()
 {
-    static char tfile[2048];
     static int ttrack=0;
     bool domidi=false;
     
@@ -3323,15 +3273,6 @@ void play_DmapMusic()
                 zcmusic = NULL;
             }
             
-            // Try the ZC directory first
-            {
-                char exepath[2048];
-                char musicpath[2048];
-                get_executable_name(exepath, 2048);
-                replace_filename(musicpath, exepath, DMaps[currdmap].tmusic, 2048);
-                zcmusic=(ZCMUSIC*)zcmusic_load_file(musicpath);
-            }
-            
             // Not in ZC directory, try the quest directory
             if(zcmusic==NULL)
             {
@@ -3343,7 +3284,6 @@ void play_DmapMusic()
             if(zcmusic!=NULL)
             {
                 stop_midi();
-                strcpy(tfile,DMaps[currdmap].tmusic);
                 zcmusic_play(zcmusic, emusic_volume);
                 int temptracks=0;
                 temptracks=zcmusic_get_tracks(zcmusic);
@@ -3353,7 +3293,6 @@ void play_DmapMusic()
             }
             else
             {
-                tfile[0] = 0;
                 domidi=true;
             }
         }
@@ -3992,4 +3931,429 @@ bool ReadKey(int k)
     return false;
 }
 
-/*** end of zc_sys.cc ***/
+char *time_str_med(dword time)
+{
+    static char s[16];
+    
+    dword secs = (time/60)%60;
+    dword mins = (time/3600)%60;
+    dword hours = time/216000;
+    
+    sprintf(s,"%d:%02d:%02d",hours,mins,secs);
+    return s;
+}
+
+char *time_str_short(dword time)
+{
+    static char s[16];
+    
+    dword mins = (time/3600)%60;
+    dword hours = time/216000;
+    
+    sprintf(s,"%02d%s%02d",hours,(time%60)<30?":":";",mins);
+    return s;
+}
+
+int vbound(int x,int low,int high)
+{
+    if(x<low) return low;
+    
+    if(x>high) return high;
+    
+    return x;
+}
+
+float vbound(float x,float low,float high)
+{
+    if(x<low) return low;
+    
+    if(x>high) return high;
+    
+    return x;
+}
+
+void set_bit(byte *bitstr,int bit,byte val)
+{
+    bitstr += bit>>3;
+    byte mask = 1 << (bit&7);
+    
+    if(val)
+        *bitstr |= mask;
+    else
+        *bitstr &= ~mask;
+}
+
+int get_bit(byte *bitstr,int bit)
+{
+    bitstr += bit>>3;
+    return ((*bitstr) >> (bit&7))&1;
+}
+
+void Z_error(const char *format,...)
+{
+    char buf[256];
+    
+    va_list ap;
+    va_start(ap, format);
+    vsprintf(buf, format, ap);
+    va_end(ap);
+    
+    al_trace("%s\n",buf);
+    exit(1);
+}
+
+void Z_message(const char *format,...)
+{
+    char buf[2048];
+    
+    va_list ap;
+    va_start(ap, format);
+    vsprintf(buf, format, ap);
+    va_end(ap);
+    
+    al_trace("%s",buf);
+}
+
+int anim_3_4(int clk, int speed)
+{
+    clk /= speed;
+    
+    switch(clk&3)
+    {
+    case 0:
+    case 2:
+        clk = 0;
+        break;
+        
+    case 1:
+        clk = 1;
+        break;
+        
+    case 3:
+        clk = 2;
+        break;
+    }
+    
+    return clk;
+}
+
+/**********  Encryption Stuff  *****************/
+
+//#define MASK 0x4C358938
+static int seed = 0;
+//#define MASK 0x91B2A2D1
+//static int seed = 7351962;
+static unsigned int enc_mask[ENC_METHOD_MAX]= {0x4C358938,0x91B2A2D1,0x4A7C1B87,0xF93941E6,0xFD095E94};
+static int pvalue[ENC_METHOD_MAX]= {0x62E9,0x7D14,0x1A82,0x02BB,0xE09C};
+static int qvalue[ENC_METHOD_MAX]= {0x3619,0xA26B,0xF03C,0x7B12,0x4E8F};
+
+static int rand_007(int method)
+{
+    short BX = seed >> 8;
+    short CX = (seed & 0xFF) << 8;
+    signed char AL = seed >> 24;
+    signed char C = AL >> 7;
+    signed char D = BX >> 15;
+    AL <<= 1;
+    BX = (BX << 1) | C;
+    CX = (CX << 1) | D;
+    CX += seed & 0xFFFF;
+    BX += (seed >> 16) + C;
+    //  CX += 0x62E9;
+    //  BX += 0x3619 + D;
+    CX += pvalue[method];
+    BX += qvalue[method] + D;
+    seed = (BX << 16) + CX;
+    return (CX << 16) + BX;
+}
+
+//
+// RETURNS:
+//   0 - OK
+//   1 - srcfile not opened
+//   2 - destfile not opened
+//
+int encode_file_007(const char *srcfile, const char *destfile, int key2, const char *header, int method)
+{
+    FILE *src, *dest;
+    int tog = 0, c, r=0;
+    short c1 = 0, c2 = 0;
+    
+    seed = key2;
+    src = fopen(srcfile, "rb");
+    
+    if(!src)
+        return 1;
+        
+    dest = fopen(destfile, "wb");
+    
+    if(!dest)
+    {
+        fclose(src);
+        return 2;
+    }
+    
+    
+    // write the header
+    if(header)
+    {
+        for(c=0; header[c]; c++)
+            fputc(header[c], dest);
+    }
+    
+    // write the key, XORed with MASK
+    key2 ^= enc_mask[method];
+    fputc(key2>>24, dest);
+    fputc((key2>>16)&255, dest);
+    fputc((key2>>8)&255, dest);
+    fputc(key2&255, dest);
+    
+    // encode the data
+    while((c=fgetc(src)) != EOF)
+    {
+        c1 += c;
+        c2 = (c2 << 4) + (c2 >> 12) + c;
+        
+        if(tog)
+            c += r;
+        else
+        {
+            r = rand_007(method);
+            c ^= r;
+        }
+        
+        tog ^= 1;
+        
+        fputc(c, dest);
+    }
+    
+    // write the checksums
+    r = rand_007(method);
+    c1 ^= r;
+    c2 += r;
+    fputc(c1>>8, dest);
+    fputc(c1&255, dest);
+    fputc(c2>>8, dest);
+    fputc(c2&255, dest);
+    
+    fclose(src);
+    fclose(dest);
+    return 0;
+}
+
+//
+// RETURNS:
+//   0 - OK
+//   1 - srcfile not opened
+//   2 - destfile not opened
+//   3 - scrfile too small
+//   4 - srcfile EOF
+//   5 - checksum mismatch
+//   6 - header mismatch
+//
+int decode_file_007(const char *srcfile, const char *destfile, const char *header, int method)
+{
+    FILE *src=NULL, *dest=NULL;
+    int tog = 0, c, r=0, err;
+    long size, i;
+    short c1 = 0, c2 = 0, check1, check2;
+    
+    // open files
+    size = file_size_ex(srcfile);
+    
+    if(size < 1)
+    {
+        return 1;
+    }
+    
+    size -= 8;   // get actual data size, minus key and checksums
+    
+    if(size < 1)
+    {
+        return 3;
+    }
+    
+    src = fopen(srcfile, "rb");
+    
+    if(!src)
+    {
+        return 1;
+    }
+
+    
+    dest = fopen(destfile, "wb");
+    
+    if(!dest)
+    {
+        fclose(src);
+        return 2;
+    }
+    
+    // read the header
+    err = 4;
+    
+    if(header)
+    {
+        for(i=0; header[i]; i++)
+        {
+            if((c=fgetc(src)) == EOF)
+            {
+                goto error;
+            }
+            
+            if((c&255) != header[i])
+            {
+                err = 6;
+                goto error;
+            }
+            
+            --size;
+        }
+    }
+    
+    // read the key
+    if((c=fgetc(src)) == EOF)
+    {
+        goto error;
+    }
+    
+    seed = c << 24;
+    
+    if((c=fgetc(src)) == EOF)
+    {
+        goto error;
+    }
+    
+    seed += (c & 255) << 16;
+    
+    if((c=fgetc(src)) == EOF)
+    {
+        goto error;
+    }
+    
+    seed += (c & 255) << 8;
+    
+    if((c=fgetc(src)) == EOF)
+    {
+        goto error;
+    }
+    
+    seed += c & 255;
+    seed ^= enc_mask[method];
+    
+    // decode the data
+    for(i=0; i<size; i++)
+    {
+        if((c=fgetc(src)) == EOF)
+        {
+            goto error;
+        }
+        
+        if(tog)
+        {
+            c -= r;
+        }
+        else
+        {
+            r = rand_007(method);
+            c ^= r;
+        }
+        
+        tog ^= 1;
+        
+        c &= 255;
+        c1 += c;
+        c2 = (c2 << 4) + (c2 >> 12) + c;
+        
+        fputc(c, dest);
+    }
+    
+    // read checksums
+    if((c=fgetc(src)) == EOF)
+    {
+        goto error;
+    }
+    
+    check1 = c << 8;
+    
+    if((c=fgetc(src)) == EOF)
+    {
+        goto error;
+    }
+    
+    check1 += c & 255;
+    
+    if((c=fgetc(src)) == EOF)
+    {
+        goto error;
+    }
+    
+    check2 = c << 8;
+    
+    if((c=fgetc(src)) == EOF)
+    {
+        goto error;
+    }
+    
+    check2 += c & 255;
+    
+    // verify checksums
+    r = rand_007(method);
+    check1 ^= r;
+    check2 -= r;
+    check1 &= 0xFFFF;
+    check2 &= 0xFFFF;
+    
+    if(check1 != c1 || check2 != c2)
+    {
+        err = 5;
+        goto error;
+    }
+    
+    fclose(src);
+    fclose(dest);
+    return 0;
+    
+error:
+    fclose(src);
+    fclose(dest);
+    delete_file(destfile);
+    return err;
+}
+
+//Fun fact: Allegro used to be in control of allegro.log. This caused
+//problems, because it would hold on to a file handle. Even if we blank
+//the contents of the log, it will still write to the end, causing
+//lots of nulls.
+
+//No more!
+
+FILE * trace_file;
+
+int zc_trace_handler(const char * msg)
+{
+    if(trace_file == 0)
+    {
+        trace_file = fopen("allegro.log", "a+");
+        
+        if(0==trace_file)
+        {
+            return 0; // blargh.
+        }
+    }
+    
+    fprintf(trace_file, "%s", msg);
+    fflush(trace_file);
+    return 1;
+}
+
+void zc_trace_clear()
+{
+    if(trace_file)
+    {
+        fclose(trace_file);
+    }
+    
+    trace_file = fopen("allegro.log", "w");
+    ASSERT(trace_file);
+}

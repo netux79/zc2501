@@ -40,6 +40,3 @@
 #define ZC_MIDI_TITLE                    5        /* MIDI */
 #define ZC_MIDI_TRIFORCE                 6        /* MIDI */
 #define ZC_MIDI_COUNT                    7
-
-
- 

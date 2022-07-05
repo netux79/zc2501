@@ -1,9 +1,8 @@
 #ifndef _FFSCRIPT_H_
 #define _FFSCRIPT_H_
+
 #include "zdefs.h"
-#include <utility>
 #include <string>
-#include <list>
 
 long32 get_register(const long32 arg);
 int run_script(const byte type, const word script, const byte i = -1); //Global scripts don't need 'i'
@@ -23,22 +22,9 @@ struct script_command
     bool more_stuff;
 };
 
-struct script_variable
-{
-    char name[16];
-    long32 id;
-    word maxcount;
-    byte multiple;
-};
-
 // Defines for script flags
 #define TRUEFLAG          0x0001
 #define MOREFLAG          0x0002
-#define TRIGGERED         0x0004
-
-//What are these for exactly?
-//#define fflong(x,y,z)       (((x[(y)][(z)])<<24)+((x[(y)][(z)+1])<<16)+((x[(y)][(z)+2])<<8)+(x[(y)][(z)+3]))
-//#define ffword(x,y,z)       (((x[(y)][(z)])<<8)+(x[(y)][(z)+1]))
 
 // Defines for the ASM operations
 enum ASM_DEFINE
@@ -784,19 +770,5 @@ enum ASM_DEFINE
 #define SCRIPT_NPC             6
 #define SCRIPT_SUBSCREEN       7
 #define SCRIPT_EWPN            8
-
-struct quad3Dstruct
-{
-    int index;
-    float pos[12], uv[8];
-    int size[2], color[4];
-};
-
-struct triangle3Dstruct
-{
-    int index;
-    float pos[9], uv[6];
-    int size[2], color[3];
-};
 
 #endif

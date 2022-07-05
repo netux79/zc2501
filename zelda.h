@@ -1,13 +1,3 @@
-//--------------------------------------------------------
-//  Zelda Classic
-//  by Jeremy Craner, 1999-2000
-//
-//  zelda.h
-//
-//  Definitions, function prototypes, etc. for zelda.cc
-//
-//--------------------------------------------------------
-
 #ifndef _ZELDA_H_
 #define _ZELDA_H_
 
@@ -17,18 +7,14 @@
 
 #include <vector>
 #include "zdefs.h"
-#include "zc_array.h"
-#include "zc_sys.h"
+#include "zcarray.h"
+#include "zcsys.h"
 #include "zeldadat.h"
 #include "sfx.h"
 #include "zcmusic.h"
-#include "zsys.h"
-#include "script_drawing.h"
+#include "scriptdraw.h"
 
 #define  MAXMIDIS     ZC_MIDI_COUNT+MAXCUSTOMTUNES
-
-#define MAX_IDLE      72000                                 // 20 minutes
-#define MAX_ACTIVE    72000                                 // 20 minutes
 
 // saved games
 #define MAXSAVES      6 // It's constant enough... :p
@@ -126,6 +112,7 @@ int  init_game();
 int  cont_game();
 void restart_level();
 void load_game(gamedata *g);
+void quit_game();
 
 int get_currdmap();
 int get_dlevel();
@@ -139,6 +126,7 @@ INLINE void sfx(int index)
 {
     sfx(index,128,false);
 }
+
 INLINE void sfx(int index,int pan)
 {
     sfx(index,vbound(pan, 0, 255) ,false);
@@ -162,18 +150,15 @@ extern RGB_MAP rgb_table;
 extern COLOR_MAP trans_table, trans_table2;
 extern BITMAP     *framebuf, *scrollbuf, *tmp_scr, *msgbmpbuf, *msgdisplaybuf, *pricesdisplaybuf, *real_screen, *prim_bmp, *lens_scr;
 extern DATAFILE *data, *sfxdata, *fontsdata, *mididata;
-extern SAMPLE   wav_refill;
 extern FONT  *nfont, *zfont, *z3font, *z3smallfont, *deffont, *lfont, *lfont_l, *pfont, *mfont, *ztfont, *sfont, *sfont2, *sfont3, *spfont, *ssfont1, *ssfont2, *ssfont3, *ssfont4, *gblafont,
        *goronfont, *zoranfont, *hylian1font, *hylian2font, *hylian3font, *hylian4font, *gboraclefont, *gboraclepfont, *dsphantomfont, *dsphantompfont;
 extern PALETTE  RAMpal;
 extern byte     *colordata;
-//extern byte     *tilebuf;
 extern itemdata *itemsbuf;
 extern wpndata  *wpnsbuf;
 extern comboclass *combo_class_buf;
 extern guydata  *guysbuf;
 extern item_drop_object    item_drop_sets[MAXITEMDROPSETS];
-extern ZCHEATS  zcheats;
 
 extern bool ewind_restart;
 extern word     msgclk, msgstr, msgpos, msgptr, msgcolour, msgspeed,msg_w,
@@ -234,7 +219,6 @@ extern byte   guygrid[176];
 extern mapscr tmpscr[2];
 extern mapscr tmpscr2[6];
 extern mapscr tmpscr3[6];
-extern char   sig_str[44];
 extern ffscript *ffscripts[512];
 extern ffscript *itemscripts[256];
 extern ffscript *globalscripts[NUMSCRIPTGLOBAL];
@@ -250,6 +234,7 @@ extern int sfxdat;
 typedef ZCArray<long32> ZScriptArray;
 extern ZScriptArray localRAM[MAX_ZCARRAY_SIZE];
 extern byte arrayOwner[MAX_ZCARRAY_SIZE];
+extern ZScriptDrawingRenderTarget* zscriptDrawingRenderTarget;
 
 dword getNumGlobalArrays();
 
@@ -268,10 +253,9 @@ extern void throttleFPS();
 extern zquestheader QHeader;
 extern byte                quest_rules[QUESTRULES_SIZE];
 extern byte                midi_flags[MIDIFLAGS_SIZE];
-extern byte                music_flags[MUSICFLAGS_SIZE];
 extern word                map_count;
 extern MsgStr              *MsgStrings;
-extern int				   msg_strings_size;
+extern int                 msg_strings_size;
 extern DoorComboSet        *DoorComboSets;
 extern dmap                *DMaps;
 extern miscQdata           QMisc;
@@ -289,9 +273,5 @@ extern const byte sty[4][9];
 extern const byte ten_rupies_x[10];
 extern const byte ten_rupies_y[10];
 extern zctune tunes[MAXMIDIS];
-//extern zcmidi_ tunes[MAXMIDIS];
-//extern emusic enhancedMusic[MAXMUSIC];
+
 #endif
-
-/*** end of zelda.h ***/
-
