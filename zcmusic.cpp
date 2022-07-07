@@ -196,7 +196,7 @@ extern "C"
             return NULL;
         }
         
-        Z_message("Trying to load %s\n", filename);
+        Z_message("Loading %s\n", filename);
         
         if(strlen(filename)>255)
         {
@@ -212,7 +212,7 @@ extern "C"
             
             if(!p)
             {
-                Z_message("OGG file '%s' not loaded.\n",filename);
+                Z_message("OGG file '%s' not found.\n",filename);
                 goto error;
             }
             

@@ -48,34 +48,6 @@ namespace
         { "COMPOSER...... KONCHAN", 40,  560, red   }
     };
     
-    const int numQuest1EndLines = 4;
-    const EndingTextLine quest1End[]={
-        { "ANOTHER QUEST WILL START", 32, 656, white },
-        { "FROM HERE.",               88, 672, white },
-        { "PRESS THE START BUTTON.",  40, 696, white },
-        { "\2731986 NINTENDO",        72, 760, white }
-    };
-    
-    const int numQuest2EndLines = 4;
-    const EndingTextLine quest2End[]={
-        { "YOU ARE GREAT.",      72, 768, white },
-        /* name - deaths */
-        { "YOU HAVE AN AMAZING", 48, 816, white },
-        { "WISDOM AND POWER.",   64, 832, white },
-        { "\2731986 NINTENDO",   72, 912, blue  }
-    };
-    
-    const int numQuest34EndLines = 6;
-    const EndingTextLine quest34End[]={
-        { "YOU ARE GREAT.",            72,  768, white },
-        /* name - deaths */
-        { "YOU HAVE AN AMAZING",       48,  816, white },
-        { "WISDOM AND POWER.",         64,  832, white },
-        { "END OF",                    104, 880, white },
-        { "\"THE LEGEND OF ZELDA 1\"", 32,  896, white },
-        { "\2731986 NINTENDO",         72,  912, blue  }
-    };
-    
     const int numCustomQuestEndLines = 6;
     const EndingTextLine customQuestEnd[]={
         { "Congratulations!", 64, 768, white },

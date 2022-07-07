@@ -2150,6 +2150,8 @@ int main(int argc, char* argv[])
         exit(-1);
     }
     
+    Z_message("OK\n");
+    
     three_finger_flag=false;
 
    // Get the quest file to run.
@@ -2171,8 +2173,6 @@ int main(int argc, char* argv[])
       exit(-1);
    }
     
-    Z_message("OK\n");
-
     // allocate quest data buffers
     if(!get_qst_buffers())
     {
@@ -2205,8 +2205,6 @@ int main(int argc, char* argv[])
         Z_error("Couldn't Allocate Timers");
         quit_game();
     }
-    
-    Z_message("OK\n");
     
     // allocate bitmap buffers
     Z_message("Allocating bitmap buffers... ");
@@ -2492,7 +2490,6 @@ int main(int argc, char* argv[])
     quit_game();
     Z_message("Armageddon Games web site: http://www.armageddongames.com\n");
     Z_message("Zelda Classic web site: http://www.zeldaclassic.com\n");
-    Z_message("Zelda Classic wiki: http://www.shardstorm.com/ZCwiki/\n");
     
     allegro_exit();
     return 0;

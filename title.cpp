@@ -16,9 +16,8 @@ extern int skipcont;
 /****  Game Selection Screens  *****/
 /***********************************/
 
-// first the game saving & loading system
+/* first the game saving & loading system */
 
-static const char *SAVE_HEADER = "Zelda Classic Save File";
 static char SAVE_FILE[1048] = {'\0'};
 
 int readsaves(gamedata *savedata, PACKFILE *f)
@@ -578,10 +577,8 @@ int readsaves(gamedata *savedata, PACKFILE *f)
 // call once at startup
 int load_savedgames()
 {
-    int ret;
     PACKFILE *f=NULL;
-    const char *tmpfilename = "tmpsav";
-
+    
     /* Calculate the savefile name based on the quest filename */
     replace_extension(SAVE_FILE, quest_path, "sav", sizeof(SAVE_FILE));
 
@@ -614,16 +611,8 @@ int load_savedgames()
         }
     }
     
-    // decode to temp file
-    ret = decode_file_007(SAVE_FILE, tmpfilename, SAVE_HEADER, ENC_METHOD_MAX-1);
-    
-    if(ret)
-    {
-        goto cantopen;
-    }
-    
     // load the games
-    f = pack_fopen(tmpfilename, F_READ_PACKED);
+    f = pack_fopen(SAVE_FILE, F_READ_PACKED);
     
     if(!f)
         goto cantopen;
@@ -632,7 +621,6 @@ int load_savedgames()
         goto reset;
      
     pack_fclose(f);
-    delete_file(tmpfilename);
     return 0;
     
 newdata:
@@ -647,7 +635,6 @@ reset:
     if(f)
         pack_fclose(f);
         
-    delete_file(tmpfilename);
     Z_message("Format error or entries don't match with quest: %s. Resetting game data... ", SAVE_FILE);
     
     for(int i=0; i<MAXSAVES; i++)
@@ -903,32 +890,22 @@ int save_savedgames()
     if(saves==NULL)
         return 1;
         
-    const char *tmpfilename = "tmpsav";
-    
-    PACKFILE *f = pack_fopen(tmpfilename, F_WRITE_PACKED);
+    PACKFILE *f = pack_fopen(SAVE_FILE, F_WRITE_PACKED);
     
     if(!f)
     {
-        delete_file(tmpfilename);
         return 2;
     }
     
     if(writesaves(saves, f)!=0)
     {
         pack_fclose(f);
-        delete_file(tmpfilename);
-        return 4;
+        return 3;
     }
     
     pack_fclose(f);
-    int ret = encode_file_007(tmpfilename, SAVE_FILE, 0x413F0000 + (frame&0xffff), SAVE_HEADER, ENC_METHOD_MAX-1);
     
-    if(ret)
-        ret += 100;
-        
-    delete_file(tmpfilename);
-    
-    return ret;
+    return 0;
 }
 
 void load_game_icon(gamedata *g)
