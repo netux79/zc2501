@@ -43,18 +43,12 @@ bool fixpolsvoice=false;
 
 int memDBGwatch[8]= {0,0,0,0,0,0,0,0}; //So I can monitor memory crap
 
-//enum { qe_OK, qe_notfound, qe_invalid, qe_version, qe_obsolete,
-//       qe_missing, qe_internal, qe_pwd, qe_match, qe_minver };
-
 extern combo_alias combo_aliases[MAXCOMBOALIASES];
 const char *qst_error[] =
 {
     "OK","File not found","Invalid quest file",
     "Version not supported","Obsolete version",
-    "Missing new data"  ,                                     /* but let it pass in ZQuest */
-    "Internal error occurred", "Invalid password",
-    "Doesn't match saved game", "New quest version; please restart game",
-    "Out of memory", "File Debug Mode"
+    "Internal error occurred", "Out of memory"
 };
 
 //for legacy quests -DD

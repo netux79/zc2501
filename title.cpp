@@ -68,6 +68,9 @@ int readsaves(gamedata *savedata, PACKFILE *f)
     {
         return 5;
     }
+
+    if(save_count > MAXSAVES)
+        save_count = MAXSAVES;
     
     for(int i=0; i<save_count; i++)
     {
@@ -79,6 +82,12 @@ int readsaves(gamedata *savedata, PACKFILE *f)
         savedata[i].set_name(name);
         
         if(!p_getc(&tempbyte,f,true))
+        {
+            return 7;
+        }
+        
+        /* Custom quest only accepted */
+        if (tempbyte!=0xFF)
         {
             return 7;
         }
@@ -168,7 +177,7 @@ int readsaves(gamedata *savedata, PACKFILE *f)
         savedata[i].set_cheat(tempbyte);
         char temp;
         
-        for(int j=0; j<256; j++) // why not MAXITEMS ?
+        for(int j=0; j<MAXITEMS; j++)
         {
             if(!p_getc(&temp, f, true))
                 return 18;
@@ -180,12 +189,24 @@ int readsaves(gamedata *savedata, PACKFILE *f)
         {
             return 20;
         }
-        
+
+        /* Check if version is valid */
+        if (strcmp(savedata[i].version, QHeader.minver) < 0)
+        {
+            return 20;
+        }
+
         if(!pfread(savedata[i].title,sizeof(savedata[i].title),f,true))
         {
             return 21;
         }
         
+        /* Check if quest title matches */
+        if (strcmp(savedata[i].title, QHeader.title))
+        {
+            return 21;
+        }
+
         if(!p_getc(&tempbyte,f,true))
         {
             return 22;
@@ -571,7 +592,10 @@ int load_savedgames()
         if(saves==NULL)
             return 1;
     }
-    
+
+    for(int i=0; i<MAXSAVES; i++)
+        saves[i].Clear();
+
     // see if it's there
     if(!exists(SAVE_FILE))
     {
@@ -624,12 +648,12 @@ reset:
         pack_fclose(f);
         
     delete_file(tmpfilename);
-    Z_message("Format error: %s. Resetting game data... ", SAVE_FILE);
+    Z_message("Format error or entries don't match with quest: %s. Resetting game data... ", SAVE_FILE);
     
-init:
-
     for(int i=0; i<MAXSAVES; i++)
         saves[i].Clear();
+    
+init:
     
     return 0;
 }
@@ -641,7 +665,16 @@ int writesaves(gamedata *savedata, PACKFILE *f)
     int section_version=V_SAVEGAME;
     int section_cversion=CV_SAVEGAME;
     int section_size=0;
-    
+    word save_count=0;
+
+    /* Calculate the # of saves */
+    while(save_count < MAXSAVES && saves[save_count].get_quest()>0)
+        ++save_count;
+
+    /* Nothing to do if there are no save slots to write */
+    if (!save_count)
+        return -1;
+
     //section id
     if(!p_mputl(section_id,f))
     {
@@ -665,17 +698,14 @@ int writesaves(gamedata *savedata, PACKFILE *f)
         return 4;
     }
     
-    //word item_count=iMax;
-    word qstpath_len=0;
-    
-    if(!p_iputw(MAXSAVES,f))
+    if(!p_iputw(save_count,f))
     {
         return 5;
     }
     
-    for(int i=0; i<MAXSAVES; i++)
+    for(int i=0; i<save_count; i++)
     {
-        qstpath_len=(word)strlen(savedata[i].qstpath);
+        word qstpath_len=(word)strlen(savedata[i].qstpath);
         
         if(!pfwrite(savedata[i].get_name(),9,f))
         {
@@ -1276,27 +1306,29 @@ static bool register_name()
     
     if(done)
     {
-        saves[s].set_quest(0xFF); // Always a custom quest, no longer matters.
-        sprintf(saves[s].qstpath, "%s", quest_path);
-        load_game(saves+s);
-        flushItemCache();
-        //messy hack to get this to work, since game is not yet initialized -DD
+        /* Need to temporary point game global to the new 
+           save slot to correctly initilize it */
         gamedata *oldgame = game;
         game = saves+s;
-        saves[s].set_maxlife(zinit.hc*HP_PER_HEART);
-        //saves[s].items[itype_ring]=0;
-        //removeItemsOfFamily(&saves[s], itemsbuf, itype_ring);
-        int maxringid = getHighestLevelOfFamily(&zinit, itemsbuf, itype_ring);
 
+        game->set_quest(0xFF); /* Now it will always be a custom quest */
+        sprintf(game->qstpath, "%s", quest_path);
+        strcpy(game->version, QHeader.version);
+        strcpy(game->title, QHeader.title);
+
+        flushItemCache();
+        game->set_maxlife(zinit.hc*HP_PER_HEART);
+        int maxringid = getHighestLevelOfFamily(&zinit, itemsbuf, itype_ring);
         if(maxringid != -1)
+        {
             getitem(maxringid, true);
-            
-        //      game->set_maxbombs(&saves[s], zinit.max_bombs);
+        }
         ringcolor(false);
-        load_game_icon(saves+s);
+        load_game_icon(game);
+        game->set_timevalid(1);
+
+        /* Restore original game global */
         game = oldgame;
-        //selectscreen();                                       // refresh palette
-        saves[s].set_timevalid(1);
     }
     
     if(x<0 || cancel)

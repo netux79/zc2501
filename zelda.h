@@ -68,7 +68,6 @@ enum
 void Z_eventlog(const char *format, ...);
 void Z_scripterrlog(const char * const format, ...);
 
-// zelda.cc
 void ALLOFF(bool messagesToo = true, bool decorationsToo = true);
 void centerLink();
 fix  LinkX();
@@ -111,7 +110,6 @@ void init_dmap();
 int  init_game();
 int  cont_game();
 void restart_level();
-void load_game(gamedata *g);
 void quit_game();
 
 int get_currdmap();
@@ -169,7 +167,7 @@ extern word     msgclk, msgstr, msgpos, msgptr, msgcolour, msgspeed,msg_w,
        cursor_x,
        cursor_y;
 extern bool msg_onscreen, msg_active,msgspace;
-extern FONT	*msgfont;
+extern FONT     *msgfont;
 extern word     door_combo_set_count;
 extern word     introclk, intropos, dmapmsgclk, linkedmsgclk;
 extern short    lensclk;
@@ -241,7 +239,7 @@ dword getNumGlobalArrays();
 extern int  resx,resy,scrx,scry;
 extern bool sbig;                                           // big screen
 extern int screen_scale; //user adjustable screen size.
-extern char *quest_path;
+extern char quest_path[1024];
 extern gamedata *saves;
 extern gamedata *game;
 

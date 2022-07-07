@@ -289,7 +289,7 @@ std::vector<mapscr> TheMaps;
 zcmap               *ZCMaps;
 dword               quest_map_pos[MAPSCRS*MAXMAPS2];
 
-char     *quest_path=NULL;
+char     quest_path[1024] = {'\0'};
 gamedata *saves=NULL;
 
 volatile int lastfps=0;
@@ -779,25 +779,6 @@ void CatchBrang()
 /***** Main Game Code *****/
 /**************************/
 
-void load_game(gamedata *g)
-{
-   int ret = 0;
-
-   if (!g->title[0] || g->get_hasplayed() == 0)
-   {
-      strcpy(g->version, QHeader.version);
-      strcpy(g->title, QHeader.title);
-   }
-   else if (strcmp(g->title, QHeader.title))
-      ret = qe_match;
-
-   if (!ret && QHeader.minver[0] && (strcmp(g->version, QHeader.minver) < 0))
-      ret = qe_minver;
-
-   if (ret)
-      Z_error("Error loading %s: %s\n", get_filename(quest_path), qst_error[ret]);
-}
-
 void init_dmap()
 {
     // readjust disabled items; could also do dmap-specific scripts here
@@ -932,13 +913,10 @@ int init_game()
         lens_hint_weapon[x][1]=0;
     }
     
+    /* Point game to the current save game slot */
     game->Clear();
-    //Copy saved data to RAM data (but not global arrays)
     game->Copy(saves[currgame]);
     flushItemCache();
-    
-    //Load the quest
-    load_game(game);
     
     bool firstplay = (game->get_hasplayed() == 0);
     
@@ -2174,16 +2152,7 @@ int main(int argc, char* argv[])
     
     three_finger_flag=false;
 
-    quest_path = (char*)malloc(2048);
-    memset(quest_path, 0, 2048);
-
-    if(!quest_path)
-    {
-        Z_error("Allocation error");
-        exit(-1);
-    }
-    
-       // Get the quest file to run.
+   // Get the quest file to run.
    char *temp = get_cmd_arg(argc, argv);
 
    if (temp != NULL)
@@ -2519,7 +2488,7 @@ int main(int argc, char* argv[])
     save_savedgames();
     save_game_configs();
     set_gfx_mode(GFX_TEXT,80,25,0,0);
-    //rest(250); // ???
+
     quit_game();
     Z_message("Armageddon Games web site: http://www.armageddongames.com\n");
     Z_message("Zelda Classic web site: http://www.zeldaclassic.com\n");
@@ -2620,6 +2589,4 @@ void quit_game()
     
     Z_message("Deleting quest buffers... \n");
     del_qst_buffers();
-    
-    if(quest_path) free(quest_path);
 }

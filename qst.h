@@ -28,8 +28,7 @@ extern bool bad_version(int ver);
 enum
 {
     qe_OK, qe_notfound, qe_invalid, qe_version, qe_obsolete,
-    qe_missing, qe_internal, qe_pwd, qe_match, qe_minver,
-    qe_nomem, qe_debug, qe_cancel
+    qe_internal, qe_nomem
 };
 
 enum
