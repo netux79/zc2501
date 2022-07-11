@@ -26,11 +26,6 @@
 #include "ending.h"
 #include "zcsys.h"
 
-bool blockmoving;
-movingblock mblock2;                                        //mblock[4]?
-sprite_list  guys, items, Ewpns, Lwpns, Sitems, chainlinks, decorations, particles;
-LinkClass   Link;
-
 ZCMUSIC *zcmusic = NULL;
 zinitdata zinit;
 int lens_hint_item[MAXITEMS][2];                            //aclk, aframe
@@ -55,8 +50,6 @@ extern int directItemB;
 
 int favorite_combos[MAXFAVORITECOMBOS];
 int favorite_comboaliases[MAXFAVORITECOMBOALIASES];
-
-void playLevelMusic();
 
 volatile int logic_counter=0;
 void update_logic_counter()
@@ -202,6 +195,78 @@ byte arrayOwner[MAX_ZCARRAY_SIZE];
 //script bitmap drawing
 ZScriptDrawingRenderTarget* zscriptDrawingRenderTarget;
 
+int resx,resy,scrx,scry;
+bool sbig;                                                  // big screen
+int screen_scale = 2; //default = 2 (640x480)
+
+// quest file data
+zquestheader QHeader;
+byte                quest_rules[QUESTRULES_SIZE];
+byte                midi_flags[MIDIFLAGS_SIZE];
+word                map_count;
+MsgStr              *MsgStrings;
+int                 msg_strings_size;
+DoorComboSet        *DoorComboSets;
+dmap                *DMaps;
+miscQdata           QMisc;
+std::vector<mapscr> TheMaps;
+zcmap               *ZCMaps;
+dword               quest_map_pos[MAPSCRS*MAXMAPS2];
+
+char     quest_path[1024] = {'\0'};
+gamedata *saves=NULL;
+
+volatile int lastfps=0;
+volatile int framecnt=0;
+
+bool blockmoving;
+movingblock mblock2;
+sprite_list  guys, items, Ewpns, Lwpns, Sitems, chainlinks, decorations, particles;
+LinkClass   Link;
+
+/**********************************/
+/*********** Misc Data ************/
+/**********************************/
+
+const char startguy[8] = {-13,-13,-13,-14,-15,-18,-21,-40};
+const char gambledat[12*6] =
+{
+    20,-10,-10, 20,-10,-10, 20,-40,-10, 20,-10,-40,
+    50,-10,-10, 50,-10,-10, 50,-40,-10, 50,-10,-40,
+    -10,20,-10, -10,20,-10, -40,20,-10, -10,20,-40,
+    -10,50,-10, -10,50,-10, -40,50,-10, -10,50,-40,
+    -10,-10,20, -10,-10,20, -10,-40,20, -40,-10,20,
+    -10,-10,50, -10,-10,50, -10,-40,50, -40,-10,50
+};
+const byte stx[4][9] =
+{
+    { 48, 80, 80, 96,112,144,160,160,192},
+    { 48, 80, 80, 96,128,144,160,160,192},
+    { 80, 80,128,128,160,160,192,192,208},
+    { 32, 48, 48, 80, 80,112,112,160,160}
+};
+const byte sty[4][9] =
+{
+    {112, 64,128, 96, 80, 96, 64,128,112},
+    { 48, 32, 96, 64, 80, 64, 32, 96, 48},
+    { 32,128, 64, 96, 64, 96, 48,112, 80},
+    { 80, 48,112, 64, 96, 64, 96, 32,128}
+};
+
+const byte ten_rupies_x[10] = {120,112,128,96,112,128,144,112,128,120};
+const byte ten_rupies_y[10] = {49,65,65,81,81,81,81,97,97,113};
+
+zctune tunes[MAXMIDIS] =
+{
+    // (title)                              (s) (ls) (le) (l) (vol) (midi)(fmt)
+    zctune((char *)"Zelda - Dungeon",     0,  -1,  -1,  1,  176,  NULL, 0),
+    zctune((char *)"Zelda - Ending",      0, 129, 225,  1,  160,  NULL, 0),
+    zctune((char *)"Zelda - Game Over",   0,  -1,  -1,  1,  224,  NULL, 0),
+    zctune((char *)"Zelda - Level 9",     0,  -1,  -1,  1,  255,  NULL, 0),
+    zctune((char *)"Zelda - Overworld",   0,  17,  -1,  1,  208,  NULL, 0),
+    zctune((char *)"Zelda - Title",       0,  -1,  -1,  0,  168,  NULL, 0),
+    zctune((char *)"Zelda - Triforce",    0,  -1,  -1,  0,  168,  NULL, 0)
+};
 
 void setZScriptVersion(int s_version)
 {
@@ -267,77 +332,6 @@ dword getNumGlobalArrays()
     
     return ret;
 }
-
-//movingblock mblock2; //mblock[4]?
-//LinkClass   Link;
-
-int resx,resy,scrx,scry;
-bool sbig;                                                  // big screen
-int screen_scale = 2; //default = 2 (640x480)
-
-// quest file data
-zquestheader QHeader;
-byte                quest_rules[QUESTRULES_SIZE];
-byte                midi_flags[MIDIFLAGS_SIZE];
-word                map_count;
-MsgStr              *MsgStrings;
-int                 msg_strings_size;
-DoorComboSet        *DoorComboSets;
-dmap                *DMaps;
-miscQdata           QMisc;
-std::vector<mapscr> TheMaps;
-zcmap               *ZCMaps;
-dword               quest_map_pos[MAPSCRS*MAXMAPS2];
-
-char     quest_path[1024] = {'\0'};
-gamedata *saves=NULL;
-
-volatile int lastfps=0;
-volatile int framecnt=0;
-
-/**********************************/
-/*********** Misc Data ************/
-/**********************************/
-
-const char startguy[8] = {-13,-13,-13,-14,-15,-18,-21,-40};
-const char gambledat[12*6] =
-{
-    20,-10,-10, 20,-10,-10, 20,-40,-10, 20,-10,-40,
-    50,-10,-10, 50,-10,-10, 50,-40,-10, 50,-10,-40,
-    -10,20,-10, -10,20,-10, -40,20,-10, -10,20,-40,
-    -10,50,-10, -10,50,-10, -40,50,-10, -10,50,-40,
-    -10,-10,20, -10,-10,20, -10,-40,20, -40,-10,20,
-    -10,-10,50, -10,-10,50, -10,-40,50, -40,-10,50
-};
-const byte stx[4][9] =
-{
-    { 48, 80, 80, 96,112,144,160,160,192},
-    { 48, 80, 80, 96,128,144,160,160,192},
-    { 80, 80,128,128,160,160,192,192,208},
-    { 32, 48, 48, 80, 80,112,112,160,160}
-};
-const byte sty[4][9] =
-{
-    {112, 64,128, 96, 80, 96, 64,128,112},
-    { 48, 32, 96, 64, 80, 64, 32, 96, 48},
-    { 32,128, 64, 96, 64, 96, 48,112, 80},
-    { 80, 48,112, 64, 96, 64, 96, 32,128}
-};
-
-const byte ten_rupies_x[10] = {120,112,128,96,112,128,144,112,128,120};
-const byte ten_rupies_y[10] = {49,65,65,81,81,81,81,97,97,113};
-
-zctune tunes[MAXMIDIS] =
-{
-    // (title)                              (s) (ls) (le) (l) (vol) (midi)(fmt)
-    zctune((char *)"Zelda - Dungeon",     0,  -1,  -1,  1,  176,  NULL, 0),
-    zctune((char *)"Zelda - Ending",      0, 129, 225,  1,  160,  NULL, 0),
-    zctune((char *)"Zelda - Game Over",   0,  -1,  -1,  1,  224,  NULL, 0),
-    zctune((char *)"Zelda - Level 9",     0,  -1,  -1,  1,  255,  NULL, 0),
-    zctune((char *)"Zelda - Overworld",   0,  17,  -1,  1,  208,  NULL, 0),
-    zctune((char *)"Zelda - Title",       0,  -1,  -1,  0,  168,  NULL, 0),
-    zctune((char *)"Zelda - Triforce",    0,  -1,  -1,  0,  168,  NULL, 0)
-};
 
 FONT *setmsgfont()
 {

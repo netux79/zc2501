@@ -1408,7 +1408,6 @@ int current_item_id(int itemtype, bool checkmagic)
         {
             if((checkmagic || itemtype == itype_ring) && itemtype != itype_magicring)
             {
-                //printf("Checkmagic for %d: %d (%d %d)\n",i,checkmagiccost(i),itemsbuf[i].magic*game->get_magicdrainrate(),game->get_magic());
                 if(!checkmagiccost(i))
                 {
                     continue;
@@ -3221,8 +3220,6 @@ bool try_zcmusic(char *filename, int track, int midi)
 
 void jukebox(int index)
 {
-    music_stop();
-    
     if(index<0) index=MAXMIDIS-1;
     
     if(index>=MAXMIDIS) index=0;

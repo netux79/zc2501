@@ -955,7 +955,7 @@ void movingblock::draw(BITMAP *dest)
     if(clk)
     {
         //    sprite::draw(dest);
-        overcombo(dest,real_x(x+xofs),real_y(y+yofs),bcombo ,cs);
+        overcombo(dest,real_x(x+xofs),real_y(y+yofs),bcombo,cs);
     }
 }
 

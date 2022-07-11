@@ -3274,7 +3274,6 @@ bool LinkClass::checkdamagecombos(int dx1, int dx2, int dy1, int dy2, int layer,
 
 void LinkClass::hitlink(int hit2)
 {
-//printf("Stomp check: %d <= 12, %d < %d\n", int((y+16)-(((enemy*)guys.spr(hit2))->y)), (int)falling_oldy, (int)y);
     if(current_item(itype_stompboots) && checkmagiccost(current_item(itype_stompboots)) && (stomping ||
             (z > (((enemy*)guys.spr(hit2))->z)) ||
             (((tmpscr->flags7&fSIDEVIEW) && (y+16)-(((enemy*)guys.spr(hit2))->y)<=14) && falling_oldy<y)))

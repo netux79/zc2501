@@ -125,6 +125,7 @@ int dmap_tile_mod();
 
 bool try_zcmusic(char *filename, int track, int midi);
 void jukebox(int index);
+void playLevelMusic();
 void play_DmapMusic();
 void music_pause();
 void music_resume();

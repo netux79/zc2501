@@ -103,18 +103,20 @@ RGB _RGB(int r,int g,int b)
 
 void loadfullpal()
 {
-    for(int i=0; i<253; i++)
+    for(int i=0; i<240; i++)
         RAMpal[i]=_RGB(colordata+i*3);
-    
+
+    /* Some quests use colors in this range (and 255),
+       so we need to keep them here accordingly */
+    for(int i=240; i<253; i++)
+        RAMpal[i]=((RGB*)data[PAL_GUI].dat)[i];
+    RAMpal[255]=((RGB*)data[PAL_GUI].dat)[255];
+
     RAMpal[BLACK] = _RGB(0,0,0);
     RAMpal[WHITE] = _RGB(63,63,63);
     
     refreshpal=true;
 }
-
-/*void loadlvlpal256(int level)
-  {
-  byte *si = colordata + */
 
 void loadlvlpal(int level)
 {
