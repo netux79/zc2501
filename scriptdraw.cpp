@@ -2056,12 +2056,9 @@ void do_drawscreenr(BITMAP *bmp, int *sdci, int xoffset, int yoffset, bool isOff
 // do primitives
 ////////////////////////////////////////////////////////
 
-void do_primitives(BITMAP *targetBitmap, int type, mapscr *, int xoffset, int yoffset)
+void do_primitives(BITMAP *targetBitmap, int type, mapscr *, int xoff, int yoff)
 {
     color_map = &trans_table2;
-    
-    //was this next variable ever used? -- DN
-    //bool drawsubscr=false;
     
     if(type > 7)
         return;
@@ -2076,8 +2073,14 @@ void do_primitives(BITMAP *targetBitmap, int type, mapscr *, int xoffset, int yo
     bool isTargetOffScreenBmp = false;
     const int type_mul_10000 = type * 10000;
     const int numDrawCommandsToProcess = script_drawing_commands.Count();
+
+    /* Auto select version to use, 2.50.0 or 2.50.2 */
+    bool oldVer = (QHeader.zelda_version > 0x250) ? false : (QHeader.zelda_version != 0x250 || QHeader.zelda_version < 29);
     
-    for(int i(0); i < numDrawCommandsToProcess; ++i)
+    int xoffset = 0;
+    int yoffset = 0;
+
+    for(int i=0; i < numDrawCommandsToProcess; ++i)
     {
         int *sdci = &script_drawing_commands[i][0];
         
@@ -2089,13 +2092,23 @@ void do_primitives(BITMAP *targetBitmap, int type, mapscr *, int xoffset, int yo
         
         if(!bmp)
         {
+            /* draw to screen with subscreen offset */
+            xoffset = xoff;
+            yoffset = yoff;
             bmp = targetBitmap;
         }
         else
         {
-            //not drawing to screen, so no subscreen offset
+            /* not drawing to screen, so no subscreen offset */
             xoffset = 0;
             yoffset = 0;
+            
+            /* Apply fix for old versions 2.50.1 or lesser */
+            if (oldVer)
+            {
+                xoff = yoff = 0;
+            }
+
             isTargetOffScreenBmp = true;
         }
         

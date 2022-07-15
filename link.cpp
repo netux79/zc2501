@@ -105,7 +105,12 @@ void LinkClass::resetflags(bool all)
 
 void LinkClass::Freeze()
 {
-    if(action!=inwind) action=freeze;
+    if (action != inwind)
+    {
+        action = freeze;
+        // also cancel Link's attack
+        attackclk = 0;
+    }
 }
 void LinkClass::unfreeze()
 {
@@ -218,15 +223,24 @@ int  LinkClass::getLadderY()
 }
 void LinkClass::setX(int new_x)
 {
+    fix dx=new_x-x;
     if(Lwpns.idFirst(wHookshot)>-1)
     {
-        Lwpns.spr(Lwpns.idFirst(wHookshot))->x+=(new_x-x);
+        Lwpns.spr(Lwpns.idFirst(wHookshot))->x+=dx;
     }
     
     if(Lwpns.idFirst(wHSHandle)>-1)
     {
-        Lwpns.spr(Lwpns.idFirst(wHSHandle))->x+=(new_x-x);
+        Lwpns.spr(Lwpns.idFirst(wHSHandle))->x+=dx;
     }
+	
+	if(chainlinks.Count()>0)
+	{
+		for(int j=0; j<chainlinks.Count(); j++)
+        {
+            chainlinks.spr(j)->x+=dx;
+        }
+	}
     
     x=new_x;
     
@@ -236,15 +250,24 @@ void LinkClass::setX(int new_x)
 }
 void LinkClass::setY(int new_y)
 {
+    fix dy=new_y-y;
     if(Lwpns.idFirst(wHookshot)>-1)
     {
-        Lwpns.spr(Lwpns.idFirst(wHookshot))->y+=(new_y-y);
+        Lwpns.spr(Lwpns.idFirst(wHookshot))->y+=dy;
     }
     
     if(Lwpns.idFirst(wHSHandle)>-1)
     {
-        Lwpns.spr(Lwpns.idFirst(wHSHandle))->y+=(new_y-y);
+        Lwpns.spr(Lwpns.idFirst(wHSHandle))->y+=dy;
     }
+	
+	if(chainlinks.Count()>0)
+	{
+		for(int j=0; j<chainlinks.Count(); j++)
+        {
+            chainlinks.spr(j)->y+=dy;
+        }
+	}
     
     y=new_y;
     
@@ -422,7 +445,8 @@ int  LinkClass::getAction() // Used by ZScript
 void LinkClass::setAction(actiontype new_action) // Used by ZScript
 {
     if(new_action==dying || new_action==won || new_action==scrolling ||
-       new_action==inwind || new_action==rafting || new_action==ischarging)
+       new_action==inwind || new_action==rafting || new_action==ischarging ||
+       new_action==hopping)
         return; // Can't use these actions.
     
     if(magicitem>-1 && itemsbuf[magicitem].family==itype_faroreswind)
@@ -1781,17 +1805,15 @@ void LinkClass::checkstab()
                 break;
             }
             
-            if(attackclk==12 && z==0 && sideviewhammerpound())
-            {
-                decorations.add(new dHammerSmack((fix)wx, (fix)wy, dHAMMERSMACK, 0));
-            }
-            
             return;
         }
-        else if(attackclk==15 && w->dir==up)
+        else if(attackclk==15)
         {
             // Hammer's reach needs adjusted slightly for backward compatibility
-            w->hyofs-=1;
+            if(w->dir==up)
+                w->hyofs-=1;
+            else if(w->dir==left)
+                w->hxofs-=2;
         }
     }
     
@@ -2064,7 +2086,7 @@ void LinkClass::checkstab()
             check_wand_block(wx+wxsz-8,y+8);
         }
     }
-    else if((attack==wHammer) && (attackclk==15))
+    else if((attack==wHammer) && ((attackclk==15) || ( spins==1 && attackclk >=15 ))) //quake hammer should be spins == 1
     {
         // poundable blocks
         for(int q=0; q<176; q++)
@@ -2908,11 +2930,13 @@ void LinkClass::checkhit()
                 
                 hitdir = s->hitdir(x,y,16,16,dir);
                 
-                if(action!=rafting && action!=freeze)
-                    action=gothit;
-                    
-                if(action==swimming || hopclk==0xFF)
-                    action=swimhit;
+                if (action != rafting && action != freeze)
+                {
+                    if (action == swimming || hopclk == 0xFF)
+                        action = swimhit;
+                    else
+                        action = gothit;
+                }
                     
                 if(charging > 0 || spins > 0 || attack == wSword || attack == wHammer)
                 {
@@ -3051,11 +3075,13 @@ killweapon:
                 
                 hitdir = s->hitdir(x,y,16,16,dir);
                 
-                if(action!=rafting && action!=freeze)
-                    action=gothit;
-                    
-                if(action==swimming || hopclk==0xFF)
-                    action=swimhit;
+                if (action != rafting && action != freeze)
+                {
+                    if (action == swimming || hopclk == 0xFF)
+                        action = swimhit;
+                    else
+                        action = gothit;
+                }
                     
                 if(charging > 0 || spins > 0 || attack == wSword || attack == wHammer)
                 {
@@ -3248,11 +3274,14 @@ bool LinkClass::checkdamagecombos(int dx1, int dx2, int dy1, int dy2, int layer,
             
             hitdir = (dir^1);
             
-            if(action!=rafting && action!=freeze)
-                action=gothit;
+            if (action != rafting && action != freeze)
+            {
+                if (action == swimming || hopclk == 0xFF)
+                    action = swimhit;
+                else
+                    action = gothit;
+            }
                 
-            if(action==swimming || hopclk==0xFF)
-                action=swimhit;
                 
             hclk=48;
             
@@ -3482,6 +3511,25 @@ void LinkClass::addsparkle2(int type1, int type2)
     Lwpns.add(new weapon((fix)((Lwpns.spr(arrow)->x-3)+(rand()%7)),
                          (fix)((Lwpns.spr(arrow)->y-3)+(rand()%7)),
                          Lwpns.spr(arrow)->z, wPhantom, type2,0,0,((weapon*)Lwpns.spr(arrow))->parentitem,-1));
+}
+
+//cleans up decorations that exit the bounds of the screen for a long time, to prevebt them wrapping around.
+void LinkClass::PhantomsCleanup()
+{
+	if(Lwpns.idCount(wPhantom))
+	{
+		for(int i=0; i<Lwpns.Count(); i++)
+		{
+			weapon *w = ((weapon *)Lwpns.spr(i));
+			if ( w->id == wPhantom )
+			{
+				if ( w->x < -10000 || w->y > 10000 || w->x < -10000 || w->y > 10000 )
+				{
+					Lwpns.remove(w);
+				}				
+			}
+		}	
+	}
 }
 
 // returns true when game over
@@ -3883,6 +3931,8 @@ bool LinkClass::animate(int)
                 if(w->id==wCByrna)
                     w->dead=1;
             }
+	    //kill the sound effect for the orbits -Z 14FEB2019
+	    stop_sfx(itemsbuf[itemid].usesound);
         }
         else paymagiccost(itemid);
     }
@@ -4415,6 +4465,35 @@ bool LinkClass::animate(int)
     checkstab();
     
     check_conveyor();
+    PhantomsCleanup();
+    
+    //Try to time the hammer pound so that Link can;t change direction while it occurs. 
+    if(attack==wHammer)
+    {
+        if(attackclk==12 && z==0 && sideviewhammerpound())
+	{
+		switch(dir) //Link's dir
+		{
+			case up:
+			    decorations.add(new dHammerSmack(x-1, y-4, dHAMMERSMACK, 0));
+			    break;
+			    
+			case down:
+			    decorations.add(new dHammerSmack(x+8, y+28, dHAMMERSMACK, 0));
+			    break;
+			    
+			case left:
+			    decorations.add(new dHammerSmack(x-13, y+14, dHAMMERSMACK, 0));
+			    break;
+			    
+			case right:
+			    decorations.add(new dHammerSmack(x+21, y+14, dHAMMERSMACK, 0));
+			    break;
+		}
+            
+	}
+	
+    }
     return false;
 }
 
@@ -4730,32 +4809,6 @@ bool LinkClass::startwpn(int itemid)
         else
             sfx(itemsbuf[itemid].usesound,pan(wx));
     }
-    /*
-    //    Fireball Wand
-    Lwpns.add(new weapon((fix)wx,(fix)wy,(fix)wz,wRefFireball,0,2*DAMAGE_MULTIPLIER,dir));
-    switch (dir)
-    {
-    case up:
-      Lwpns.spr(Lwpns.Count()-1)->angle=-PI/2;
-      Lwpns.spr(Lwpns.Count()-1)->dir=up;
-      break;
-    case down:
-      Lwpns.spr(Lwpns.Count()-1)->angle=PI/2;
-      Lwpns.spr(Lwpns.Count()-1)->dir=down;
-      break;
-    case left:
-      Lwpns.spr(Lwpns.Count()-1)->angle=PI;
-      Lwpns.spr(Lwpns.Count()-1)->dir=left;
-      break;
-    case right:
-      Lwpns.spr(Lwpns.Count()-1)->angle=0;
-      Lwpns.spr(Lwpns.Count()-1)->dir=right;
-      break;
-    }
-    Lwpns.spr(Lwpns.Count()-1)->clk=16;
-    ((weapon*)Lwpns.spr(Lwpns.Count()-1))->step=3.5;
-    Lwpns.spr(Lwpns.Count()-1)->dummy_bool[0]=true; //homing
-    */
     break;
     
     case itype_sword:
@@ -4821,8 +4874,6 @@ bool LinkClass::startwpn(int itemid)
             
         if(!checkmagiccost(itemid))
             return false;
-            
-        paymagiccost(itemid);
         
         if(get_bit(quest_rules,qr_TRUEARROWS) && !current_item_power(itype_quiver))
         {
@@ -4838,6 +4889,8 @@ bool LinkClass::startwpn(int itemid)
                 
             game->change_drupy(-1);
         }
+        
+        paymagiccost(itemid);
         
         Lwpns.add(new weapon((fix)wx,(fix)wy,(fix)wz,wArrow,itemsbuf[itemid].fam_type,DAMAGE_MULTIPLIER*itemsbuf[itemid].power,dir,itemid,getUID()));
         ((weapon*)Lwpns.spr(Lwpns.Count()-1))->step*=(current_item_power(itype_bow)+1)/2;
@@ -5040,12 +5093,18 @@ bool LinkClass::startwpn(int itemid)
         }
         
         if(!checkmagiccost(itemid))
-            return false;
+	{
+		stop_sfx(itemsbuf[itemid].usesound); //if we can't pay the cost, kill the sound. 
+		//last_cane_of_byrna_item_id = -1; //no, we'd do this in a byrna cleanup function. 
+		return false;
+	}
             
         paymagiccost(itemid);
         
         for(int i=0; i<itemsbuf[itemid].misc3; i++)
             Lwpns.add(new weapon((fix)wx,(fix)wy,(fix)wz,wCByrna,i,itemsbuf[itemid].power*DAMAGE_MULTIPLIER,dir,itemid,getUID()));
+	if(!(Lwpns.idCount(wCByrna))) stop_sfx(itemsbuf[itemid].usesound); //If we can't create the beams, kill the sound. 
+	
     }
     break;
     
@@ -5132,13 +5191,38 @@ bool LinkClass::doattack()
         magiccharge = itemsbuf[itemid].misc2;
     }
     
-    // Now work out the magic cost
     itemid = current_item_id(attack==wHammer ? itype_quakescroll : itype_spinscroll);
+    
+    bool doCharge=true;
+    if(z!=0)
+        doCharge=false;
+    if(attack==wSword)
+    {
+        if(!(attackclk==SWORDCHARGEFRAME && isWpnPressed(itype_sword)))
+            doCharge=false;
+        else if(charging<=normalcharge)
+        {
+            if(itemid<0 || !checkmagiccost(itemid))
+                doCharge=false;
+        }
+    }
+    else if(attack==wHammer)
+    {
+        if(!(attackclk==HAMMERCHARGEFRAME && isWpnPressed(itype_hammer)))
+            doCharge=false;
+        else if(charging<=normalcharge)
+        {
+            if(itemid<0 || !checkmagiccost(itemid))
+                doCharge=false;
+        }
+    }
+    else
+        doCharge=false;
+    
     
     // charging up weapon...
     //
-    if(((attack==wSword && attackclk==SWORDCHARGEFRAME && itemid>=0 && isWpnPressed(itype_sword)) ||
-            (attack==wHammer && attackclk==HAMMERCHARGEFRAME && itemid>=0 && isWpnPressed(itype_hammer))) && z==0 && checkmagiccost(itemid))
+    if(doCharge)
     {
         // Increase charging while holding down button.
         if(spins==0 && charging<magiccharge)
@@ -5150,11 +5234,11 @@ bool LinkClass::doattack()
             paymagiccost(itemid);
             sfx(WAV_ZN1CHARGE,pan(int(x)));
         }
-        else
+        else if(charging==magiccharge)
         {
             itemid = current_item_id(attack==wHammer ? itype_quakescroll2 : itype_spinscroll2);
             
-            if(itemid>-1 && charging==magiccharge && checkmagiccost(itemid))
+            if(itemid>-1 && checkmagiccost(itemid))
             {
                 paymagiccost(itemid);
                 charging++; // charging>magiccharge signifies a successful supercharge.
@@ -7622,8 +7706,10 @@ LinkClass::WalkflagInfo LinkClass::walkflag(int wx,int wy,int cnt,byte d2)
                     //int vy=((int)y+4)&0xFFF8;
                     if(d2==left)
                     {
-                        if(!iswater(MAPCOMBO(x-1,y+(bigHitbox?7:11)))&&!iswater(MAPCOMBO(x-1,y+(bigHitbox?8:12)))
-                                && !_walkflag(x-1,y+(bigHitbox?7:11),1) && !_walkflag(x-1,y+(bigHitbox?8:12),1))
+                        if(!iswater(MAPCOMBO(x-1,y+(bigHitbox?6:11))) &&
+                           !iswater(MAPCOMBO(x-1,y+(bigHitbox?9:12))) &&
+                           !_walkflag(x-1,y+(bigHitbox?6:11),1) &&
+                           !_walkflag(x-1,y+(bigHitbox?9:12),1))
                         {
                             ret.setHopDir(d2);
                             ret.setIlswim(true);
@@ -7632,8 +7718,10 @@ LinkClass::WalkflagInfo LinkClass::walkflag(int wx,int wy,int cnt,byte d2)
                     }
                     else if(d2==right)
                     {
-                        if(!iswater(MAPCOMBO(x+16,y+(bigHitbox?7:11)))&&!iswater(MAPCOMBO(x+16,y+(bigHitbox?8:12)))
-                                && !_walkflag(x+16,y+(bigHitbox?7:11),1) && !_walkflag(x+16,y+(bigHitbox?8:12),1))
+                        if(!iswater(MAPCOMBO(x+16,y+(bigHitbox?6:11))) &&
+                           !iswater(MAPCOMBO(x+16,y+(bigHitbox?9:12))) &&
+                           !_walkflag(x+16,y+(bigHitbox?6:11),1) &&
+                           !_walkflag(x+16,y+(bigHitbox?9:12),1))
                         {
                             ret.setHopDir(d2);
                             ret.setIlswim(true);
@@ -7642,8 +7730,10 @@ LinkClass::WalkflagInfo LinkClass::walkflag(int wx,int wy,int cnt,byte d2)
                     }
                     else if(d2==up)
                     {
-                        if(!iswater(MAPCOMBO(x+7,y+(bigHitbox?0:8)-1))&&!iswater(MAPCOMBO(x+8,y+(bigHitbox?0:8)-1))
-                                && !_walkflag(x+7,y+(bigHitbox?0:8)-1,1) && !_walkflag(x+8,y+(bigHitbox?0:8)-1,1))
+                        if(!iswater(MAPCOMBO(x+7,y+(bigHitbox?0:8)-1)) &&
+                           !iswater(MAPCOMBO(x+8,y+(bigHitbox?0:8)-1)) &&
+                           !_walkflag(x+7,y+(bigHitbox?0:8)-1,1) &&
+                           !_walkflag(x+8,y+(bigHitbox?0:8)-1,1))
                         {
                             ret.setHopDir(d2);
                             ret.setIlswim(true);
@@ -7652,8 +7742,10 @@ LinkClass::WalkflagInfo LinkClass::walkflag(int wx,int wy,int cnt,byte d2)
                     }
                     else if(d2==down)
                     {
-                        if(!iswater(MAPCOMBO(x+7,y+16))&&!iswater(MAPCOMBO(x+8,y+16))
-                                && !_walkflag(x+7,y+16,1) && !_walkflag(x+8,y+16,1))
+                        if(!iswater(MAPCOMBO(x+7,y+16)) &&
+                           !iswater(MAPCOMBO(x+8,y+16)) &&
+                           !_walkflag(x+7,y+16,1) &&
+                           !_walkflag(x+8,y+16,1))
                         {
                             ret.setHopDir(d2);
                             ret.setIlswim(true);
@@ -7912,12 +8004,27 @@ LinkClass::WalkflagInfo LinkClass::walkflag(int wx,int wy,int cnt,byte d2)
                         // If the difference between wy and y is small enough
                         if(abs((wy)-(int(y+c)))<=(b) && wtrx)
                         {
-                            ladderx = wx&0xF0;
-                            laddery = y;
-                            ladderdir = left;
-                            ladderstart = d2;
-                            ret.setUnwalkable(laddery!=int(y));
-                            return ret;
+                            // Don't activate the ladder if it would be entirely
+                            // over water and Link has the flippers. This isn't
+                            // a good way to do this, but it's too risky
+                            // to make big changes to this stuff.
+                            bool deployLadder=true;
+                            int lx=wx&0xF0;
+                            if(current_item(itype_flippers) && z==0)
+                            {
+                                if(iswater(MAPCOMBO(lx, y)) && iswater(MAPCOMBO(lx+15, y)) &&
+                                  iswater(MAPCOMBO(lx, y+15)) && iswater(MAPCOMBO(lx+15, y+15)))
+                                    deployLadder=false;
+                            }
+                            if(deployLadder)
+                            {
+                                ladderx = wx&0xF0;
+                                laddery = y;
+                                ladderdir = left;
+                                ladderstart = d2;
+                                ret.setUnwalkable(laddery!=int(y));
+                                return ret;
+                            }
                         }
                     }
                     else if(d2<=down)
@@ -8274,7 +8381,8 @@ void LinkClass::checklockblock()
         break;
         
     case left:
-        bx-=16;
+        if((((int)x)&0x0F)<8)
+            bx-=16;
         
         if(int(y)&8)
         {
@@ -8349,7 +8457,8 @@ void LinkClass::checkbosslockblock()
         break;
         
     case left:
-        bx-=16;
+        if((((int)x)&0x0F)<8)
+            bx-=16;
         
         if(int(y)&8)
         {
@@ -8504,144 +8613,392 @@ void LinkClass::checklocked()
 {
     if(!isdungeon()) return;
     
-    if(pushing!=8) return;
+    if( !diagonalMovement && pushing!=8) return;
+	/*This is required to allow the player to open a door, while sliding along a wall (pressing in the direction of the door, and sliding left or right)
+	*/
+	if ( diagonalMovement && pushing < 8 ) return; //Allow wall walking Should I add a quest rule for this? -Z
     
-    if((tmpscr->door[dir]!=dLOCKED) && (tmpscr->door[dir]!=dBOSS)) return;
+	
+	bool found;
+	for ( int q = 0; q < 4; q++ ) {
+		if ( tmpscr->door[q] == dLOCKED || tmpscr->door[q] == dBOSS ) { found = true; }
+	}
+	
+    if ( !found ) return;
     
     int si = (currmap<<7) + currscr;
-    int di = nextscr(dir);
+    int di;
     
-    switch(dir)
-    {
-    case up:
-        if(y>32 || (diagonalMovement?(x<=112||x>=128):x!=120)) return;
-        
-        if(tmpscr->door[dir]==dLOCKED)
-        {
-            if(usekey())
-            {
-                putdoor(scrollbuf,0,up,dUNLOCKED);
-                tmpscr->door[0]=dUNLOCKED;
-                setmapflag(si, mDOOR_UP);
-                
-                if(di != 0xFFFF)
-                    setmapflag(di, mDOOR_DOWN);
-            }
-            else return;
-        }
-        else if(tmpscr->door[dir]==dBOSS)
-        {
-            if(game->lvlitems[dlevel]&liBOSSKEY)
-            {
-                putdoor(scrollbuf,0,up,dOPENBOSS);
-                tmpscr->door[0]=dOPENBOSS;
-                setmapflag(si, mDOOR_UP);
-                
-                if(di != 0xFFFF)
-                    setmapflag(di, mDOOR_DOWN);
-            }
-            else return;
-        }
-        
-        break;
-        
-    case down:
-        if(y<128 || (diagonalMovement?(x<=112||x>=128):x!=120)) return;
-        
-        if(tmpscr->door[dir]==dLOCKED)
-        {
-            if(usekey())
-            {
-                putdoor(scrollbuf,0,down,dUNLOCKED);
-                tmpscr->door[1]=dUNLOCKED;
-                setmapflag(si, mDOOR_DOWN);
-                
-                if(di != 0xFFFF)
-                    setmapflag(di, mDOOR_UP);
-            }
-            else return;
-        }
-        else if(tmpscr->door[dir]==dBOSS)
-        {
-            if(game->lvlitems[dlevel]&liBOSSKEY)
-            {
-                putdoor(scrollbuf,0,down,dOPENBOSS);
-                tmpscr->door[1]=dOPENBOSS;
-                setmapflag(si, mDOOR_DOWN);
-                
-                if(di != 0xFFFF)
-                    setmapflag(di, mDOOR_UP);
-            }
-            else return;
-        }
-        
-        break;
-        
-    case left:
-        if((diagonalMovement?(y<=72||y>=88):y!=80) || x>32) return;
-        
-        if(tmpscr->door[dir]==dLOCKED)
-        {
-            if(usekey())
-            {
-                putdoor(scrollbuf,0,left,dUNLOCKED);
-                tmpscr->door[2]=dUNLOCKED;
-                setmapflag(si, mDOOR_LEFT);
-                
-                if(di != 0xFFFF)
-                    setmapflag(di, mDOOR_RIGHT);
-            }
-            else return;
-        }
-        else if(tmpscr->door[dir]==dBOSS)
-        {
-            if(game->lvlitems[dlevel]&liBOSSKEY)
-            {
-                putdoor(scrollbuf,0,left,dOPENBOSS);
-                tmpscr->door[2]=dOPENBOSS;
-                setmapflag(si, mDOOR_LEFT);
-                
-                if(di != 0xFFFF)
-                    setmapflag(di, mDOOR_RIGHT);
-            }
-            else return;
-        }
-        
-        break;
-        
-    case right:
-        if((diagonalMovement?(y<=72||y>=88):y!=80) || x<208) return;
-        
-        if(tmpscr->door[dir]==dLOCKED)
-        {
-            if(usekey())
-            {
-                putdoor(scrollbuf,0,right,dUNLOCKED);
-                tmpscr->door[3]=dUNLOCKED;
-                setmapflag(si, mDOOR_RIGHT);
-                
-                if(di != 0xFFFF)
-                    setmapflag(di, mDOOR_LEFT);
-            }
-            else return;
-        }
-        else if(tmpscr->door[dir]==dBOSS)
-        {
-            if(game->lvlitems[dlevel]&liBOSSKEY)
-            {
-                putdoor(scrollbuf,0,right,dOPENBOSS);
-                tmpscr->door[3]=dOPENBOSS;
-                setmapflag(si, mDOOR_RIGHT);
-                
-                if(di != 0xFFFF)
-                    setmapflag(di, mDOOR_LEFT);
-            }
-            else return;
-        }
-    }
     
-    sfx(WAV_DOOR);
-    markBmap(-1);
+	
+	if ( diagonalMovement ) 
+	{
+		//Up door
+		if ( y <= 32 && x >= 112 && x <= 128 )
+		{
+			if (
+				dir == up || dir == l_up || dir == r_up //|| Up() || ( Up()&&Left()) || ( Up()&&Right()) 
+				
+			)
+			{
+				di = nextscr(up);
+				if(tmpscr->door[0]==dLOCKED)
+				{
+				    if(usekey())
+				    {
+					putdoor(scrollbuf,0,up,dUNLOCKED);
+					tmpscr->door[0]=dUNLOCKED;
+					setmapflag(si, mDOOR_UP);
+					
+					if(di != 0xFFFF)
+					    setmapflag(di, mDOOR_DOWN);
+					sfx(WAV_DOOR);
+					markBmap(-1);
+				    }
+				    else return;
+				}
+				else if(tmpscr->door[0]==dBOSS)
+				{
+				    if(game->lvlitems[dlevel]&liBOSSKEY)
+				    {
+					putdoor(scrollbuf,0,up,dOPENBOSS);
+					tmpscr->door[0]=dOPENBOSS;
+					setmapflag(si, mDOOR_UP);
+					
+					if(di != 0xFFFF)
+					    setmapflag(di, mDOOR_DOWN);
+					sfx(WAV_DOOR);
+					markBmap(-1);
+				    }
+				    else return;
+
+				}
+					
+			}
+		}
+		//Down
+		if ( y >= 128 && x >= 112 && x <= 128 ) 
+		{
+			if ( dir == down || dir == l_down || dir == r_down ) //|| Down() || ( Down()&&Left()) || ( Down()&&Right()))
+			{
+				di = nextscr(down);
+				if(tmpscr->door[1]==dLOCKED)
+				{
+				    if(usekey())
+				    {
+					putdoor(scrollbuf,0,down,dUNLOCKED);
+					tmpscr->door[1]=dUNLOCKED;
+					setmapflag(si, mDOOR_DOWN);
+					
+					if(di != 0xFFFF)
+					    setmapflag(di, mDOOR_UP);
+					sfx(WAV_DOOR);
+					markBmap(-1);
+				    }
+				    else return;
+				}
+				else if(tmpscr->door[1]==dBOSS)
+				{
+				    if(game->lvlitems[dlevel]&liBOSSKEY)
+				    {
+					putdoor(scrollbuf,0,down,dOPENBOSS);
+					tmpscr->door[1]=dOPENBOSS;
+					setmapflag(si, mDOOR_DOWN);
+					
+					if(di != 0xFFFF)
+					    setmapflag(di, mDOOR_UP);
+					sfx(WAV_DOOR);
+					markBmap(-1);
+				    }
+				    else return;
+				}
+			}
+		}
+		//left
+		if ( y > 72 && y < 88 && x <= 32 )
+		{
+			if ( dir == left || dir == l_up || dir == l_down )//|| Left()  || ( Up()&&Left()) || ( Down()&&Left() ) )
+			{
+				di = nextscr(left);
+				if(tmpscr->door[2]==dLOCKED)
+				{
+				    if(usekey())
+				    {
+					putdoor(scrollbuf,0,left,dUNLOCKED);
+					tmpscr->door[2]=dUNLOCKED;
+					setmapflag(si, mDOOR_LEFT);
+					
+					if(di != 0xFFFF)
+					    setmapflag(di, mDOOR_RIGHT);
+					sfx(WAV_DOOR);
+					markBmap(-1);
+				    }
+				    else return;
+				}
+				else if(tmpscr->door[2]==dBOSS)
+				{
+				    if(game->lvlitems[dlevel]&liBOSSKEY)
+				    {
+					putdoor(scrollbuf,0,left,dOPENBOSS);
+					tmpscr->door[2]=dOPENBOSS;
+					setmapflag(si, mDOOR_LEFT);
+					
+					if(di != 0xFFFF)
+					    setmapflag(di, mDOOR_RIGHT);
+					sfx(WAV_DOOR);
+					markBmap(-1);
+				    }
+				    else return;
+				}
+			}
+		}
+		
+		
+		//right
+		if ( ( y > 72 && y < 88 ) && x >= 208 )
+			//!( (y<=72||y>=88) && x<206 ) )
+			//y<=72||y>=88):y!=80) || x<208)
+		{
+			if ( dir == right || dir == r_up || dir == r_down ) //|| Right()  || ( Down()&&Right() ) || ( Up()&&Right()))
+			{
+				di  = nextscr(right);
+				if(tmpscr->door[right]==dLOCKED)
+				{
+				    if(usekey())
+				    {
+					putdoor(scrollbuf,0,right,dUNLOCKED);
+					tmpscr->door[3]=dUNLOCKED;
+					setmapflag(si, mDOOR_RIGHT);
+					
+					if(di != 0xFFFF)
+					    setmapflag(di, mDOOR_LEFT);
+					sfx(WAV_DOOR);
+					markBmap(-1);
+				    }
+				    else return;
+				}
+				else if(tmpscr->door[right]==dBOSS)
+				{
+				    if(game->lvlitems[dlevel]&liBOSSKEY)
+				    {
+					putdoor(scrollbuf,0,right,dOPENBOSS);
+					tmpscr->door[3]=dOPENBOSS;
+					setmapflag(si, mDOOR_RIGHT);
+					
+					if(di != 0xFFFF)
+					    setmapflag(di, mDOOR_LEFT);
+					sfx(WAV_DOOR);
+					markBmap(-1);
+				    }
+				    else return;
+				}
+			
+			}
+		}
+	}
+	else
+	{
+		//orthogonal movement
+		//Up door
+		if ( y<=32 && x == 120 )
+			//!( y>32 && (x!=120) ))
+		{
+			switch ( dir ) 
+			{
+				case up:
+				case r_up:
+				case l_up:
+				{
+					di  = nextscr(up);
+					if(tmpscr->door[0]==dLOCKED)
+					{
+					    if(usekey())
+					    {
+						putdoor(scrollbuf,0,up,dUNLOCKED);
+						tmpscr->door[0]=dUNLOCKED;
+						setmapflag(si, mDOOR_UP);
+						
+						if(di != 0xFFFF)
+						    setmapflag(di, mDOOR_DOWN);
+						sfx(WAV_DOOR);
+						markBmap(-1);
+					    }
+					    else return;
+					}
+					else if(tmpscr->door[0]==dBOSS)
+					{
+					    if(game->lvlitems[dlevel]&liBOSSKEY)
+					    {
+						putdoor(scrollbuf,0,up,dOPENBOSS);
+						tmpscr->door[0]=dOPENBOSS;
+						setmapflag(si, mDOOR_UP);
+						
+						if(di != 0xFFFF)
+						    setmapflag(di, mDOOR_DOWN);
+						sfx(WAV_DOOR);
+						markBmap(-1);
+					    }
+					    else return;
+					}
+					break;
+				}
+				default: break;
+					
+			}
+		}
+		//Down
+		if ( y >= 128 && x == 120 )
+			//!(y<128 && (x!=120) ) )
+		{
+			switch(dir)
+			{
+				case down:
+				case l_down:
+				case r_down:
+				{
+					di  = nextscr(down);
+					
+					if(tmpscr->door[1]==dLOCKED)
+					{
+					    if(usekey())
+					    {
+						putdoor(scrollbuf,0,down,dUNLOCKED);
+						tmpscr->door[1]=dUNLOCKED;
+						setmapflag(si, mDOOR_DOWN);
+						
+						if(di != 0xFFFF)
+						    setmapflag(di, mDOOR_UP);
+						sfx(WAV_DOOR);
+						markBmap(-1);
+					    }
+					    else return;
+					}
+					else if(tmpscr->door[1]==dBOSS)
+					{
+					    if(game->lvlitems[dlevel]&liBOSSKEY)
+					    {
+						putdoor(scrollbuf,0,down,dOPENBOSS);
+						tmpscr->door[1]=dOPENBOSS;
+						setmapflag(si, mDOOR_DOWN);
+						
+						if(di != 0xFFFF)
+						    setmapflag(di, mDOOR_UP);
+						sfx(WAV_DOOR);
+						markBmap(-1);
+					    }
+					    else return;
+					}
+					break;
+				}
+				default: break;
+			}
+		}
+		//left
+		if ( y == 80 && x <= 32 )
+			//!( (y!=80) && x>32 ) )
+		{
+			switch(dir)
+			{
+				case left:
+				case l_up:
+				case l_down:
+				{
+					di  = nextscr(left);
+					if(tmpscr->door[2]==dLOCKED)
+					{
+					    if(usekey())
+					    {
+						putdoor(scrollbuf,0,left,dUNLOCKED);
+						tmpscr->door[2]=dUNLOCKED;
+						setmapflag(si, mDOOR_LEFT);
+						
+						if(di != 0xFFFF)
+						    setmapflag(di, mDOOR_RIGHT);
+						sfx(WAV_DOOR);
+						markBmap(-1);
+					    }
+					    else return;
+					}
+					else if(tmpscr->door[2]==dBOSS)
+					{
+					    if(game->lvlitems[dlevel]&liBOSSKEY)
+					    {
+						putdoor(scrollbuf,0,left,dOPENBOSS);
+						tmpscr->door[2]=dOPENBOSS;
+						setmapflag(si, mDOOR_LEFT);
+						
+						if(di != 0xFFFF)
+						    setmapflag(di, mDOOR_RIGHT);
+						sfx(WAV_DOOR);
+						markBmap(-1);
+					    }
+					    else return;
+					}
+					
+					break;	
+					
+				}
+				default: break;
+			}
+		}
+		//right
+		if ( y == 80 && x >= 208 )
+			//!((y!=80) && x<208 ) )
+		{
+			switch(dir)
+			{
+				case right:
+				case r_down:
+				case r_up:
+				{
+					di  = nextscr(right);
+					if(tmpscr->door[3]==dLOCKED)
+					{
+					    if(usekey())
+					    {
+						putdoor(scrollbuf,0,right,dUNLOCKED);
+						tmpscr->door[3]=dUNLOCKED;
+						setmapflag(si, mDOOR_RIGHT);
+						
+						if(di != 0xFFFF)
+						    setmapflag(di, mDOOR_LEFT);
+						sfx(WAV_DOOR);
+						markBmap(-1);
+					    }
+					    else return;
+					}
+					else if(tmpscr->door[3]==dBOSS)
+					{
+					    if(game->lvlitems[dlevel]&liBOSSKEY)
+					    {
+						putdoor(scrollbuf,0,right,dOPENBOSS);
+						tmpscr->door[3]=dOPENBOSS;
+						setmapflag(si, mDOOR_RIGHT);
+						
+						
+						if(di != 0xFFFF)
+						    setmapflag(di, mDOOR_LEFT);
+						sfx(WAV_DOOR);
+						markBmap(-1);
+
+					    }
+					    else return;
+					}
+					
+					
+					break;
+				}
+				default: break;
+				
+			}
+		}
+	}
+	
+	
+		
+
+    
+    
 }
 
 void LinkClass::checkswordtap()
@@ -9688,6 +10045,9 @@ void LinkClass::checkspecial2(int *ls)
     
     if(flag==mfZELDA||flag2==mfZELDA||flag3==mfZELDA || combo_class_buf[type].win_game)
     {
+	
+	    attackclk = 0; //get rid of Link's sword if it was stuck out, charged. 
+	 
         saved_Zelda();
         return;
     }
@@ -10064,6 +10424,9 @@ void kill_enemy_sfx()
         if(((enemy*)guys.spr(i))->bgsfx)
             stop_sfx(((enemy*)guys.spr(i))->bgsfx);
     }
+    
+    if(tmpscr->room==rGANON)
+        stop_sfx(WAV_ROAR);
 }
 
 void LinkClass::setEntryPoints(int x2, int y2)
@@ -10129,7 +10492,7 @@ bool LinkClass::dowarp(int type, int index)
                 level = selectWlevel(blowcnt);
         }
         
-        if(level > QMisc.warp[wind].size)
+        if(level > QMisc.warp[wind].size && QMisc.warp[wind].size>0)
         {
             level %= QMisc.warp[wind].size;
             game->set_wlevel(level);
@@ -10473,7 +10836,20 @@ bool LinkClass::dowarp(int type, int index)
     {
         int c = DMaps[currdmap].color;
         currmap = DMaps[wdmap].map;
-        
+	update_subscreens(wdmap);
+	
+	dlevel = DMaps[wdmap].level;
+	    //check if Link has the map for the new location before updating the subscreen. ? -Z
+	    //This works only in one direction, if Link had a map, to not having one.
+	    //If Link does not have a map, and warps somewhere where he does, then the map still briefly shows. 
+	update_subscreens(wdmap);
+	    
+	if ( has_item(itype_map, dlevel) ) 
+	{
+		//Blank the map during an intra-dmap scrolling warp. 
+		dlevel = -1; //a hack for the minimap. This works!! -Z
+	}
+	    
         // fix the scrolling direction, if it was a tile or instant warp
         if(type==0 || type>=3)
         {
@@ -10481,6 +10857,8 @@ bool LinkClass::dowarp(int type, int index)
         }
         
         scrollscr(sdir, wscr+DMaps[wdmap].xoff, wdmap);
+	dlevel = DMaps[wdmap].level; //Fix dlevel and draw the map (end hack). -Z
+	
         reset_hookshot();
         
         if(!intradmap)
@@ -11803,6 +12181,11 @@ int LinkClass::lookahead(int destscr, int d2)                       // Helper fo
     int s = currscr;
     int cx = x;
     int cy = y + 8;
+	
+	cx = vbound(cx, 0, 240); //Fix crash during screen scroll when Link is moving too quickly through a corner - DarkDragon
+	cy = vbound(cy, 0, 168); //Fix crash during screen scroll when Link is moving too quickly through a corner - DarkDragon
+	//y+8 could be 168  //Attempt to fix a frash where scrolling through the lower-left corner could crassh ZC as reported by Lut. -Z
+	//Applying this here, too. -Z
     
     switch(d2)
     {
@@ -11850,6 +12233,11 @@ int LinkClass::lookaheadflag(int destscr, int d2)
     int s = currscr;
     int cx = x;
     int cy = y + 8;
+	
+	cx = vbound(cx, 0, 240); //Fix crash during screen scroll when Link is moving too quickly through a corner - DarkDragon
+	cy = vbound(cy, 0, 168); //Fix crash during screen scroll when Link is moving too quickly through a corner - DarkDragon
+	//y+8 could be 168  //Attempt to fix a frash where scrolling through the lower-left corner could crassh ZC as reported by Lut. -Z
+	//Applying this here, too. -Z
     
     switch(d2)
     {
@@ -12000,6 +12388,10 @@ bool LinkClass::maze_enabled_sizewarp(int scrolldir)
 
 int LinkClass::get_scroll_step(int scrolldir)
 {
+	// For side-scrollers, where the relative speed of 'fast' scrolling is a bit slow.
+	if(get_bit(quest_rules, qr_VERYFASTSCROLLING))
+		return 16;
+
     if(get_bit(quest_rules, qr_SMOOTHVERTICALSCROLLING) != 0)
     {
         return (isdungeon() && !get_bit(quest_rules,qr_FASTDNGN)) ? 2 : 4;
@@ -12019,10 +12411,13 @@ int LinkClass::get_scroll_step(int scrolldir)
 
 int LinkClass::get_scroll_delay(int scrolldir)
 {
-    if(get_bit(quest_rules,qr_NOSCROLL))
+    if(get_bit(quest_rules, qr_NOSCROLL) != 0)
+    {
         return 0;
+    }
         
-    if(get_bit(quest_rules, qr_SMOOTHVERTICALSCROLLING) != 0)
+    if( (get_bit(quest_rules, qr_VERYFASTSCROLLING) != 0) ||
+        (get_bit(quest_rules, qr_SMOOTHVERTICALSCROLLING) != 0) )
     {
         return 1;
     }
@@ -12088,6 +12483,8 @@ void LinkClass::scrollscr(int scrolldir, int destscr, int destdmap)
         tmpscr3[1].cset.resize(_mapsSize, 0);
     }
     
+    conveyclk = 2;
+    
     mapscr *newscr = &tmpscr[0];
     mapscr *oldscr = &tmpscr[1];
     
@@ -12097,7 +12494,7 @@ void LinkClass::scrollscr(int scrolldir, int destscr, int destdmap)
     int step = get_scroll_step(scrolldir);
     int delay = get_scroll_delay(scrolldir);
     
-    int scx = get_bit(quest_rules,qr_FASTDNGN) ? 30 : 0;
+    int scx = get_bit(quest_rules, qr_VERYFASTSCROLLING) ? 32 : (get_bit(quest_rules,qr_FASTDNGN) ? 30 : 0);
     
     actiontype lastaction = action;
     ALLOFF(false, false);
@@ -12133,6 +12530,12 @@ void LinkClass::scrollscr(int scrolldir, int destscr, int destdmap)
     lstep = (lstep + 6) % 12;
     cx = scx;
     
+    if(global_wait)
+    {
+        ZScriptVersion::RunScript(SCRIPT_GLOBAL, GLOBAL_SCRIPT_GAME);
+        global_wait=false;
+    }
+    
     do
     {
         draw_screen(tmpscr);
@@ -12151,6 +12554,8 @@ void LinkClass::scrollscr(int scrolldir, int destscr, int destdmap)
         ++cx;
     }
     while(cx < 32);
+    
+    script_drawing_commands.Clear();
     
     if((DMaps[currdmap].type&dmfTYPE)==dmCAVE)
         markBmap(scrolldir);
@@ -12373,6 +12778,7 @@ fade((specialcave > 0) ? (specialcave >= GUYCAVE) ? 10 : 11 : currcset, true, fa
             action = scrolling;
             ZScriptVersion::RunScrollingScript(scrolldir, cx, sx, sy, end_frames);
             action = lastaction;
+            global_wait=false;
         }
         
         //Drawing
@@ -12681,6 +13087,7 @@ fade((specialcave > 0) ? (specialcave >= GUYCAVE) ? 10 : 11 : currcset, true, fa
     activated_timed_warp=false;
     loadside = scrolldir^1;
     eventlog_mapflags();
+    decorations.animate(); //continue to animate tall grass during scrolling
 }
 
 // How much to reduce Link's damage, taking into account various rings.
@@ -12800,6 +13207,7 @@ bool checkmagiccost(int itemid)
     }
     else if(itemsbuf[itemid].flags & ITEM_RUPEE_MAGIC)
     {
+	if (current_item_power(itype_wallet)) return true; //Infinite wallet.
         return (game->get_rupies()+game->get_drupy()>=itemsbuf[itemid].magic);
     }
     else if(get_bit(quest_rules,qr_ENABLEMAGIC))
@@ -12822,6 +13230,7 @@ void paymagiccost(int itemid)
         
     if(itemsbuf[itemid].flags & ITEM_RUPEE_MAGIC)
     {
+	if (current_item_power(itype_wallet)) return; //Infinite wallet.
         game->change_drupy(-itemsbuf[itemid].magic);
         return;
     }
@@ -13255,11 +13664,17 @@ void dospecialmoney(int index)
     case rINFO:                                             // pay for info
         if(prices[priceindex]!=100000) // 100000 is a placeholder price for free items
         {
-            if(game->get_spendable_rupies() < abs(prices[priceindex]))
+            if (game->get_spendable_rupies() < abs(prices[priceindex]) && !current_item_power(itype_wallet))
                 return;
                 
             if(!current_item_power(itype_wallet))
+	    {
                 game->change_drupy(-abs(prices[priceindex]));
+	    }
+	    if ( current_item_power(itype_wallet)>0 )
+	    {
+		 game->change_drupy(0);   
+	    }
         }
         rectfill(msgdisplaybuf, 0, 0, msgdisplaybuf->w, 80, 0);
         donewmsg(QMisc.info[tmpscr[tmp].catchall].str[priceindex]);
@@ -13279,14 +13694,17 @@ void dospecialmoney(int index)
         break;
         
     case rMONEY:                                            // secret money
-        ((item*)items.spr(0))->pickup=ipDUMMY;
-        
-        if(!current_item_power(itype_wallet))
-            game->change_drupy((prices[0]=tmpscr[tmp].catchall));
-            
+    {
+        ((item*)items.spr(0))->pickup = ipDUMMY;
+
+        prices[0] = tmpscr[tmp].catchall;
+        if (!current_item_power(itype_wallet))
+            game->change_drupy(prices[0]);
+
         putprices(false);
         setmapflag();
         break;
+    }
         
     case rGAMBLE:                                           // gamble
     {
@@ -13306,10 +13724,21 @@ void dospecialmoney(int index)
     break;
     
     case rBOMBS:
+	{
         if(game->get_spendable_rupies()<abs(tmpscr[tmp].catchall) && !current_item_power(itype_wallet))
             return;
-            
-        game->change_drupy(-abs(tmpscr[tmp].catchall));
+        
+		int price = -abs(tmpscr[tmp].catchall);
+		int wmedal = current_item_id(itype_wealthmedal);
+		if(wmedal >= 0)
+		{
+			if(itemsbuf[wmedal].flags & ITEM_FLAG1)
+				price*=(itemsbuf[wmedal].misc1/100.0);
+			else
+				price+=itemsbuf[wmedal].misc1;
+		}
+		
+        game->change_drupy(price);
         setmapflag();
         game->change_maxbombs(4);
         game->set_bombs(game->get_maxbombs());
@@ -13335,12 +13764,24 @@ void dospecialmoney(int index)
         //    putscr(scrollbuf,0,0,tmpscr);
         verifyBothWeapons();
         break;
+	}
         
     case rARROWS:
+	{
         if(game->get_spendable_rupies()<abs(tmpscr[tmp].catchall) && !current_item_power(itype_wallet))
             return;
             
-        game->change_drupy(-abs(tmpscr[tmp].catchall));
+        int price = -abs(tmpscr[tmp].catchall);
+		int wmedal = current_item_id(itype_wealthmedal);
+		if(wmedal >= 0)
+		{
+			if(itemsbuf[wmedal].flags & ITEM_FLAG1)
+				price*=(itemsbuf[wmedal].misc1/100.0);
+			else
+				price+=itemsbuf[wmedal].misc1;
+		}
+		
+        game->change_drupy(price);
         setmapflag();
         game->change_maxarrows(10);
         game->set_arrows(game->get_maxarrows());
@@ -13352,6 +13793,7 @@ void dospecialmoney(int index)
         //    putscr(scrollbuf,0,0,tmpscr);
         verifyBothWeapons();
         break;
+	}
         
     case rSWINDLE:
         if(items.spr(index)->id==iRupy)
@@ -13733,7 +14175,14 @@ void LinkClass::checkitems(int index)
                 if(game->get_spendable_rupies()<abs(prices[PriceIndex]) && !current_item_power(itype_wallet))
                     return;
                 
-                game->change_drupy(-abs(prices[PriceIndex]));
+                if(!current_item_power(itype_wallet))
+		{
+                    game->change_drupy(-abs(prices[PriceIndex]));
+		}
+		 if(current_item_power(itype_wallet))
+		{
+                    game->change_drupy(0);
+		}
             }
             boughtsomething=true;
             //make the other shop items untouchable after
@@ -14665,6 +15114,11 @@ void LinkClass::ganon_intro()
     }
     
     dir=down;
+    if (!(tmpscr->flags7&fSIDEVIEW))
+    {
+	fall = 0; //Fix midair glitch on holding triforce. -Z
+	z = 0;
+    }
     action=landhold2;
     holditem=getItemID(itemsbuf,itype_triforcepiece, 1);
     //not good, as this only returns the highest level that Link possesses. -DD

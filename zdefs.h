@@ -10,6 +10,7 @@
 #include "zcarray.h"
 
 #define ZELDA_VERSION       0x0250                          //version of the program
+#define ZC_VERSION          25300                           //Version ID for ZScript Game->Version
 #define VERSION_BUILD       28                              //build number of this version
 #define DATE_STR            "October 4, 2014"
 #define DATA_PASSWORD       "longtan"                       /* Password used to encrypt the game datafiles */
@@ -207,7 +208,7 @@ extern bool fake_pack_writing;
 #define MAXCOMBOS        COMBO_PAGES*COMBOS_PER_PAGE
 #define MAXSUBSCREENITEMS	256
 #define MAXCUSTOMSUBSCREENS 128
-#define MAXFFCS			 32
+#define MAXFFCS          32
 
 #define MAXFAVORITECOMMANDS 8
 #define MAXFAVORITECOMBOS 100
@@ -491,7 +492,7 @@ enum
     qr_TRIGGERSREPEAT /* Compatibility */, qr_ENEMIESFLICKER, qr_OVALWIPE, qr_TRIANGLEWIPE,
     // 19
     qr_SMASWIPE, qr_NOSOLIDDAMAGECOMBOS /* Compatibility */, qr_SHOPCHEAT, qr_HOOKSHOTDOWNBUG /* Compatibility */,
-    qr_OLDHOOKSHOTGRAB /* Compatibility */, qr_PEAHATCLOCKVULN /* Compatibility */,
+    qr_OLDHOOKSHOTGRAB /* Compatibility */, qr_PEAHATCLOCKVULN /* Compatibility */, qr_VERYFASTSCROLLING, qr_OFFSCREENWEAPONS /* Compatibility */,
     qr_MAX
 };
 

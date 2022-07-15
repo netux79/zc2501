@@ -1274,7 +1274,21 @@ int readrules(PACKFILE *f, zquestheader *Header, bool keepdata)
     {
         set_bit(quest_rules,qr_PEAHATCLOCKVULN, 1);
     }
-    
+
+    if(tempheader.zelda_version < 0x250 || (tempheader.zelda_version == 0x250 && tempheader.build<28))
+    {
+        set_bit(quest_rules, qr_OFFSCREENWEAPONS, 1);
+    }
+
+    if(tempheader.zelda_version < 0x250 || (tempheader.zelda_version == 0x250 && tempheader.build<29))
+    {
+        // qr_OFFSETEWPNCOLLISIONFIX
+        // All 'official' quests need this disabled.
+        // All 2.10 and lower quests need this enabled to preseve compatability.
+        // All 2.11 - 2.5.1 quests should have it set also, due to a bug in about half of all the betas.
+        set_bit(quest_rules, qr_OFFSETEWPNCOLLISIONFIX, 1);
+    }
+
     if(s_version < 3)
     {
         set_bit(quest_rules, qr_HOLDNOSTOPMUSIC, 1);
@@ -1994,8 +2008,6 @@ void clear_screen(mapscr *temp_scr)
     {
         temp_scr->ffwidth[j] = 15;
         temp_scr->ffheight[j] = 15;
-        temp_scr->scriptData[j].a[0] = 10000;
-        temp_scr->scriptData[j].a[1] = 10000;
     }
 }
 
@@ -12348,6 +12360,7 @@ int loadquest(const char *filename, zquestheader *Header, miscQdata *Misc, zctun
         set_bit(quest_rules, qr_CONTFULL_DEP, 0);
         set_bit(zinit.misc, idM_CONTPERCENT, 1);
         zinit.cont_heart=100;
+        zinit.start_heart=zinit.hc;
     }
     
     memcpy(Header, &tempheader, sizeof(tempheader));

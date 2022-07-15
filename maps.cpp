@@ -98,7 +98,7 @@ inline bool ffcIsAt(int index, int x, int y)
 
 int MAPFFCOMBO(int x,int y)
 {
-    for(int i=0; i<32; i++)
+    for(int i=0; i<MAXFFCS; i++)
     {
         if(ffcIsAt(i, x, y))
             return tmpscr->ffdata[i];
@@ -146,7 +146,7 @@ int MAPCOMBOFLAG(int x,int y)
 
 int MAPFFCOMBOFLAG(int x,int y)
 {
-    for(int i=0; i<32; i++)
+    for(int i=0; i<MAXFFCS; i++)
     {
         if(ffcIsAt(i, x, y))
         {
@@ -161,7 +161,7 @@ int MAPFFCOMBOFLAG(int x,int y)
 
 int getFFCAt(int x, int y)
 {
-    for(int i=0; i<32; i++)
+    for(int i=0; i<MAXFFCS; i++)
     {
         if(ffcIsAt(i, x, y))
             return i;
@@ -487,7 +487,7 @@ void update_combo_cycling()
         newcset[i]=-1;
     }
     
-    for(int i=0; i<32; i++)
+    for(int i=0; i<MAXFFCS; i++)
     {
         x=tmpscr->ffdata[i];
         y=animated_combo_table[x][0];
@@ -510,7 +510,7 @@ void update_combo_cycling()
         }
     }
     
-    for(int i=0; i<32; i++)
+    for(int i=0; i<MAXFFCS; i++)
     {
         x=tmpscr->ffdata[i];
         y=animated_combo_table2[x][0];
@@ -533,7 +533,7 @@ void update_combo_cycling()
         }
     }
     
-    for(int i=0; i<32; i++)
+    for(int i=0; i<MAXFFCS; i++)
     {
         if(newdata[i]==-1)
             continue;
@@ -827,7 +827,7 @@ int findtrigger(int scombo, bool ff)
     int iter;
     int ret = 0;
     
-    for(int j=0; j<(ff?32:176); j++)
+    for(int j=0; j<(ff?MAXFFCS:176); j++)
     {
         if(ff)
         {
@@ -1225,7 +1225,7 @@ void hidden_entrance(int tmp,bool , bool high16only,int single) //Perhaps better
         }
     }
     
-    for(int i=0; i<32; i++) //FFC 'trigger flags'
+    for(int i=0; i<MAXFFCS; i++) //FFC 'trigger flags'
     {
         if(single>=0) if(i+176!=single) continue;
         
@@ -1443,7 +1443,7 @@ void hidden_entrance(int tmp,bool , bool high16only,int single) //Perhaps better
           */
     }
     
-    for(int i=0; i<32; i++) // FFCs
+    for(int i=0; i<MAXFFCS; i++) // FFCs
     {
         if((!(s->flags2&fCLEARSECRET) /*Enemies->Secret*/ && single < 0) || high16only || s->flags4&fENEMYSCRTPERM)
         {
@@ -1896,22 +1896,22 @@ int nextscr(int dir)
         switch(dir)
         {
         case up:
-            if(!(tmpscr->flags2&wfUP))    goto skip;
+            if(!(tmpscr->flags2&wfUP))    goto nowarp;
             
             break;
             
         case down:
-            if(!(tmpscr->flags2&wfDOWN))  goto skip;
+            if(!(tmpscr->flags2&wfDOWN))  goto nowarp;
             
             break;
             
         case left:
-            if(!(tmpscr->flags2&wfLEFT))  goto skip;
+            if(!(tmpscr->flags2&wfLEFT))  goto nowarp;
             
             break;
             
         case right:
-            if(!(tmpscr->flags2&wfRIGHT)) goto skip;
+            if(!(tmpscr->flags2&wfRIGHT)) goto nowarp;
             
             break;
         }
@@ -1919,11 +1919,10 @@ int nextscr(int dir)
         m = DMaps[tmpscr->sidewarpdmap[index]].map;
         s = tmpscr->sidewarpscr[index] + DMaps[tmpscr->sidewarpdmap[index]].xoff;
     }
-    
+
+nowarp:
     if(s<0||s>=128)
         return 0xFFFF;
-        
-skip:
 
     return (m<<7) + s;
 }
@@ -1995,7 +1994,7 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
     {
     case -4: //overhead FFCs
     case -3:                                                //freeform combos
-        for(int i = 31; i >= 0; i--)
+        for(int i = MAXFFCS-1; i >= 0; i--)
         {
             if(layer->ffdata[i])
             {
@@ -3214,7 +3213,7 @@ void putdoor(BITMAP *dest,int t,int side,int door,bool redraw,bool even_walls)
         break;
         
     case dSHUTTER:
-        if(screenscrolling && ((LinkDir()^1)==side))
+        if(screenscrolling && ((Link.getDir()^1)==side))
         {
             doortype=dt_osht;
             opendoors=-4;
@@ -3454,7 +3453,6 @@ void openshutters()
 
 void loadscr(int tmp,int destdmap, int scr,int ldir,bool overlay=false)
 {
-    //  introclk=intropos=msgclk=msgpos=dmapmsgclk=0;
     for(word x=0; x<animated_combos; x++)
     {
         if(combobuf[animated_combo_table4[x][0]].nextcombo!=0)
@@ -3503,8 +3501,8 @@ void loadscr(int tmp,int destdmap, int scr,int ldir,bool overlay=false)
         {
             if(ffscr.layermap[i]>0 && tmpscr[tmp].layermap[i]>0)
             {
-                int lm = tmpscr[tmp].layermap[i]*MAPSCRS+tmpscr[tmp].layerscreen[i];
-                int fm = ffscr.layermap[i]*MAPSCRS+ffscr.layerscreen[i];
+                int lm = (tmpscr[tmp].layermap[i]-1)*MAPSCRS+tmpscr[tmp].layerscreen[i];
+                int fm = (ffscr.layermap[i]-1)*MAPSCRS+ffscr.layerscreen[i];
                 
                 if(!TheMaps[lm].data.empty() && !TheMaps[fm].data.empty())
                 {
@@ -3536,8 +3534,8 @@ void loadscr(int tmp,int destdmap, int scr,int ldir,bool overlay=false)
             // If these aren't reset, changers may not work right
             ffposx[i]=-1000;
             ffposy[i]=-1000;
-            ffprvx[i]=-1000;
-            ffprvy[i]=-1000;
+            ffprvx[i]=-10000000;
+            ffprvy[i]=-10000000;
             
             if((ffscr.ffflags[i]&ffCARRYOVER) && !(ffscr.flags5&fNOFFCARRYOVER))
             {

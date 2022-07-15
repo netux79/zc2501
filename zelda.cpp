@@ -719,29 +719,17 @@ void StunGuy(int j,int stun)
     }
 }
 
-fix LinkModifiedX()
-{
-    return Link.getModifiedX();
-}
-fix LinkModifiedY()
-{
-    return Link.getModifiedY();
-}
-int LinkDir()
-{
-    return Link.getDir();
-}
 void add_grenade(int wx, int wy, int wz, int size, int parentid)
 {
     if(size)
     {
-        Lwpns.add(new weapon((fix)wx,(fix)wy,(fix)wz,wSBomb,0,16*DAMAGE_MULTIPLIER,LinkDir(),
+        Lwpns.add(new weapon((fix)wx,(fix)wy,(fix)wz,wSBomb,0,16*DAMAGE_MULTIPLIER,Link.getDir(),
                              -1, parentid));
         Lwpns.spr(Lwpns.Count()-1)->id=wSBomb;
     }
     else
     {
-        Lwpns.add(new weapon((fix)wx,(fix)wy,(fix)wz,wBomb,0,4*DAMAGE_MULTIPLIER,LinkDir(),
+        Lwpns.add(new weapon((fix)wx,(fix)wy,(fix)wz,wBomb,0,4*DAMAGE_MULTIPLIER,Link.getDir(),
                              -1, parentid));
         Lwpns.spr(Lwpns.Count()-1)->id=wBomb;
     }

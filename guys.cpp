@@ -205,13 +205,14 @@ bool m_walkflag(int dx,int dy,int special, int x=-1000, int y=-1000)
     if(dx<16-nb || dy<zc_max(16-yg-nb,0) || dx>=240+nb || dy>=160+nb)
         return true;
         
-    if(isdungeon() || special==spw_wizzrobe)
+    bool isInDungeon = isdungeon();
+    if(isInDungeon || special==spw_wizzrobe)
     {
         if((x>=32 && dy<32-yg) || (y>-1000 && y<=144 && dy>=144))
             return true;
             
         if((x>=32 && dx<32) || (x>-1000 && x<224 && dx>=224))
-            if(special!=spw_door)                                 // walk in door way
+            if(special!=spw_door) // walk in door way
                 return true;
     }
     
@@ -223,9 +224,16 @@ bool m_walkflag(int dx,int dy,int special, int x=-1000, int y=-1000)
     case spw_clipright:
         break; //if(x>=208) return true; break;
         
-    case spw_wizzrobe:
-    case spw_floater:
-        return false;
+    case spw_wizzrobe: // fall through
+    case spw_floater: // Special case for fliers and wizzrobes - hack!
+		{
+			if(isInDungeon)
+			{
+				if(dy < 32-yg || dy >= 144) return true;
+				if(dx < 32 || dx >= 224) return true;
+			}
+			return false;
+		}
     }
     
     dx&=(special==spw_halfstep)?(~7):(~15);
@@ -4696,7 +4704,7 @@ bool eLeever::animate(int index)
                 
                 int d2=rand()&1;
                 
-                if(LinkDir()>=left)
+                if(Link.getDir()>=left)
                 {
                     d2+=2;
                 }
@@ -4896,14 +4904,14 @@ bool eWallM::animate(int index)
                 
                 if(wall<=down)
                 {
-                    if(LinkDir()==left)
+                    if(Link.getDir()==left)
                         dir=right;
                     else
                         dir=left;
                 }
                 else
                 {
-                    if(LinkDir()==up)
+                    if(Link.getDir()==up)
                         dir=down;
                     else
                         dir=up;
@@ -5956,37 +5964,40 @@ void eSpinTile::facelink()
 {
     if(Link.x-x==0)
     {
-        dir=(Link.y+8<y)?up:down;
+		if (Link.y + 8 < y)
+			dir = up;
+		else
+			dir = down;
     }
     else
     {
         double ddir=atan2(double(y-(Link.y)),double(Link.x-x));
         
-        if((ddir<=(((-5)*PI)/8))&&(ddir>(((-7)*PI)/8)))
+        if((ddir <= -5.0*PI/8.0) && (ddir > -7.0*PI/8.0))
         {
             dir=l_down;
         }
-        else if((ddir<=(((-3)*PI)/8))&&(ddir>(((-5)*PI)/8)))
+        else if ((ddir <= -3.0*PI / 8.0) && (ddir > -5.0*PI / 8.0))
         {
             dir=down;
         }
-        else if((ddir<=(((-1)*PI)/8))&&(ddir>(((-3)*PI)/8)))
+        else if ((ddir <= -1.0*PI / 8.0) && (ddir > -3.0*PI / 8.0))
         {
             dir=r_down;
         }
-        else if((ddir<=(((1)*PI)/8))&&(ddir>(((-1)*PI)/8)))
+        else if ((ddir <= 1.0*PI / 8.0) && (ddir > -1.0*PI / 8.0))
         {
             dir=right;
         }
-        else if((ddir<=(((3)*PI)/8))&&(ddir>(((1)*PI)/8)))
+        else if ((ddir <= 3.0*PI / 8.0) && (ddir > 1.0*PI / 8.0))
         {
             dir=r_up;
         }
-        else if((ddir<=(((5)*PI)/8))&&(ddir>(((3)*PI)/8)))
+        else if ((ddir <= 5.0*PI / 8.0) && (ddir > 3.0*PI / 8.0))
         {
             dir=up;
         }
-        else if((ddir<=(((7)*PI)/8))&&(ddir>(((5)*PI)/8)))
+        else if ((ddir <= 7.0*PI / 8.0) && (ddir > 5.0*PI / 8.0))
         {
             dir=l_up;
         }
@@ -6244,7 +6255,7 @@ bool eStalfos::animate(int index)
         if(dmisc9==e9tROPE && dmisc2==e2tBOMBCHU && !fired && hp<=0 && hp>-1000 && wpn>wEnemyWeapons)
         {
             hp=-1000;
-            weapon *ew=new weapon(x,y,z, wpn, 0, wdp, dir,-1,getUID(),false);
+            weapon *ew=new weapon(x,y,z, wpn, 0, dmisc4, dir,-1,getUID(),false);
             Ewpns.add(ew);
             
             if(wpn==ewSBomb || wpn==ewBomb)
@@ -6269,14 +6280,14 @@ bool eStalfos::animate(int index)
                 }
                 
                 dummy_bool[0]=true;
-                addEwpn(x,y,z,wpn2,2,dmisc4,up, getUID());
-                addEwpn(x,y,z,wpn2,2,dmisc4,down, getUID());
-                addEwpn(x,y,z,wpn2,2,dmisc4,left, getUID());
-                addEwpn(x,y,z,wpn2,2,dmisc4,right, getUID());
-                addEwpn(x,y,z,wpn2,2,dmisc4,l_up, getUID());
-                addEwpn(x,y,z,wpn2,2,dmisc4,r_up, getUID());
-                addEwpn(x,y,z,wpn2,2,dmisc4,l_down, getUID());
-                addEwpn(x,y,z,wpn2,2,dmisc4,r_down, getUID());
+                addEwpn(x,y,z,wpn2,0,dmisc4,up, getUID());
+                addEwpn(x,y,z,wpn2,0,dmisc4,down, getUID());
+                addEwpn(x,y,z,wpn2,0,dmisc4,left, getUID());
+                addEwpn(x,y,z,wpn2,0,dmisc4,right, getUID());
+                addEwpn(x,y,z,wpn2,0,dmisc4,l_up, getUID());
+                addEwpn(x,y,z,wpn2,0,dmisc4,r_up, getUID());
+                addEwpn(x,y,z,wpn2,0,dmisc4,l_down, getUID());
+                addEwpn(x,y,z,wpn2,0,dmisc4,r_down, getUID());
                 sfx(wpnsfx(wpn2),pan(int(x)));
             }
         }
@@ -6751,6 +6762,7 @@ bool eStalfos::animate(int index)
             haslink=false;
         }
         
+        stop_bgsfx(index);
         return true;
     }
     
@@ -7099,6 +7111,7 @@ bool eKeese::animate(int index)
                     ((enemy*)guys.spr(kids))->count_enemy = count_enemy;
                 }
                 
+                stop_bgsfx(index);
                 return true;
             }
             else
@@ -8832,6 +8845,8 @@ bool eMoldorm::animate(int index)
     }
     else
     {
+        if(stunclk>0)
+            stunclk=0;
         constant_walk_8(rate,homing,spw_floater);
         misc=dir;
         
@@ -8984,7 +8999,7 @@ void esMoldorm::draw(BITMAP *dest)
         if(dir<8)
         {
             flip=0;
-            tile+=4*dir;
+            tile+=4*zc_max(dir, 0); // dir is -1 if trapped
             
             if(dir>3) // Skip to the next row for diagonals
                 tile+=4;
@@ -12651,30 +12666,139 @@ void setupscreen()
     // Prices are already set to 0 in dowarp()
     switch(tmpscr[t].room)
     {
-    case rSP_ITEM:                                          // special item
-        additem(120,89,tmpscr[t].catchall,ipONETIME2+ipHOLDUP+ipCHECK);
-        break;
-        
-    case rINFO:                                             // pay for info
-    {
-        int count = 0;
-        int base  = 88;
-        int step  = 5;
-        
-        moneysign();
-        
-        for(int i=0; i<3; i++)
+        case rSP_ITEM:                                          // special item
+            additem(120,89,tmpscr[t].catchall,ipONETIME2+ipHOLDUP+ipCHECK);
+            break;
+            
+        case rINFO:                                             // pay for info
         {
-            if(QMisc.info[tmpscr[t].catchall].str[i])
+            int count = 0;
+            int base  = 88;
+            int step  = 5;
+            
+            moneysign();
+            
+            for(int i=0; i<3; i++)
             {
-                ++count;
+                if(QMisc.info[tmpscr[t].catchall].str[i])
+                {
+                    ++count;
+                }
+                else
+                    break;
             }
-            else
-                break;
+            
+            if(count)
+            {
+                if(count==1)
+                {
+                    base = 88+32;
+                }
+                
+                if(count==2)
+                {
+                    step = 6;
+                }
+                
+                for(int i=0; i < count; i++)
+                {
+                    additem((i << step)+base, 89, iRupy, ipMONEY + ipDUMMY);
+                    ((item*)items.spr(items.Count()-1))->PriceIndex = i;
+                    prices[i] = -(QMisc.info[tmpscr[t].catchall].price[i]);
+                    if(prices[i]==0)
+                        prices[i]=100000; // So putprices() knows there's an item here and positions the price correctly
+                    int itemid = current_item_id(itype_wealthmedal);
+                    
+                    if(itemid>=0 && prices[i]!=100000)
+                    {
+                        if(itemsbuf[itemid].flags & ITEM_FLAG1)
+                            prices[i]=((prices[i]*itemsbuf[itemid].misc1)/100);
+                        else
+                            prices[i]-=itemsbuf[itemid].misc1;
+                            
+                        prices[i]=vbound(prices[i], -99999, 0);
+                        
+                        if(prices[i]==0)
+                            prices[i]=100000;
+                    }
+                    
+                    if((QMisc.info[tmpscr[t].catchall].price[i])>1 && prices[i]>-1 && prices[i]!=100000)
+                        prices[i]=-1;
+                }
+            }
+            
+            break;
         }
         
-        if(count)
+        case rMONEY:                                            // secret money
+            additem(120,89,iRupy,ipONETIME+ipDUMMY+ipMONEY);
+            ((item*)items.spr(items.Count()-1))->PriceIndex = 0;
+            break;
+            
+        case rGAMBLE:                                           // gambling
+            prices[0]=prices[1]=prices[2]=-10;
+            moneysign();
+            additem(88,89,iRupy,ipMONEY+ipDUMMY);
+            ((item*)items.spr(items.Count()-1))->PriceIndex = 0;
+            additem(120,89,iRupy,ipMONEY+ipDUMMY);
+            ((item*)items.spr(items.Count()-1))->PriceIndex = 1;
+            additem(152,89,iRupy,ipMONEY+ipDUMMY);
+            ((item*)items.spr(items.Count()-1))->PriceIndex = 2;
+            break;
+            
+        case rREPAIR:                                           // door repair
+            setmapflag();
+            //  }
+            repaircharge=tmpscr[t].catchall;
+            break;
+            
+        case rMUPGRADE:                                         // upgrade magic
+            adjustmagic=true;
+            break;
+            
+        case rLEARNSLASH:                                       // learn slash attack
+            learnslash=true;
+            break;
+            
+        case rRP_HC:                                            // heart container or red potion
+            additem(88,89,iRPotion,ipONETIME2+ipHOLDUP+ipFADE);
+            ((item*)items.spr(items.Count()-1))->PriceIndex = 0;
+            additem(152,89,iHeartC,ipONETIME2+ipHOLDUP+ipFADE);
+            ((item*)items.spr(items.Count()-1))->PriceIndex = 1;
+            break;
+            
+        case rP_SHOP:                                           // potion shop
+            if(current_item(itype_letter)<i_letter_used)
+            {
+                str=0;
+                break;
+            }
+            
+            // fall through
+            
+        case rTAKEONE:                                          // take one
+        case rSHOP:                                             // shop
         {
+            int count = 0;
+            int base  = 88;
+            int step  = 5;
+            
+            if(tmpscr[t].room != rTAKEONE)
+                moneysign();
+                
+            //count and align the stuff
+            for(int i=0; i<3; ++i)
+            {
+                if(QMisc.shop[tmpscr[t].catchall].hasitem[count] != 0)
+                {
+                    ++count;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            
             if(count==1)
             {
                 base = 88+32;
@@ -12685,159 +12809,59 @@ void setupscreen()
                 step = 6;
             }
             
-            for(int i=0; i < count; i++)
+            for(int i=0; i<count; i++)
             {
-                additem((i << step)+base, 89, iRupy, ipMONEY + ipDUMMY);
+                additem((i<<step)+base, 89, QMisc.shop[tmpscr[t].catchall].item[i], ipHOLDUP+ipFADE+(tmpscr[t].room == rTAKEONE ? ipONETIME2 : ipCHECK));
                 ((item*)items.spr(items.Count()-1))->PriceIndex = i;
-                prices[i] = -(QMisc.info[tmpscr[t].catchall].price[i]);
-                if(prices[i]==0)
-                    prices[i]=100000; // So putprices() knows there's an item here and positions the price correctly
-                int itemid = current_item_id(itype_wealthmedal);
                 
-                if(itemid >= 0)
+                if(tmpscr[t].room != rTAKEONE)
                 {
-                    if(itemsbuf[itemid].flags & ITEM_FLAG1)
-                        prices[i]=((prices[i]*itemsbuf[itemid].misc1)/100);
-                    else
-                        prices[i]+=itemsbuf[itemid].misc1;
+                    prices[i] = QMisc.shop[tmpscr[t].catchall].price[i];
+                    if(prices[i]==0)
+                        prices[i]=100000; // So putprices() knows there's an item here and positions the price correctly
+                    int itemid = current_item_id(itype_wealthmedal);
+                    
+                    if(itemid>=0 && prices[i]!=100000)
+                    {
+                        if(itemsbuf[itemid].flags & ITEM_FLAG1)
+                            prices[i]=((prices[i]*itemsbuf[itemid].misc1)/100);
+                        else
+                            prices[i]+=itemsbuf[itemid].misc1;
+                        
+                        prices[i]=vbound(prices[i], 0, 99999);
+                        
+                        if(prices[i]==0)
+                            prices[i]=100000;
+                    }
+                    
+                    if((QMisc.shop[tmpscr[t].catchall].price[i])>1 && prices[i]<1)
+                        prices[i]=1;
                 }
-                
-                if((QMisc.info[tmpscr[t].catchall].price[i])>1 && prices[i]>-1)
-                    prices[i]=-1;
             }
-        }
-        
-        break;
-    }
-    
-    case rMONEY:                                            // secret money
-        additem(120,89,iRupy,ipONETIME+ipDUMMY+ipMONEY);
-        ((item*)items.spr(items.Count()-1))->PriceIndex = 0;
-        break;
-        
-    case rGAMBLE:                                           // gambling
-        prices[0]=prices[1]=prices[2]=-10;
-        moneysign();
-        additem(88,89,iRupy,ipMONEY+ipDUMMY);
-        ((item*)items.spr(items.Count()-1))->PriceIndex = 0;
-        additem(120,89,iRupy,ipMONEY+ipDUMMY);
-        ((item*)items.spr(items.Count()-1))->PriceIndex = 1;
-        additem(152,89,iRupy,ipMONEY+ipDUMMY);
-        ((item*)items.spr(items.Count()-1))->PriceIndex = 2;
-        break;
-        
-    case rREPAIR:                                           // door repair
-        setmapflag();
-        //  }
-        repaircharge=tmpscr[t].catchall;
-        break;
-        
-    case rMUPGRADE:                                         // upgrade magic
-        adjustmagic=true;
-        break;
-        
-    case rLEARNSLASH:                                       // learn slash attack
-        learnslash=true;
-        break;
-        
-    case rRP_HC:                                            // heart container or red potion
-        additem(88,89,iRPotion,ipONETIME2+ipHOLDUP+ipFADE);
-        ((item*)items.spr(items.Count()-1))->PriceIndex = 0;
-        additem(152,89,iHeartC,ipONETIME2+ipHOLDUP+ipFADE);
-        ((item*)items.spr(items.Count()-1))->PriceIndex = 1;
-        break;
-        
-    case rP_SHOP:                                           // potion shop
-        if(current_item(itype_letter)<i_letter_used)
-        {
-            str=0;
+            
             break;
         }
         
-        // fall through
-        
-    case rTAKEONE:                                          // take one
-    case rSHOP:                                             // shop
-    {
-        int count = 0;
-        int base  = 88;
-        int step  = 5;
-        
-        if(tmpscr[t].room != rTAKEONE)
-            moneysign();
+        case rBOMBS:                                            // more bombs
+            additem(120,89,iRupy,ipDUMMY+ipMONEY);
+            ((item*)items.spr(items.Count()-1))->PriceIndex = 0;
+            prices[0]=-tmpscr[t].catchall;
+            break;
             
-        //count and align the stuff
-        for(int i=0; i<3; ++i)
-        {
-            if(QMisc.shop[tmpscr[t].catchall].hasitem[count] != 0)
-            {
-                ++count;
-            }
-            else
-            {
-                break;
-            }
-        }
-        
-        if(count==1)
-        {
-            base = 88+32;
-        }
-        
-        if(count==2)
-        {
-            step = 6;
-        }
-        
-        for(int i=0; i<count; i++)
-        {
-            additem((i<<step)+base, 89, QMisc.shop[tmpscr[t].catchall].item[i], ipHOLDUP+ipFADE+(tmpscr[t].room == rTAKEONE ? ipONETIME2 : ipCHECK));
-            ((item*)items.spr(items.Count()-1))->PriceIndex = i;
+        case rARROWS:                                            // more arrows
+            additem(120,89,iRupy,ipDUMMY+ipMONEY);
+            ((item*)items.spr(items.Count()-1))->PriceIndex = 0;
+            prices[0]=-tmpscr[t].catchall;
+            break;
             
-            if(tmpscr[t].room != rTAKEONE)
-            {
-                prices[i] = QMisc.shop[tmpscr[t].catchall].price[i];
-                if(prices[i]==0)
-                    prices[i]=100000; // So putprices() knows there's an item here and positions the price correctly
-                int itemid = current_item_id(itype_wealthmedal);
-                
-                if(itemid >= 0)
-                {
-                    if(itemsbuf[itemid].flags & ITEM_FLAG1)
-                        prices[i]=((prices[i]*itemsbuf[itemid].misc1)/100);
-                    else
-                        prices[i]+=itemsbuf[itemid].misc1;
-                }
-                
-                if((QMisc.shop[tmpscr[t].catchall].price[i])>1 && prices[i]<1)
-                    prices[i]=1;
-            }
-        }
-        
-        break;
-    }
-    
-    case rBOMBS:                                            // more bombs
-        additem(120,89,iRupy,ipDUMMY+ipMONEY);
-        ((item*)items.spr(items.Count()-1))->PriceIndex = 0;
-        prices[0]=-tmpscr[t].catchall;
-        break;
-        
-    case rARROWS:                                            // more arrows
-        additem(120,89,iRupy,ipDUMMY+ipMONEY);
-        ((item*)items.spr(items.Count()-1))->PriceIndex = 0;
-        prices[0]=-tmpscr[t].catchall;
-        break;
-        
-    case rSWINDLE:                                          // leave heart container or money
-        additem(88,89,iHeartC,ipDUMMY+ipMONEY);
-        ((item*)items.spr(items.Count()-1))->PriceIndex = 0;
-        prices[0]=-1;
-        additem(152,89,iRupy,ipDUMMY+ipMONEY);
-        ((item*)items.spr(items.Count()-1))->PriceIndex = 1;
-        prices[1]=-tmpscr[t].catchall;
-        break;
-        
+        case rSWINDLE:                                          // leave heart container or money
+            additem(88,89,iHeartC,ipDUMMY+ipMONEY);
+            ((item*)items.spr(items.Count()-1))->PriceIndex = 0;
+            prices[0]=-1;
+            additem(152,89,iRupy,ipDUMMY+ipMONEY);
+            ((item*)items.spr(items.Count()-1))->PriceIndex = 1;
+            prices[1]=-tmpscr[t].catchall;
+            break;
     }
     
     if(tmpscr[t].room == rBOMBS || tmpscr[t].room == rARROWS)
@@ -12848,7 +12872,7 @@ void setupscreen()
         if(itemid >= 0)
         {
             if(itemsbuf[itemid].flags & ITEM_FLAG1)
-                prices[i]*=(itemsbuf[itemid].misc1/100);
+                prices[i]*=(itemsbuf[itemid].misc1/100.0);
             else
                 prices[i]+=itemsbuf[itemid].misc1;
         }

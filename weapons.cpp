@@ -850,6 +850,12 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
         hxofs=0;
         hxsz=16;
         
+        if(get_bit(quest_rules, qr_OFFSETEWPNCOLLISIONFIX))
+        {
+            hyofs=0;
+            hysz=16;
+        }
+
         if(id==ewBomb)
             misc=2;
         else
@@ -878,6 +884,12 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
         LOADGFX(ewSBOMB);
         hxofs=0;
         hxsz=16;
+
+        if(get_bit(quest_rules, qr_OFFSETEWPNCOLLISIONFIX))
+        {
+            hyofs=0;
+            hysz=16;
+        }
         
         if(id==ewSBomb)
             misc=2;
@@ -903,10 +915,12 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
         break;
         
     case ewBrang:
-        if(!get_bit(quest_rules, qr_OFFSETEWPNCOLLISIONFIX))
+        if(get_bit(quest_rules, qr_OFFSETEWPNCOLLISIONFIX))
         {
             hxofs=0;
-            hxsz=15;
+            hxsz=16;
+            hyofs=0;
+            hysz=16;
         }
         else
         {
@@ -943,10 +957,12 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
     case ewRock:
         LOADGFX(ewROCK);
         
-        if(!get_bit(quest_rules, qr_OFFSETEWPNCOLLISIONFIX))
+        if(get_bit(quest_rules, qr_OFFSETEWPNCOLLISIONFIX))
         {
             hxofs=0;
-            hxsz=15;
+            hxsz=16;
+            hyofs=0;
+            hysz=16;
         }
         else
         {
@@ -985,10 +1001,12 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
     case ewSword:
         LOADGFX(ewSWORD);
         
-        if(!get_bit(quest_rules, qr_OFFSETEWPNCOLLISIONFIX))
+        if(get_bit(quest_rules, qr_OFFSETEWPNCOLLISIONFIX))
         {
             hxofs=0;
-            hxsz=15;
+            hxsz=16;
+            hyofs=0;
+            hysz=16;
         }
         else
         {
@@ -1021,10 +1039,12 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
     case ewMagic:
         LOADGFX(ewMAGIC);
         
-        if(!get_bit(quest_rules, qr_OFFSETEWPNCOLLISIONFIX))
+        if(get_bit(quest_rules, qr_OFFSETEWPNCOLLISIONFIX))
         {
             hxofs=0;
-            hxsz=15;
+            hxsz=16;
+            hyofs=0;
+            hysz=16;
         }
         else
         {
@@ -1086,9 +1106,17 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
             }
         }
         
-        hxofs = hyofs=1;
-        hxsz = hysz = 14;
-        
+        if(get_bit(quest_rules, qr_OFFSETEWPNCOLLISIONFIX))
+        {
+            hxofs=hyofs=0;
+            hxsz=hysz=16;
+        }
+        else
+        {
+            hxofs = hyofs=1; // hof of 1 means that link can use the 'half-tile trick'.
+            hxsz = hysz = 14;
+        }
+
         if(BSZ)
             yofs+=2;
             
@@ -1098,15 +1126,30 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
         LOADGFX(ewFIRETRAIL);
         step=0;
         dir=-1;
-        hxofs = hyofs=1;
-        hxsz = hysz = 15;
-        
+
+        if(get_bit(quest_rules, qr_OFFSETEWPNCOLLISIONFIX))
+        {
+            hxofs=hyofs=0;
+            hxsz=hysz=16;
+        }
+        else
+        {
+            hxofs = hyofs=1; // hof of 1 means that link can use the 'half-tile trick'.
+            hxsz = hysz = 15;
+        }
+
         if(BSZ)
             yofs+=2;
             
         break;
         
     case ewWind:
+        if(get_bit(quest_rules, qr_OFFSETEWPNCOLLISIONFIX))
+        {
+            hxofs=hyofs=0;
+            hxsz=hysz=16;
+        }
+
         LOADGFX(ewWIND);
         clk=0;
         step=3;
@@ -3162,8 +3205,9 @@ void weapon::onhit(bool clipped, int special, int linkdir)
 {
     if((scriptcoldet&1) == 0)
     {
-        // These won't hit anything, but they can still go too far offscreen
-        if(!clipped)
+        // These won't hit anything, but they can still go too far offscreen...
+        // Unless the compatibility rule is set.
+        if(get_bit(quest_rules, qr_OFFSCREENWEAPONS) || !clipped)
             return;
         goto offscreenCheck;
     }

@@ -23,42 +23,46 @@ item::~item()
 
 bool item::animate(int)
 {
-    if(is_side_view())
+    if(!screenscrolling) // Because subscreen items are items, too. :p
     {
-        if(can_drop(x,y) && !(pickup & ipDUMMY) && !(pickup & ipCHECK))
+
+        if(is_side_view())
         {
-            y+=fall/100;
-            
-            if((fall/100)==0 && fall>0)
-                fall*=(fall>0 ? 2 : 0.5); // That oughta do something about the floatiness.
+            if(can_drop(x,y) && !(pickup & ipDUMMY) && !(pickup & ipCHECK))
+            {
+                y+=fall/100;
                 
-            if(fall <= (int)zinit.terminalv)
+                if((fall/100)==0 && fall>0)
+                    fall*=(fall>0 ? 2 : 0.5); // That oughta do something about the floatiness.
+                    
+                if(fall <= (int)zinit.terminalv)
+                {
+                    fall += zinit.gravity;
+                }
+            }
+            else if(!can_drop(x,y) && !(pickup & ipDUMMY) && !(pickup & ipCHECK))
+            {
+                fall = -fall/2; // LA key bounce.
+            }
+        }
+        else
+        {
+            z-=fall/100;
+            
+            if(z<0)
+            {
+                z = 0;
+                fall = -fall/2;
+            }
+            else if(z <= 1 && abs(fall) < (int)zinit.gravity)
+            {
+                z=0;
+                fall=0;
+            }
+            else if(fall <= (int)zinit.terminalv)
             {
                 fall += zinit.gravity;
             }
-        }
-        else if(!can_drop(x,y) && !(pickup & ipDUMMY) && !(pickup & ipCHECK))
-        {
-            fall = -fall/2; // LA key bounce.
-        }
-    }
-    else
-    {
-        z-=fall/100;
-        
-        if(z<0)
-        {
-            z = 0;
-            fall = -fall/2;
-        }
-        else if(z <= 1 && abs(fall) < (int)zinit.gravity)
-        {
-            z=0;
-            fall=0;
-        }
-        else if(fall <= (int)zinit.terminalv)
-        {
-            fall += zinit.gravity;
         }
     }
     

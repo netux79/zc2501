@@ -3,12 +3,15 @@
 #include "zdefs.h"
 #include "tiles.h"
 #include "zcsys.h"
+#include "link.h"
 
 extern RGB_MAP rgb_table;
 extern COLOR_MAP trans_table;
 extern itemdata   *itemsbuf;
 extern wpndata    *wpnsbuf;
 extern byte        quest_rules[QUESTRULES_SIZE];
+extern LinkClass   Link;
+
 tiledata *newtilebuf;
 newcombo *combobuf;
 word animated_combo_table[MAXCOMBOS][2];                    //[0]=position in act2, [1]=original tile
@@ -19,8 +22,6 @@ word animated_combo_table24[MAXCOMBOS][2];                   //[0]=combo, [1]=cl
 word animated_combos2;
 bool blank_tile_table[NEWMAXTILES];                         //keeps track of blank tiles
 bool blank_tile_quarters_table[NEWMAXTILES*4];              //keeps track of blank tile quarters
-extern fix  LinkModifiedX();
-extern fix  LinkModifiedY();
 
 byte unpackbuf[UNPACKSIZE];
 
@@ -1263,7 +1264,7 @@ int combo_tile(const newcombo &c, int x, int y)
         
     case 1: //cOLD_EYEBALL_A
     {
-        double ddir=atan2((double)(y-LinkModifiedY()-playing_field_offset), (double)(LinkModifiedX()-x));
+        double ddir=atan2((double)(y-Link.getModifiedY()-playing_field_offset), (double)(Link.getModifiedX()-x));
         
         if((ddir<=(((-5)*PI)/8))&&(ddir>(((-7)*PI)/8)))
         {
@@ -1303,7 +1304,7 @@ int combo_tile(const newcombo &c, int x, int y)
     
     case 3: // 4-way Eyeball (up-down-left-right)
     {
-        double ddir=atan2((double)(y-LinkModifiedY()-playing_field_offset), (double)(LinkModifiedX()-x));
+        double ddir=atan2((double)(y-Link.getModifiedY()-playing_field_offset), (double)(Link.getModifiedX()-x));
         
         if((ddir<=(((-2)*PI)/8))&&(ddir>(((-6)*PI)/8)))
         {
@@ -1327,7 +1328,7 @@ int combo_tile(const newcombo &c, int x, int y)
     
     case 2: //cOLD_EYEBALL_B
     {
-        double ddir=atan2((double)(y-LinkModifiedY()-playing_field_offset), (double)(LinkModifiedX()-x));
+        double ddir=atan2((double)(y-Link.getModifiedY()-playing_field_offset), (double)(Link.getModifiedX()-x));
         
         if((ddir<=(((-6)*PI)/8))&&(ddir>(((-8)*PI)/8)))
         {

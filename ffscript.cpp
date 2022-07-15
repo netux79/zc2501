@@ -41,6 +41,8 @@ long32 ffc_stack[32][256];
 long32 global_stack[256];
 long32 item_stack[256];
 
+static bool scriptCanSave = true;
+
 void clear_ffc_stack(const byte i)
 {
     memset(ffc_stack[i], 0, 256 * sizeof(long32));
@@ -1062,7 +1064,8 @@ long32 get_register(const long32 arg)
         break;
         
     case LINKJUMP:
-        ret = long32((-Link.getFall() / fix(100.0)) * 10000);
+        // -fall/100*10000, but doing it that way screwed up the result
+        ret = long32(-Link.getFall()) * 100;
         break;
         
     case LINKDIR:
@@ -1098,7 +1101,7 @@ long32 get_register(const long32 arg)
         break;
         
     case LINKITEMD:
-        ret = game->item[ri->d[0]/10000] ? 10000 : 0;
+        ret = game->item[vbound(ri->d[0]/10000, 0, MAXITEMS-1)] ? 10000 : 0;
         break;
         
     case LINKEQUIP:
@@ -1383,7 +1386,7 @@ long32 get_register(const long32 arg)
     case ITEMJUMP:
         if(0!=(s=checkItem(ri->itemref)))
         {
-            ret = long32((-((item*)(s))->fall / fix(100.0))  * 10000);
+            ret = long32(((item*)(s))->fall) * -100.0;
         }
         
         break;
@@ -1775,7 +1778,7 @@ long32 get_register(const long32 arg)
         if(GuyH::loadNPC(ri->guyref, "npc->Jump") != SH::_NoError)
             ret = -10000;
         else
-            ret = (long32(-GuyH::getNPC()->fall / fix(100.0)) * 10000);
+            ret = (long32(GuyH::getNPC()->fall) * -100.0);
             
         break;
         
@@ -1863,7 +1866,7 @@ long32 get_register(const long32 arg)
         
     case LWPNJUMP:
         if(0!=(s=checkLWpn(ri->lwpn,"Jump")))
-            ret = long32((-((weapon*)(s))->fall / fix(100.0)) * 100000);
+            ret = long32(((weapon*)(s))->fall) * -100.0;
             
         break;
         
@@ -2088,7 +2091,7 @@ long32 get_register(const long32 arg)
         
     case EWPNJUMP:
         if(0!=(s=checkEWpn(ri->ewpn, "Jump")))
-            ret = long32((-((weapon*)(s))->fall / fix(100.0)) * 100000);
+            ret = long32(((weapon*)(s))->fall) * -100.0;
             
         break;
         
@@ -2293,6 +2296,10 @@ long32 get_register(const long32 arg)
         
 ///----------------------------------------------------------------------------------------------------//
 //Game Info
+    case ZELDAVERSION:
+        ret=ZC_VERSION; //Do *not* multiply by 10,000!
+        break;
+
     case GAMEDEATHS:
         ret=game->get_deaths()*10000;
         break;
@@ -2566,7 +2573,7 @@ else \
             else ret=TheMaps[scr].data[pos]*10000;
         }
         else
-            ret = 10000;
+            ret = -10000;
     }
     break;
     
@@ -2587,7 +2594,7 @@ else \
             else ret=TheMaps[scr].cset[pos]*10000;
         }
         else
-            ret = 10000;
+            ret = -10000;
     }
     break;
     
@@ -2608,7 +2615,7 @@ else \
             else ret=TheMaps[scr].sflag[pos]*10000;
         }
         else
-            ret = 10000;
+            ret = -10000;
     }
     break;
     
@@ -2630,7 +2637,7 @@ else \
                              TheMaps[scr].data[pos]].type*10000;
         }
         else
-            ret = 10000;
+            ret = -10000;
     }
     break;
     
@@ -2651,7 +2658,7 @@ else \
             else ret=combobuf[TheMaps[scr].data[pos]].flag*10000;
         }
         else
-            ret = 10000;
+            ret = -10000;
     }
     break;
     
@@ -2672,7 +2679,7 @@ else \
             else ret=(combobuf[TheMaps[scr].data[pos]].walk&15)*10000;
         }
         else
-            ret = 10000;
+            ret = -10000;
     }
     break;
     
@@ -2901,7 +2908,7 @@ void set_register(const long32 arg, const long32 value)
         break;
         
     case FFLINK:
-        (tmpscr->fflink[ri->ffcref])=vbound(value/10000, 1, 32);
+        (tmpscr->fflink[ri->ffcref])=vbound(value/10000, 0, 32); //Needs to be 0 to be able to clear it. 
         break;
         
     case FFMISCD:
@@ -2979,7 +2986,10 @@ void set_register(const long32 arg, const long32 value)
             if(value==0 && itemID==current_item_id(itype_cbyrna))
                 stopCaneOfByrna();
             
-            game->set_item(itemID,(value != 0));
+            bool settrue = ( value != 0 );
+            //Sanity check to prevent setting the item if the value would be the same. -Z
+            if ( game->item[itemID] != settrue ) game->set_item(itemID,(value != 0));
+
             if((get_bit(quest_rules,qr_OVERWORLDTUNIC) != 0) || (currscr<128 || dlevel)) ringcolor(false);
         }
         break;
@@ -4345,11 +4355,11 @@ if(GuyH::loadNPC(ri->guyref, str) == SH::_NoError) \
         break;
         
     case GAMELITEMSD:
-        game->lvlitems[(ri->d[0])/10000]=value/10000;
+        game->lvlitems[(ri->d[0])/10000]=vbound(value/10000, 0, 255);
         break;
         
     case GAMELKEYSD:
-        game->lvlkeys[(ri->d[0])/10000]=value/10000;
+        game->lvlkeys[(ri->d[0])/10000]=vbound(value/10000, 0, 255);
         break;
         
     case SCREENSTATED:
@@ -7294,7 +7304,11 @@ int run_script(const byte type, const word script, const byte i)
             break;
             
         case SAVE:
-            save_game(false);
+            if(scriptCanSave)
+            {
+                save_game(false);
+                scriptCanSave=false;
+            }
             break;
             
         case SAVESCREEN:
@@ -7343,7 +7357,10 @@ int run_script(const byte type, const word script, const byte i)
             sarg2 = curscript[pc].arg2;
         }
     }
-    
+
+    if(!scriptCanSave)
+        scriptCanSave=true;
+
     if(scommand == WAITDRAW)
     {
         switch(type)
