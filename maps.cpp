@@ -2008,7 +2008,7 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                     if(!!(layer->ffflags[i]&ffOVERLAY) == (type==-4)) //what exactly is this supposed to mean?
                     {
                         int tx=((layer->ffx[i]/10000));
-                        int ty=((layer->ffy[i]/10000))+playing_field_offset;
+                        int ty=((layer->ffy[i]/10000))+PLAYFIELD_OFFSET;
                         
                         if(layer->ffflags[i]&ffTRANS)
                         {
@@ -2032,7 +2032,7 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
             
             if(mf==mfPUSHUD || mf==mfPUSH4 || mf==mfPUSHED || ((mf>=mfPUSHLR)&&(mf<=mfPUSHRINS)))
             {
-                overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,layer->data[i],layer->cset[i]);
+                overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,layer->data[i],layer->cset[i]);
             }
             else
             {
@@ -2040,7 +2040,7 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                 
                 if(mf==mfPUSHUD || mf==mfPUSH4 || mf==mfPUSHED || ((mf>=mfPUSHLR)&&(mf<=mfPUSHRINS)))
                 {
-                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,layer->data[i],layer->cset[i]);
+                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,layer->data[i],layer->cset[i]);
                 }
             }
         }
@@ -2053,7 +2053,7 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
 //        if (combobuf[layer->data[i]].type==cOLD_OVERHEAD)
             if(combo_class_buf[combobuf[layer->data[i]].type].overhead)
             {
-                overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,layer->data[i],layer->cset[i]);
+                overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,layer->data[i],layer->cset[i]);
             }
         }
         
@@ -2078,14 +2078,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                         {
                             for(int i=0; i<176; i++)
                             {
-                                overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
+                                overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
                             }
                         }
                         else
                         {
                             for(int i=0; i<176; i++)
                             {
-                                overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
+                                overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
                             }
                         }
                     }
@@ -2095,14 +2095,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                         {
                             for(int i=0; i<176; i++)
                             {
-                                overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i],layer->layeropacity[type]);
+                                overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i],layer->layeropacity[type]);
                             }
                         }
                         else
                         {
                             for(int i=0; i<176; i++)
                             {
-                                overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i],layer->layeropacity[type]);
+                                overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i],layer->layeropacity[type]);
                             }
                         }
                     }
@@ -2115,14 +2115,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                         {
                             for(int i=0; i<176; i++)
                             {
-                                overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
+                                overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
                             }
                         }
                         else
                         {
                             for(int i=0; i<176; i++)
                             {
-                                overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
+                                overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
                             }
                         }
                     }
@@ -2132,14 +2132,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                         {
                             for(int i=0; i<176; i++)
                             {
-                                overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i],layer->layeropacity[type]);
+                                overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i],layer->layeropacity[type]);
                             }
                         }
                         else
                         {
                             for(int i=0; i<176; i++)
                             {
-                                overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i],layer->layeropacity[type]);
+                                overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i],layer->layeropacity[type]);
                             }
                         }
                     }
@@ -2164,14 +2164,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
                                 }
                             }
                         }
@@ -2181,14 +2181,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
+                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
+                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
                                 }
                             }
                         }
@@ -2201,14 +2201,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
                                 }
                             }
                         }
@@ -2218,14 +2218,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i],layer->layeropacity[type]);
+                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i],layer->layeropacity[type]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i],layer->layeropacity[type]);
+                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i],layer->layeropacity[type]);
                                 }
                             }
                         }
@@ -2241,14 +2241,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
                                 }
                             }
                         }
@@ -2258,14 +2258,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
+                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
+                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
                                 }
                             }
                         }
@@ -2278,14 +2278,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
                                 }
                             }
                         }
@@ -2295,14 +2295,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i],layer->layeropacity[type]);
+                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i],layer->layeropacity[type]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i],layer->layeropacity[type]);
+                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i],layer->layeropacity[type]);
                                 }
                             }
                         }
@@ -2328,14 +2328,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
                                 }
                             }
                         }
@@ -2345,14 +2345,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
+                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
+                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
                                 }
                             }
                         }
@@ -2365,14 +2365,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
                                 }
                             }
                         }
@@ -2382,14 +2382,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i],layer->layeropacity[type]);
+                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i],layer->layeropacity[type]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i],layer->layeropacity[type]);
+                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i],layer->layeropacity[type]);
                                 }
                             }
                         }
@@ -2405,14 +2405,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
                                 }
                             }
                         }
@@ -2422,14 +2422,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
+                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
+                                    overcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
                                 }
                             }
                         }
@@ -2442,14 +2442,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
+                                    putcombo(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i]);
                                 }
                             }
                         }
@@ -2459,14 +2459,14 @@ void do_scrolling_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, bool
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr2[type].data[i],tmpscr2[type].cset[i],layer->layeropacity[type]);
+                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr2[type].data[i],tmpscr2[type].cset[i],layer->layeropacity[type]);
                                 }
                             }
                             else
                             {
                                 for(int i=0; i<176; i++)
                                 {
-                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+playing_field_offset-y,tmpscr3[type].data[i],tmpscr3[type].cset[i],layer->layeropacity[type]);
+                                    overcombotranslucent(bmp,((i&15)<<4)-x,(i&0xF0)+PLAYFIELD_OFFSET-y,tmpscr3[type].data[i],tmpscr3[type].cset[i],layer->layeropacity[type]);
                                 }
                             }
                         }
@@ -2494,7 +2494,7 @@ void do_layer(BITMAP *bmp, int type, mapscr* layer, int x, int y, int tempscreen
         
         if(drawprimitives && type >= 0 && type <= 5)
         {
-            do_primitives(bmp, type+1, layer, 0,  playing_field_offset);
+            do_primitives(bmp, type+1, layer, 0,  PLAYFIELD_OFFSET);
         }
     }
 }
@@ -2555,7 +2555,7 @@ void draw_screen(mapscr* this_screen, bool showlink)
         }
     }
     
-    putscr(scrollbuf,0,playing_field_offset,this_screen);
+    putscr(scrollbuf,0,PLAYFIELD_OFFSET,this_screen);
     
     // Lens hints, then primitives, then particles.
     if(lensclk && !get_bit(quest_rules, qr_OLDLENSORDER))
@@ -2563,7 +2563,7 @@ void draw_screen(mapscr* this_screen, bool showlink)
         draw_lens_under(scrollbuf, false);
     }
     
-    do_primitives(scrollbuf, 0, this_screen, 0, playing_field_offset);
+    do_primitives(scrollbuf, 0, this_screen, 0, PLAYFIELD_OFFSET);
         
     for(pcounter=0; pcounter<particles.Count(); pcounter++)
     {
@@ -2595,13 +2595,13 @@ void draw_screen(mapscr* this_screen, bool showlink)
             int ccx = (int)(Link.getClimbCoverX());
             int ccy = (int)(Link.getClimbCoverY());
             
-            overcombo(scrollbuf,ccx,ccy+cmby2+playing_field_offset,MAPCOMBO(ccx,ccy+cmby2),MAPCSET(ccx,ccy+cmby2));
-            putcombo(scrollbuf,ccx,ccy+playing_field_offset,MAPCOMBO(ccx,ccy),MAPCSET(ccx,ccy));
+            overcombo(scrollbuf,ccx,ccy+cmby2+PLAYFIELD_OFFSET,MAPCOMBO(ccx,ccy+cmby2),MAPCSET(ccx,ccy+cmby2));
+            putcombo(scrollbuf,ccx,ccy+PLAYFIELD_OFFSET,MAPCOMBO(ccx,ccy),MAPCSET(ccx,ccy));
             
             if(int(Link.getX())&15)
             {
-                overcombo(scrollbuf,ccx+16,ccy+cmby2+playing_field_offset,MAPCOMBO(ccx+16,ccy+cmby2),MAPCSET(ccx+16,ccy+cmby2));
-                putcombo(scrollbuf,ccx+16,ccy+playing_field_offset,MAPCOMBO(ccx+16,ccy),MAPCSET(ccx+16,ccy));
+                overcombo(scrollbuf,ccx+16,ccy+cmby2+PLAYFIELD_OFFSET,MAPCOMBO(ccx+16,ccy+cmby2),MAPCSET(ccx+16,ccy+cmby2));
+                putcombo(scrollbuf,ccx+16,ccy+PLAYFIELD_OFFSET,MAPCOMBO(ccx+16,ccy),MAPCSET(ccx+16,ccy));
             }
         }
     }
@@ -2651,20 +2651,20 @@ void draw_screen(mapscr* this_screen, bool showlink)
             int ccx = (int)(Link.getClimbCoverX());
             int ccy = (int)(Link.getClimbCoverY());
             
-            overcombo(scrollbuf,ccx,ccy+cmby2+playing_field_offset,MAPCOMBO(ccx,ccy+cmby2),MAPCSET(ccx,ccy+cmby2));
-            putcombo(scrollbuf,ccx,ccy+playing_field_offset,MAPCOMBO(ccx,ccy),MAPCSET(ccx,ccy));
+            overcombo(scrollbuf,ccx,ccy+cmby2+PLAYFIELD_OFFSET,MAPCOMBO(ccx,ccy+cmby2),MAPCSET(ccx,ccy+cmby2));
+            putcombo(scrollbuf,ccx,ccy+PLAYFIELD_OFFSET,MAPCOMBO(ccx,ccy),MAPCSET(ccx,ccy));
             
             if(int(Link.getX())&15)
             {
-                overcombo(scrollbuf,ccx+16,ccy+cmby2+playing_field_offset,MAPCOMBO(ccx+16,ccy+cmby2),MAPCSET(ccx+16,ccy+cmby2));
-                putcombo(scrollbuf,ccx+16,ccy+playing_field_offset,MAPCOMBO(ccx+16,ccy),MAPCSET(ccx+16,ccy));
+                overcombo(scrollbuf,ccx+16,ccy+cmby2+PLAYFIELD_OFFSET,MAPCOMBO(ccx+16,ccy+cmby2),MAPCSET(ccx+16,ccy+cmby2));
+                putcombo(scrollbuf,ccx+16,ccy+PLAYFIELD_OFFSET,MAPCOMBO(ccx+16,ccy),MAPCSET(ccx+16,ccy));
             }
         }
     }
     
     do_layer(scrollbuf,-2, this_screen, 0, 0, 2); // push blocks!
     
-    putscrdoors(scrollbuf,0,playing_field_offset,this_screen);
+    putscrdoors(scrollbuf,0,PLAYFIELD_OFFSET,this_screen);
     
     // Lens hints, doors etc.
     if(lensclk)
@@ -2689,7 +2689,7 @@ void draw_screen(mapscr* this_screen, bool showlink)
     
     if(!(pricesdisplaybuf->clip))
     {
-        masked_blit(pricesdisplaybuf,framebuf,0,0,0,playing_field_offset,256,168);
+        masked_blit(pricesdisplaybuf,framebuf,0,0,0,PLAYFIELD_OFFSET,256,168);
     }
     
     if(showlink && ((Link.getAction()!=climbcovertop)&&(Link.getAction()!=climbcoverbottom)))
@@ -2826,7 +2826,6 @@ void draw_screen(mapscr* this_screen, bool showlink)
     
     do_layer(tmp_scr,3, this_screen, 0, 0, 2, false, true);
     do_layer(scrollbuf, 3, this_screen, 0, 0, 2);
-    //do_primitives(tmp_scr, 3, this_screen, 0,playing_field_offset);//don't uncomment me
     
     for(pcounter=0; pcounter<particles.Count(); pcounter++)
     {
@@ -2856,7 +2855,7 @@ void draw_screen(mapscr* this_screen, bool showlink)
     if(!get_bit(quest_rules,qr_SUBSCREENOVERSPRITES))
     {
         set_clip_rect(framebuf,draw_screen_clip_rect_x1,draw_screen_clip_rect_y1,draw_screen_clip_rect_x2,draw_screen_clip_rect_y2);
-        put_passive_subscr(framebuf, &QMisc, 0, passive_subscreen_offset, false, sspUP);
+        put_passive_subscr(framebuf, &QMisc, 0, 0, false, sspUP);
     }
     
     
@@ -2950,18 +2949,18 @@ void draw_screen(mapscr* this_screen, bool showlink)
     
     if(!(msgdisplaybuf->clip))
     {
-        masked_blit(msgdisplaybuf,framebuf,0,0,0,playing_field_offset,256,168);
-        masked_blit(msgdisplaybuf,scrollbuf,0,0,0,playing_field_offset,256,168);
+        masked_blit(msgdisplaybuf,framebuf,0,0,0,PLAYFIELD_OFFSET,256,168);
+        masked_blit(msgdisplaybuf,scrollbuf,0,0,0,PLAYFIELD_OFFSET,256,168);
     }
     
     //12. Draw the subscreen, without clipping
     
     if(get_bit(quest_rules,qr_SUBSCREENOVERSPRITES))
     {
-        put_passive_subscr(framebuf, &QMisc, 0, passive_subscreen_offset, false, sspUP);
+        put_passive_subscr(framebuf, &QMisc, 0, 0, false, sspUP);
         
         // Draw primitives over subscren
-        do_primitives(framebuf, 7, this_screen, 0, playing_field_offset); //Layer '7' appears above subscreen if quest rule is set
+        do_primitives(framebuf, 7, this_screen, 0, PLAYFIELD_OFFSET); //Layer '7' appears above subscreen if quest rule is set
     }
     
     set_clip_rect(scrollbuf, 0, 0, scrollbuf->w, scrollbuf->h);
@@ -3336,103 +3335,103 @@ void showbombeddoor(BITMAP *dest, int side)
     switch(side)
     {
     case up:
-        putcombo_not_zero(dest,(7&15)<<4,(7&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(7&15)<<4,(7&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_u[dt_bomb][0],
                           DoorComboSets[d].doorcset_u[dt_bomb][0]);
-        putcombo_not_zero(dest,(8&15)<<4,(8&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(8&15)<<4,(8&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_u[dt_bomb][1],
                           DoorComboSets[d].doorcset_u[dt_bomb][1]);
-        putcombo_not_zero(dest,(23&15)<<4,(23&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(23&15)<<4,(23&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_u[dt_bomb][2],
                           DoorComboSets[d].doorcset_u[dt_bomb][2]);
-        putcombo_not_zero(dest,(24&15)<<4,(24&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(24&15)<<4,(24&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_u[dt_bomb][3],
                           DoorComboSets[d].doorcset_u[dt_bomb][3]);
-        overcombo_not_zero(dest,(39&15)<<4,(39&0xF0)+playing_field_offset,
+        overcombo_not_zero(dest,(39&15)<<4,(39&0xF0)+PLAYFIELD_OFFSET,
                            DoorComboSets[d].bombdoorcombo_u[0],
                            DoorComboSets[d].bombdoorcset_u[0]);
-        overcombo_not_zero(dest,(40&15)<<4,(40&0xF0)+playing_field_offset,
+        overcombo_not_zero(dest,(40&15)<<4,(40&0xF0)+PLAYFIELD_OFFSET,
                            DoorComboSets[d].bombdoorcombo_u[1],
                            DoorComboSets[d].bombdoorcset_u[1]);
         break;
         
     case down:
-        putcombo_not_zero(dest,(151&15)<<4,(151&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(151&15)<<4,(151&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_d[dt_bomb][0],
                           DoorComboSets[d].doorcset_d[dt_bomb][0]);
-        putcombo_not_zero(dest,(152&15)<<4,(152&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(152&15)<<4,(152&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_d[dt_bomb][1],
                           DoorComboSets[d].doorcset_d[dt_bomb][1]);
-        putcombo_not_zero(dest,(167&15)<<4,(167&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(167&15)<<4,(167&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_d[dt_bomb][2],
                           DoorComboSets[d].doorcset_d[dt_bomb][2]);
-        putcombo_not_zero(dest,(168&15)<<4,(168&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(168&15)<<4,(168&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_d[dt_bomb][3],
                           DoorComboSets[d].doorcset_d[dt_bomb][3]);
-        overcombo_not_zero(dest,(135&15)<<4,(135&0xF0)+playing_field_offset,
+        overcombo_not_zero(dest,(135&15)<<4,(135&0xF0)+PLAYFIELD_OFFSET,
                            DoorComboSets[d].bombdoorcombo_d[0],
                            DoorComboSets[d].bombdoorcset_d[0]);
-        overcombo_not_zero(dest,(136&15)<<4,(136&0xF0)+playing_field_offset,
+        overcombo_not_zero(dest,(136&15)<<4,(136&0xF0)+PLAYFIELD_OFFSET,
                            DoorComboSets[d].bombdoorcombo_d[1],
                            DoorComboSets[d].bombdoorcset_d[1]);
         break;
         
     case left:
-        putcombo_not_zero(dest,(64&15)<<4,(64&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(64&15)<<4,(64&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_l[dt_bomb][0],
                           DoorComboSets[d].doorcset_l[dt_bomb][0]);
-        putcombo_not_zero(dest,(65&15)<<4,(65&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(65&15)<<4,(65&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_l[dt_bomb][1],
                           DoorComboSets[d].doorcset_l[dt_bomb][1]);
-        putcombo_not_zero(dest,(80&15)<<4,(80&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(80&15)<<4,(80&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_l[dt_bomb][2],
                           DoorComboSets[d].doorcset_l[dt_bomb][2]);
-        putcombo_not_zero(dest,(81&15)<<4,(81&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(81&15)<<4,(81&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_l[dt_bomb][3],
                           DoorComboSets[d].doorcset_l[dt_bomb][3]);
-        putcombo_not_zero(dest,(96&15)<<4,(96&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(96&15)<<4,(96&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_l[dt_bomb][4],
                           DoorComboSets[d].doorcset_l[dt_bomb][4]);
-        putcombo_not_zero(dest,(97&15)<<4,(97&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(97&15)<<4,(97&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_l[dt_bomb][5],
                           DoorComboSets[d].doorcset_l[dt_bomb][5]);
-        overcombo_not_zero(dest,(66&15)<<4,(66&0xF0)+playing_field_offset,
+        overcombo_not_zero(dest,(66&15)<<4,(66&0xF0)+PLAYFIELD_OFFSET,
                            DoorComboSets[d].bombdoorcombo_l[0],
                            DoorComboSets[d].bombdoorcset_l[0]);
-        overcombo_not_zero(dest,(82&15)<<4,(82&0xF0)+playing_field_offset,
+        overcombo_not_zero(dest,(82&15)<<4,(82&0xF0)+PLAYFIELD_OFFSET,
                            DoorComboSets[d].bombdoorcombo_l[1],
                            DoorComboSets[d].bombdoorcset_l[1]);
-        overcombo_not_zero(dest,(98&15)<<4,(98&0xF0)+playing_field_offset,
+        overcombo_not_zero(dest,(98&15)<<4,(98&0xF0)+PLAYFIELD_OFFSET,
                            DoorComboSets[d].bombdoorcombo_l[2],
                            DoorComboSets[d].bombdoorcset_l[2]);
         break;
         
     case right:
-        putcombo_not_zero(dest,(78&15)<<4,(78&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(78&15)<<4,(78&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_r[dt_bomb][0],
                           DoorComboSets[d].doorcset_r[dt_bomb][0]);
-        putcombo_not_zero(dest,(79&15)<<4,(79&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(79&15)<<4,(79&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_r[dt_bomb][1],
                           DoorComboSets[d].doorcset_r[dt_bomb][1]);
-        putcombo_not_zero(dest,(94&15)<<4,(94&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(94&15)<<4,(94&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_r[dt_bomb][2],
                           DoorComboSets[d].doorcset_r[dt_bomb][2]);
-        putcombo_not_zero(dest,(95&15)<<4,(95&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(95&15)<<4,(95&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_r[dt_bomb][3],
                           DoorComboSets[d].doorcset_r[dt_bomb][3]);
-        putcombo_not_zero(dest,(110&15)<<4,(110&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(110&15)<<4,(110&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_r[dt_bomb][4],
                           DoorComboSets[d].doorcset_r[dt_bomb][4]);
-        putcombo_not_zero(dest,(111&15)<<4,(111&0xF0)+playing_field_offset,
+        putcombo_not_zero(dest,(111&15)<<4,(111&0xF0)+PLAYFIELD_OFFSET,
                           DoorComboSets[d].doorcombo_r[dt_bomb][5],
                           DoorComboSets[d].doorcset_r[dt_bomb][5]);
-        overcombo_not_zero(dest,(77&15)<<4,(77&0xF0)+playing_field_offset,
+        overcombo_not_zero(dest,(77&15)<<4,(77&0xF0)+PLAYFIELD_OFFSET,
                            DoorComboSets[d].bombdoorcombo_r[0],
                            DoorComboSets[d].bombdoorcset_r[0]);
-        overcombo_not_zero(dest,(93&15)<<4,(93&0xF0)+playing_field_offset,
+        overcombo_not_zero(dest,(93&15)<<4,(93&0xF0)+PLAYFIELD_OFFSET,
                            DoorComboSets[d].bombdoorcombo_r[1],
                            DoorComboSets[d].bombdoorcset_r[1]);
-        overcombo_not_zero(dest,(109&15)<<4,(109&0xF0)+playing_field_offset,
+        overcombo_not_zero(dest,(109&15)<<4,(109&0xF0)+PLAYFIELD_OFFSET,
                            DoorComboSets[d].bombdoorcombo_r[2],
                            DoorComboSets[d].bombdoorcset_r[2]);
         break;
@@ -4205,8 +4204,8 @@ void ViewMap()
     
     int px = ((8-(currscr&15)) << 9)  - 256;
     int py = ((4-(currscr>>4)) * 352) - 176;
-    int lx = ((currscr&15)<<8)  + LinkX()+8;
-    int ly = ((currscr>>4)*176) + LinkY()+8;
+    int lx = ((currscr&15)<<8)  + Link.getX()+8;
+    int ly = ((currscr>>4)*176) + Link.getY()+8;
     int sc = 6;
     
     bool done=false, redraw=true;
@@ -4253,25 +4252,25 @@ void ViewMap()
                     }
                 }
                 
-                if((tmpscr+1)->flags7&fLAYER2BG) do_layer(scrollbuf, 1, tmpscr+1, -256, playing_field_offset, 2);
+                if((tmpscr+1)->flags7&fLAYER2BG) do_layer(scrollbuf, 1, tmpscr+1, -256, PLAYFIELD_OFFSET, 2);
                 
-                if((tmpscr+1)->flags7&fLAYER3BG) do_layer(scrollbuf, 2, tmpscr+1, -256, playing_field_offset, 2);
+                if((tmpscr+1)->flags7&fLAYER3BG) do_layer(scrollbuf, 2, tmpscr+1, -256, PLAYFIELD_OFFSET, 2);
                 
                 putscr(scrollbuf,256,0,tmpscr+1);
-                do_layer(scrollbuf, 0, tmpscr+1, -256, playing_field_offset, 2);
+                do_layer(scrollbuf, 0, tmpscr+1, -256, PLAYFIELD_OFFSET, 2);
                 
-                if(!((tmpscr+1)->flags7&fLAYER2BG)) do_layer(scrollbuf, 1, tmpscr+1, -256, playing_field_offset, 2);
+                if(!((tmpscr+1)->flags7&fLAYER2BG)) do_layer(scrollbuf, 1, tmpscr+1, -256, PLAYFIELD_OFFSET, 2);
                 
                 putscrdoors(scrollbuf,256,0,tmpscr+1);
-                do_layer(scrollbuf,-2, tmpscr+1, -256, playing_field_offset, 2);
-                do_layer(scrollbuf,-3, tmpscr+1, -256, playing_field_offset, 2); // Freeform combos!
+                do_layer(scrollbuf,-2, tmpscr+1, -256, PLAYFIELD_OFFSET, 2);
+                do_layer(scrollbuf,-3, tmpscr+1, -256, PLAYFIELD_OFFSET, 2); // Freeform combos!
                 
-                if(!((tmpscr+1)->flags7&fLAYER3BG)) do_layer(scrollbuf, 2, tmpscr+1, -256, playing_field_offset, 2);
+                if(!((tmpscr+1)->flags7&fLAYER3BG)) do_layer(scrollbuf, 2, tmpscr+1, -256, PLAYFIELD_OFFSET, 2);
                 
-                do_layer(scrollbuf, 3, tmpscr+1, -256, playing_field_offset, 2);
-                do_layer(scrollbuf,-1, tmpscr+1, -256, playing_field_offset, 2);
-                do_layer(scrollbuf, 4, tmpscr+1, -256, playing_field_offset, 2);
-                do_layer(scrollbuf, 5, tmpscr+1, -256, playing_field_offset, 2);
+                do_layer(scrollbuf, 3, tmpscr+1, -256, PLAYFIELD_OFFSET, 2);
+                do_layer(scrollbuf,-1, tmpscr+1, -256, PLAYFIELD_OFFSET, 2);
+                do_layer(scrollbuf, 4, tmpscr+1, -256, PLAYFIELD_OFFSET, 2);
+                do_layer(scrollbuf, 5, tmpscr+1, -256, PLAYFIELD_OFFSET, 2);
                 
             }
             
@@ -4429,7 +4428,7 @@ void ViewMap()
         }
         
         //since stuff in here accesses tmpscr and tmpscr2... -DD
-        advanceframe(false, false);
+        advanceframe(false);
         
         
         if(rSbtn())
@@ -4445,7 +4444,7 @@ void ViewMap()
 
 void onViewMap()
 {
-    if(Playing && currscr<128 && DMaps[currdmap].flags&dmfVIEWMAP)
+    if(playing && currscr<128 && DMaps[currdmap].flags&dmfVIEWMAP)
     {
         clear_to_color(framebuf,BLACK);
         textout_centre_ex(framebuf,font,"Drawing map...",128,108,WHITE,BLACK);

@@ -129,8 +129,6 @@ END_OF_FUNCTION(fps_callback)
 int Z_init_timers()
 {
     static bool didit = false;
-    const static char *err_str = "Couldn't allocate timer";
-    err_str = err_str; //Unused variable warning
     
     if(didit)
         return 1;
@@ -169,7 +167,6 @@ void show_fps(BITMAP *target)
         int x = scrx+40-((screen_scale-1)*120);
         int y = scry+216+((screen_scale-1)*104);
         textout_ex(target,zfont,buf,x,y,-1,-1);
-        // textout_ex(target,zfont,buf,scrx+40-120,scry+216+104,-1,-1);
     }
     else
     {
@@ -960,7 +957,7 @@ void close_black_opening(int x, int y, bool wait)
         for(int i=0; i<66; i++)
         {
             draw_screen(tmpscr);
-            put_passive_subscr(framebuf,&QMisc,0,passive_subscreen_offset,false,sspUP);
+            put_passive_subscr(framebuf,&QMisc,0,0,false,sspUP);
             syskeys();
             advanceframe(true);
             
@@ -998,7 +995,7 @@ void open_black_opening(int x, int y, bool wait)
         for(int i=0; i<66; i++)
         {
             draw_screen(tmpscr);
-            put_passive_subscr(framebuf,&QMisc,0,passive_subscreen_offset,false,sspUP);
+            put_passive_subscr(framebuf,&QMisc,0,0,false,sspUP);
             syskeys();
             advanceframe(true);
             
@@ -1265,13 +1262,6 @@ bool has_item(int item_type, int it)                        //does Link possess 
     }
     
     default:
-        //it=(1<<(it-1));
-        /*if (item_type>=itype_max)
-        {
-          Z_error("Error","has_item exception",NULL,NULL,"O&K",NULL,'k',0,lfont);
-        
-          return false;
-        }*/
         int itemid = getItemID(itemsbuf, item_type, it);
         
         if(itemid == -1)
@@ -1607,11 +1597,6 @@ int item_tile_mod(bool)
     return tile;
 }
 
-int dmap_tile_mod()
-{
-    return 0;
-}
-
 // Hints are drawn on a separate layer to combo reveals.
 void draw_lens_under(BITMAP *dest, bool layer)
 {
@@ -1642,7 +1627,7 @@ void draw_lens_under(BITMAP *dest, bool layer)
         for(int i=0; i<176; i++)
         {
             int x = (i & 15) << 4;
-            int y = (i & 0xF0) + playing_field_offset;
+            int y = (i & 0xF0) + PLAYFIELD_OFFSET;
             int tempitemx=-16, tempitemy=-16;
             int tempweaponx=-16, tempweapony=-16;
             
@@ -2470,16 +2455,16 @@ void draw_lens_under(BITMAP *dest, bool layer)
         if(layer)
         {
             if(tmpscr->door[0]==dWALK)
-                rectfill(dest, 120, 16+playing_field_offset, 135, 31+playing_field_offset, WHITE);
+                rectfill(dest, 120, 16+PLAYFIELD_OFFSET, 135, 31+PLAYFIELD_OFFSET, WHITE);
                 
             if(tmpscr->door[1]==dWALK)
-                rectfill(dest, 120, 144+playing_field_offset, 135, 159+playing_field_offset, WHITE);
+                rectfill(dest, 120, 144+PLAYFIELD_OFFSET, 135, 159+PLAYFIELD_OFFSET, WHITE);
                 
             if(tmpscr->door[2]==dWALK)
-                rectfill(dest, 16, 80+playing_field_offset, 31, 95+playing_field_offset, WHITE);
+                rectfill(dest, 16, 80+PLAYFIELD_OFFSET, 31, 95+PLAYFIELD_OFFSET, WHITE);
                 
             if(tmpscr->door[3]==dWALK)
-                rectfill(dest, 224, 80+playing_field_offset, 239, 95+playing_field_offset, WHITE);
+                rectfill(dest, 224, 80+PLAYFIELD_OFFSET, 239, 95+PLAYFIELD_OFFSET, WHITE);
                 
             if(tmpscr->door[0]==dBOMB)
             {
@@ -2505,7 +2490,7 @@ void draw_lens_under(BITMAP *dest, bool layer)
         if(tmpscr->stairx + tmpscr->stairy)
         {
             if(!hints)
-                putcombo(dest,tmpscr->stairx,tmpscr->stairy+playing_field_offset,tmpscr->secretcombo[sSTAIRS],tmpscr->secretcset[sSTAIRS]);
+                putcombo(dest,tmpscr->stairx,tmpscr->stairy+PLAYFIELD_OFFSET,tmpscr->secretcombo[sSTAIRS],tmpscr->secretcset[sSTAIRS]);
             else
             {
                 if(tmpscr->flags&fWHISTLE)
@@ -2518,7 +2503,7 @@ void draw_lens_under(BITMAP *dest, bool layer)
                             || (key[KEY_N] && (frame&(blink_rate/4))))
                     {
                         tempitemx=tmpscr->stairx;
-                        tempitemy=tmpscr->stairy+playing_field_offset;
+                        tempitemy=tmpscr->stairy+PLAYFIELD_OFFSET;
                     }
                     
                     putitem2(dest,tempitemx,tempitemy,tempitem, lens_hint_item[tempitem][0], lens_hint_item[tempitem][1], 0);
@@ -2538,17 +2523,17 @@ void draw_lens_over()
     {
         if(lens_scr == NULL)
         {
-            lens_scr = create_bitmap_ex(8,2*288,2*(240-playing_field_offset));
+            lens_scr = create_bitmap_ex(8,2*288,2*(240-PLAYFIELD_OFFSET));
         }
         
         clear_to_color(lens_scr, BLACK);
-        circlefill(lens_scr, 288, 240-playing_field_offset, width, 0);
-        circle(lens_scr, 288, 240-playing_field_offset, width+2, 0);
-        circle(lens_scr, 288, 240-playing_field_offset, width+5, 0);
+        circlefill(lens_scr, 288, 240-PLAYFIELD_OFFSET, width, 0);
+        circle(lens_scr, 288, 240-PLAYFIELD_OFFSET, width+2, 0);
+        circle(lens_scr, 288, 240-PLAYFIELD_OFFSET, width+5, 0);
         last_width=width;
     }
     
-    masked_blit(lens_scr, framebuf, 288-(LinkX()+8), 240-playing_field_offset-(LinkY()+8), 0, playing_field_offset, 256, 168);
+    masked_blit(lens_scr, framebuf, 288-(Link.getX()+8), 240-PLAYFIELD_OFFSET-(Link.getY()+8), 0, PLAYFIELD_OFFSET, 256, 168);
 }
 
 //----------------------------------------------------------------
@@ -2556,7 +2541,7 @@ void draw_lens_over()
 void draw_wavy(BITMAP *buffer, int amplitude)
 {
     clear_to_color(tmp_scr,0);
-    blit(buffer,tmp_scr,0,original_playing_field_offset,16,0,256,224-original_playing_field_offset);
+    blit(buffer,tmp_scr,0,PLAYFIELD_OFFSET,16,0,256,224-PLAYFIELD_OFFSET);
     
     amplitude = zc_min(2048,amplitude); // some arbitrary limit to prevent crashing
     int amp2=168;
@@ -2570,10 +2555,20 @@ void draw_wavy(BITMAP *buffer, int amplitude)
         {
             for(int k=0; k<256; k++)
             {
-                buffer->line[j+original_playing_field_offset][k]=tmp_scr->line[j][k+ofs+16];
+                buffer->line[j+PLAYFIELD_OFFSET][k]=tmp_scr->line[j][k+ofs+16];
             }
         }
     }
+}
+
+void draw_quake(BITMAP *buffer, int qclock)
+{
+    /* Calculate the quake offset to use. */
+    int quakeofs = (int)(sin((double)(qclock*2-frame))*4);
+
+    clear_to_color(tmp_scr,0);
+    blit(buffer,tmp_scr,0,PLAYFIELD_OFFSET,0,3+quakeofs,256,224-PLAYFIELD_OFFSET);
+    blit(tmp_scr,buffer,0,0,0,PLAYFIELD_OFFSET,256,224-PLAYFIELD_OFFSET);
 }
 
 void draw_fuzzy(int fuzz)
@@ -2638,9 +2633,9 @@ void draw_fuzzy(int fuzz)
     }
 }
 
-void updatescr(bool allowwavy)
+void updatescr(bool allow_gfx)
 {
-    if(!Playing)
+    if(!playing)
         black_opening_count=0;
         
     if(black_opening_count<0) //shape is opening up
@@ -2670,27 +2665,30 @@ void updatescr(bool allowwavy)
         }
     }
     
-    bool clearwavy = (wavy <= 0);
-    
-    if(wavy <= 0)
+    if(playing && allow_gfx)
     {
-        // So far one thing can alter wavy apart from scripts: Wavy DMaps.
-        wavy = (DMaps[currdmap].flags&dmfWAVY ? 4 : 0);
+        if(wavy)
+        {
+            // Wavy was set by a script.
+            draw_wavy(framebuf, wavy);
+            wavy--; // Decrement it
+        } 
+        else if (DMaps[currdmap].flags&dmfWAVY)
+        {
+            // Wavy was set by a DMap flag.
+            draw_wavy(framebuf, 4); 
+        }
+
+        if (quakeclk)
+        {
+            draw_quake(framebuf,quakeclk);
+            quakeclk--;
+        }
     }
     
-    if(wavy && Playing && allowwavy)
+    /*if(!(msgdisplaybuf->clip) && playing && msgpos && !screenscrolling)
     {
-        draw_wavy(framebuf, wavy);
-    }
-    
-    if(clearwavy)
-        wavy = 0; // Wavy was set by a DMap flag. Clear it.
-    else if(Playing)
-        wavy--; // Wavy was set by a script. Decrement it.
-        
-    /*if(!(msgdisplaybuf->clip) && Playing && msgpos && !screenscrolling)
-    {
-        masked_blit(msgdisplaybuf,framebuf,0,0,0,playing_field_offset,256,168);
+        masked_blit(msgdisplaybuf,framebuf,0,0,0,PLAYFIELD_OFFSET,256,168);
     }*/
     
     bool nosubscr = (tmpscr->flags3&fNOSUBSCR && !(tmpscr->flags3&fNOSUBSCROFFSET));
@@ -2698,9 +2696,9 @@ void updatescr(bool allowwavy)
     /* Use tmp_scr as buffer when we want to display panorama screen */
     if(nosubscr)
     {
-        rectfill(tmp_scr,0,0,255,passive_subscreen_height/2,0);
-        rectfill(tmp_scr,0,168+passive_subscreen_height/2,255,168+passive_subscreen_height-1,0);
-        blit(framebuf,tmp_scr,0,playing_field_offset,0,passive_subscreen_height/2,256,224-passive_subscreen_height);
+        rectfill(tmp_scr,0,0,255,SUBSCREEN_HEIGHT/2,0);
+        rectfill(tmp_scr,0,168+SUBSCREEN_HEIGHT/2,255,168+SUBSCREEN_HEIGHT-1,0);
+        blit(framebuf,tmp_scr,0,PLAYFIELD_OFFSET,0,SUBSCREEN_HEIGHT/2,256,224-SUBSCREEN_HEIGHT);
     }
     
     //TODO: Optimize blit 'overcalls' -Gleeok
@@ -2725,23 +2723,9 @@ void updatescr(bool allowwavy)
     const int my = scale_mul * 112;
     
     if(sbig)
-    {
         stretch_blit(source, target, 0, 0, 256, 224, scrx+32-mx, scry+8-my, sx, sy);
-        
-        if(quakeclk>0)
-            rectfill(target, // I don't know if these are right...
-                     scrx+32 - mx, //x1
-                     scry+8 - my + sy, //y1
-                     scrx+32 - mx + sx, //x2
-                     scry+8 - my + sy + (16 * scale_mul), //y2
-                     0);
-    }
     else
-    {
         blit(source,target,0,0,scrx+32,scry+8,256,224);
-        
-        if(quakeclk>0) rectfill(target,scrx+32,scry+8+224,scrx+32+256,scry+8+232,0);
-    }
     
     if(ShowFPS)
         show_fps(target);
@@ -2753,19 +2737,12 @@ void updatescr(bool allowwavy)
 
 void f_Quit(int type)
 {
-    if(type==qQUIT && !Playing)
-        return;
-        
     music_pause();
     pause_all_sfx();
     clear_keybuf();
     
     switch(type)
     {
-    case qQUIT:
-        onQuit();
-        break;
-        
     case qRESET:
         Quit=qRESET;
         break;
@@ -2789,12 +2766,6 @@ void f_Quit(int type)
     }
     
     eat_buttons();
-    
-    if(key[KEY_ESC])
-        key[KEY_ESC]=0;
-        
-    if(key[KEY_ENTER])
-        key[KEY_ENTER]=0;
 }
 
 //----------------------------------------------------------------
@@ -2815,6 +2786,9 @@ void syskeys()
     
     if(ReadKey(KEY_F2))    ShowFPS=!ShowFPS;
     
+
+    if(ReadKey(KEY_F8))    quakeclk=100;
+
     if(ReadKey(KEY_F9))    f_Quit(qRESET);
     
     if(ReadKey(KEY_F10))   f_Quit(qEXIT);
@@ -2825,20 +2799,20 @@ void syskeys()
     if(ReadKey(KEY_B))  game->set_bombs(game->get_maxbombs());
     if(ReadKey(KEY_C))
     {
-        setClock(!getClock());
-        cheat_superman=getClock();
+        Link.setClock(!Link.getClock());
+        cheat_superman=Link.getClock();
     }
     
     verifyBothWeapons();
     
-    // What's the Playing check for?
+    // What's the playing check for?
     clear_keybuf();
 }
 
 // 99*360 + 59*60
 #define MAXTIME  21405240
 
-void advanceframe(bool allowwavy, bool sfxcleanup)
+void advanceframe(bool allow_gfx)
 {
     if(zcmusic!=NULL)
     {
@@ -2848,19 +2822,15 @@ void advanceframe(bool allowwavy, bool sfxcleanup)
     if(Quit)
         return;
         
-    if(Playing && game->get_time()<MAXTIME)
+    if(playing && game->get_time()<MAXTIME)
         game->change_time(1);
         
     ++frame;
     
     syskeys();
-    // Someday... maybe install a Turbo button here?
-    updatescr(allowwavy);
+    updatescr(allow_gfx);
     throttleFPS();
-    
-    //textprintf_ex(screen,font,0,72,254,BLACK,"%d %d", lastentrance, lastentrance_dmap);
-    if(sfxcleanup)
-        sfx_cleanup();
+    sfx_cleanup();
 }
 
 void zapout()
@@ -2888,7 +2858,7 @@ void zapin()
 {
     draw_screen(tmpscr);
     set_clip_rect(scrollbuf, 0, 0, scrollbuf->w, scrollbuf->h);
-    put_passive_subscr(framebuf,&QMisc,0,passive_subscreen_offset,false,sspUP);
+    put_passive_subscr(framebuf,&QMisc,0,0,false,sspUP);
     blit(framebuf,scrollbuf,0,0,256,0,256,224);
     
     // zap out
@@ -2908,7 +2878,7 @@ void zapin()
 void wavyout(bool showlink)
 {
     draw_screen(tmpscr, showlink);
-    put_passive_subscr(framebuf,&QMisc,0,passive_subscreen_offset,false,sspUP);
+    put_passive_subscr(framebuf,&QMisc,0,0,false,sspUP);
     
     BITMAP *wavebuf = create_bitmap_ex(8,288,224);
     clear_to_color(wavebuf,0);
@@ -2942,7 +2912,7 @@ void wavyout(bool showlink)
             set_palette(RAMpal);
         }
         
-        for(int j=0; j+playing_field_offset<224; j++)
+        for(int j=0; j+PLAYFIELD_OFFSET<224; j++)
         {
             for(int k=0; k<256; k++)
             {
@@ -2953,7 +2923,7 @@ void wavyout(bool showlink)
                     ofs=int(sin((double(i+j)*2*PI/168.0))*amplitude);
                 }
                 
-                framebuf->line[j+playing_field_offset][k]=wavebuf->line[j+playing_field_offset][k+ofs+16];
+                framebuf->line[j+PLAYFIELD_OFFSET][k]=wavebuf->line[j+PLAYFIELD_OFFSET][k+ofs+16];
             }
         }
         
@@ -2970,7 +2940,7 @@ void wavyout(bool showlink)
 void wavyin()
 {
     draw_screen(tmpscr);
-    put_passive_subscr(framebuf,&QMisc,0,passive_subscreen_offset,false,sspUP);
+    put_passive_subscr(framebuf,&QMisc,0,0,false,sspUP);
     
     BITMAP *wavebuf = create_bitmap_ex(8,288,224);
     clear_to_color(wavebuf,0);
@@ -2978,13 +2948,6 @@ void wavyin()
     
     PALETTE wavepal;
     
-    //Breaks dark rooms.
-    //In any case I don't think we need this, since palette is already loaded in doWarp() (famous last words...) -DD
-    /*
-      loadfullpal();
-      loadlvlpal(DMaps[currdmap].color);
-      ringcolor(false);
-    */
     refreshpal=false;
     int ofs;
     int amplitude=8;
@@ -3011,7 +2974,7 @@ void wavyin()
             set_palette(RAMpal);
         }
         
-        for(int j=0; j+playing_field_offset<224; j++)
+        for(int j=0; j+PLAYFIELD_OFFSET<224; j++)
         {
             for(int k=0; k<256; k++)
             {
@@ -3022,7 +2985,7 @@ void wavyin()
                     ofs=int(sin((double(i+j)*2*PI/168.0))*amplitude);
                 }
                 
-                framebuf->line[j+playing_field_offset][k]=wavebuf->line[j+playing_field_offset][k+ofs+16];
+                framebuf->line[j+PLAYFIELD_OFFSET][k]=wavebuf->line[j+PLAYFIELD_OFFSET][k+ofs+16];
             }
         }
         
@@ -3047,7 +3010,7 @@ void blackscr(int fcnt,bool showsubscr)
         
         if(showsubscr)
         {
-            put_passive_subscr(framebuf,&QMisc,0,passive_subscreen_offset,false,sspUP);
+            put_passive_subscr(framebuf,&QMisc,0,0,false,sspUP);
         }
         
         syskeys();
@@ -3067,7 +3030,7 @@ void openscreen()
     
     if(COOLSCROLL)
     {
-        open_black_opening(LinkX()+8, (LinkY()-LinkZ())+8+playing_field_offset, true);
+        open_black_opening(Link.getX()+8, (Link.getY()-Link.getZ())+8+PLAYFIELD_OFFSET, true);
         return;
     }
     else
@@ -3075,36 +3038,20 @@ void openscreen()
         Link.setDontDraw(true);
         show_subscreen_dmap_dots=false;
         show_subscreen_numbers=false;
-        //    show_subscreen_items=false;
         show_subscreen_life=false;
     }
-    
-    int x=128;
     
     for(int i=0; i<80; i++)
     {
         draw_screen(tmpscr);
-        //? draw_screen already draws the subscreen -DD
-        //put_passive_subscr(framebuf,&QMisc,0,passive_subscreen_offset,false,sspUP);
-        x=128-(((i*128/80)/8)*8);
+        int x=128-(((i*128/80)/8)*8);
         
         if(x>0)
         {
-            rectfill(framebuf,0,playing_field_offset,x,167+playing_field_offset,0);
-            rectfill(framebuf,256-x,playing_field_offset,255,167+playing_field_offset,0);
+            rectfill(framebuf,0,PLAYFIELD_OFFSET,x,167+PLAYFIELD_OFFSET,0);
+            rectfill(framebuf,256-x,PLAYFIELD_OFFSET,255,167+PLAYFIELD_OFFSET,0);
         }
         
-        //    x=((80-i)/2)*4;
-        /*
-          --x;
-          switch(++c)
-          {
-          case 5: c=0;
-          case 0:
-          case 2:
-          case 3: --x; break;
-          }
-          */
         syskeys();
         advanceframe(true);
         
@@ -3128,26 +3075,6 @@ int TriforceCount()
             ++c;
             
     return c;
-}
-
-void onQuit()
-{
-    if(Playing)
-    {
-        if(get_bit(quest_rules, qr_NOCONTINUE))
-        {
-        }
-        
-        Quit=qQUIT;
-        
-        // Trying to evade a door repair charge?
-        if(repaircharge)
-        {
-            game->change_drupy(-repaircharge);
-            repaircharge=0;
-        }
-
-    }
 }
 
 void music_pause()
@@ -3725,11 +3652,6 @@ bool AxisRight()
     return control_state[17];
 }
 
-bool cMbtn()
-{
-    return key[KEY_ESC] != 0;
-}
-
 bool rUp()
 {
     return rButton(Up,Udown);
@@ -3757,10 +3679,6 @@ bool rBbtn()
 bool rSbtn()
 {
     return rButton(cSbtn,Sdown);
-}
-bool rMbtn()
-{
-    return rButton(cMbtn,Mdown);
 }
 bool rLbtn()
 {
@@ -3840,10 +3758,6 @@ bool DrunkcSbtn()
 {
     return drunk()?(rand()%2)?0:!cSbtn():cSbtn();
 }
-bool DrunkcMbtn()
-{
-    return drunk()?(rand()%2)?0:!cMbtn():cMbtn();
-}
 bool DrunkcLbtn()
 {
     return drunk()?(rand()%2)?0:!cLbtn():cLbtn();
@@ -3885,10 +3799,6 @@ bool DrunkrSbtn()
 {
     return drunk()?(rand()%2)?0:!rSbtn():rSbtn();
 }
-bool DrunkrMbtn()
-{
-    return drunk()?(rand()%2)?0:!rMbtn():rMbtn();
-}
 bool DrunkrLbtn()
 {
     return drunk()?(rand()%2)?0:!rLbtn():rLbtn();
@@ -3907,7 +3817,6 @@ void eat_buttons()
     rAbtn();
     rBbtn();
     rSbtn();
-    rMbtn();
     rLbtn();
     rRbtn();
     rPbtn();

@@ -270,7 +270,7 @@ void ending()
         
         if(f==733)
         {
-            blit(framebuf,scrollbuf,0,playing_field_offset!=0?168:0,0,0,256,passive_subscreen_height);
+            blit(framebuf,scrollbuf,0,PLAYFIELD_OFFSET!=0?168:0,0,0,256,SUBSCREEN_HEIGHT);
             
             for(int y=0; y<224; y++)
             {
@@ -293,7 +293,7 @@ void ending()
         
         if(f==861)
         {
-            blit(scrollbuf,framebuf,0,0,0,playing_field_offset!=0?168:0,256,passive_subscreen_height);
+            blit(scrollbuf,framebuf,0,0,0,PLAYFIELD_OFFSET!=0?168:0,256,SUBSCREEN_HEIGHT);
             try_zcmusic((char*)"zelda.nsf", 1, ZC_MIDI_ENDING);
             
             for(int y=0; y<224; y++)

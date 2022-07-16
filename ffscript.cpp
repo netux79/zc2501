@@ -841,12 +841,7 @@ void deallocateArray(const long32 ptrval)
             Z_scripterrlog("Script tried to deallocate memory that was not allocated at address %ld\n", ptrval);
         else
         {
-            word size = localRAM[ptrval].Size();
             localRAM[ptrval].Clear();
-            
-            // If this happens once per frame, it can drown out every other message. -L
-            //Z_eventlog("Deallocated local array with address %ld, size %d\n", ptrval, size);
-            size = size;
         }
     }
 }
@@ -1153,7 +1148,7 @@ long32 get_register(const long32 arg)
         break;
         
     case LINKYOFS:
-        ret = (int)(Link.yofs-playing_field_offset)*10000;
+        ret = (int)(Link.yofs-PLAYFIELD_OFFSET)*10000;
         break;
         
     case LINKZOFS:
@@ -1271,7 +1266,7 @@ long32 get_register(const long32 arg)
     
     case INPUTMOUSEY:
     {
-        int topOffset=(resy/2)-((112-playing_field_offset)*screen_scale);
+        int topOffset=(resy/2)-((112-PLAYFIELD_OFFSET)*screen_scale);
         ret=((gui_mouse_y()-topOffset)/screen_scale)*10000;
         break;
     }
@@ -1514,7 +1509,7 @@ long32 get_register(const long32 arg)
     case ITEMYOFS:
         if(0!=(s=checkItem(ri->itemref)))
         {
-            ret=((int)(((item*)(s))->yofs-playing_field_offset))*10000;
+            ret=((int)(((item*)(s))->yofs-PLAYFIELD_OFFSET))*10000;
         }
         
         break;
@@ -1767,7 +1762,7 @@ long32 get_register(const long32 arg)
         GET_NPC_VAR_FIX(xofs, "npc->DrawXOffset") break;
         
     case NPCYOFS:
-        GET_NPC_VAR_FIX(yofs, "npc->DrawYOffset") ret-=playing_field_offset*10000;
+        GET_NPC_VAR_FIX(yofs, "npc->DrawYOffset") ret-=PLAYFIELD_OFFSET*10000;
         break;
         
     case NPCZOFS:
@@ -2014,7 +2009,7 @@ long32 get_register(const long32 arg)
         
     case LWPNYOFS:
         if(0!=(s=checkLWpn(ri->lwpn,"DrawYOffset")))
-            ret=((int)(((weapon*)(s))->yofs-playing_field_offset))*10000;
+            ret=((int)(((weapon*)(s))->yofs-PLAYFIELD_OFFSET))*10000;
             
         break;
         
@@ -2239,7 +2234,7 @@ long32 get_register(const long32 arg)
         
     case EWPNYOFS:
         if(0!=(s=checkEWpn(ri->ewpn,"DrawYOffset")))
-            ret=((int)(((weapon*)(s))->yofs-playing_field_offset))*10000;
+            ret=((int)(((weapon*)(s))->yofs-PLAYFIELD_OFFSET))*10000;
             
         break;
         
@@ -3042,7 +3037,7 @@ void set_register(const long32 arg, const long32 value)
         break;
         
     case LINKYOFS:
-        (Link.yofs)=(fix)(value/10000)+playing_field_offset;
+        (Link.yofs)=(fix)(value/10000)+PLAYFIELD_OFFSET;
         break;
         
     case LINKZOFS:
@@ -3232,7 +3227,7 @@ void set_register(const long32 arg, const long32 value)
     
     case INPUTMOUSEY:
     {
-        int topOffset=(resy/2)-((112-playing_field_offset)*screen_scale);
+        int topOffset=(resy/2)-((112-PLAYFIELD_OFFSET)*screen_scale);
         position_mouse(gui_mouse_x(), (value/10000)*screen_scale+topOffset);
         break;
     }
@@ -3419,7 +3414,7 @@ void set_register(const long32 arg, const long32 value)
     case ITEMYOFS:
         if(0!=(s=checkItem(ri->itemref)))
         {
-            ((item*)(s))->yofs=(fix)(value/10000)+playing_field_offset;
+            ((item*)(s))->yofs=(fix)(value/10000)+PLAYFIELD_OFFSET;
         }
         
         break;
@@ -3759,7 +3754,7 @@ void set_register(const long32 arg, const long32 value)
         
     case LWPNYOFS:
         if(0!=(s=checkLWpn(ri->lwpn,"DrawYOffset")))
-            (((weapon*)s)->yofs)=(fix)(value/10000)+playing_field_offset;
+            (((weapon*)s)->yofs)=(fix)(value/10000)+PLAYFIELD_OFFSET;
             
         break;
         
@@ -3980,7 +3975,7 @@ void set_register(const long32 arg, const long32 value)
         
     case EWPNYOFS:
         if(0!=(s=checkEWpn(ri->ewpn,"DrawYOffset")))
-            (((weapon*)s)->yofs)=(fix)(value/10000)+playing_field_offset;
+            (((weapon*)s)->yofs)=(fix)(value/10000)+PLAYFIELD_OFFSET;
             
         break;
         
@@ -4113,7 +4108,7 @@ void set_register(const long32 arg, const long32 value)
     case NPCYOFS:
     {
         if(GuyH::loadNPC(ri->guyref, "npc->DrawYOffset") == SH::_NoError)
-            GuyH::getNPC()->yofs = fix(value / 10000) + playing_field_offset;
+            GuyH::getNPC()->yofs = fix(value / 10000) + PLAYFIELD_OFFSET;
     }
     break;
     

@@ -40,10 +40,6 @@ using std::string;
 using std::pair;
 extern std::map<int, pair<string,string> > ffcmap;
 
-int passive_subscreen_height=56;
-int original_playing_field_offset=56;
-int playing_field_offset=original_playing_field_offset;
-int passive_subscreen_offset=0;
 extern int directItem;
 extern int directItemA;
 extern int directItemB;
@@ -148,10 +144,10 @@ int checkx, checky;
 int skipcont=0;
 
 bool Throttlefps, ShowFPS;
-bool Playing, TransLayers;
+bool playing, TransLayers;
 bool refreshpal,blockpath,loaded_guys,freeze_guys,
      loaded_enemies,drawguys,watch;
-bool darkroom=false,naturaldark=false,BSZ;                         //,NEWSUBSCR;
+bool darkroom=false,naturaldark=false,BSZ;
 bool Udown,Ddown,Ldown,Rdown,Adown,Bdown,Sdown,Mdown,LBdown,RBdown,Pdown,Ex1down,Ex2down,Ex3down,Ex4down,AUdown,ADdown,ALdown,ARdown,
      NESquit,boughtsomething=false,
      fixed_door=false, hookshot_used=false, hookshot_frozen=false,
@@ -501,12 +497,6 @@ extern char *guy_string[];
 /******* Other Source Files *******/
 /**********************************/
 
-void hit_close_button()
-{
-    close_button_quit=true;
-    return;
-}
-
 void Z_eventlog(const char *format,...)
 {
     if(get_bit(quest_rules,qr_LOG))
@@ -579,7 +569,6 @@ void ALLOFF(bool messagesToo, bool decorationsToo)
     add_nl1bsparkle=false;
     add_nl2asparkle=false;
     add_nl2bsparkle=false;
-    //  for(int i=0; i<1; i++)
     mblock2.clk=0;
     dismissmsg();
     fadeclk=-1;
@@ -594,8 +583,6 @@ void ALLOFF(bool messagesToo, bool decorationsToo)
         Link.setClock(false);
     }
     
-    //  if(watch)
-    //    Link.setClock(false);
     watch=freeze_guys=loaded_guys=loaded_enemies=blockpath=false;
     stop_sfx(WAV_BRANG);
     
@@ -613,87 +600,7 @@ void ALLOFF(bool messagesToo, bool decorationsToo)
         usebombpal=false;
     }
 }
-void centerLink()
-{
-    Link.setX(120);
-    Link.setY(80);
-}
-fix  LinkX()
-{
-    return Link.getX();
-}
-fix  LinkY()
-{
-    return Link.getY();
-}
-fix  LinkZ()
-{
-    return Link.getZ();
-}
-int  LinkHClk()
-{
-    return Link.getHClk();
-}
-int  LinkAction()
-{
-    return Link.getAction();
-}
-int  LinkCharged()
-{
-    return Link.isCharged();
-}
-int  LinkNayrusLoveShieldClk()
-{
-    return Link.getNayrusLoveShieldClk();
-}
-int  LinkHoverClk()
-{
-    return Link.getHoverClk();
-}
-int  LinkSwordClk()
-{
-    return Link.getSwordClk();
-}
-int  LinkItemClk()
-{
-    return Link.getItemClk();
-}
-void setSwordClk(int newclk)
-{
-    Link.setSwordClk(newclk);
-}
-void setItemClk(int newclk)
-{
-    Link.setItemClk(newclk);
-}
-int  LinkLStep()
-{
-    return Link.getLStep();
-}
-void LinkCheckItems()
-{
-    Link.checkitems();
-}
-bool LinkGetDontDraw()
-{
-    return Link.getDontDraw();
-}
-fix  GuyX(int j)
-{
-    return guys.getX(j);
-}
-fix  GuyY(int j)
-{
-    return guys.getY(j);
-}
-int  GuyID(int j)
-{
-    return guys.getID(j);
-}
-int  GuyMisc(int j)
-{
-    return guys.getMisc(j);
-}
+
 bool  GuySuperman(int j)
 {
     if((j>=guys.Count())||(j<0))
@@ -704,10 +611,6 @@ bool  GuySuperman(int j)
     return ((enemy*)guys.spr(j))->superman !=0;
 }
 
-int  GuyCount()
-{
-    return guys.Count();
-}
 void StunGuy(int j,int stun)
 {
     if(stun<=0) return;
@@ -742,19 +645,6 @@ fix distance(int x1, int y1, int x2, int y2)
 
 {
     return (fix)sqrt(pow((double)abs(x1-x2),2)+pow((double)abs(y1-y2),2));
-}
-
-bool getClock()
-{
-    return Link.getClock();
-}
-void setClock(bool state)
-{
-    Link.setClock(state);
-}
-void CatchBrang()
-{
-    Link.Catch();
 }
 
 /**************************/
@@ -862,9 +752,8 @@ void resetItems(gamedata *game2, zinitdata *zinit2, bool lvlitems)
 int init_game()
 {
     srand(time(0));
-    //introclk=intropos=msgclk=msgpos=dmapmsgclk=0;
     
-//Some initialising globals
+    //Some initialising globals
     didpit=false;
     Link.unfreeze();
     Link.reset_hookshot();
@@ -879,9 +768,8 @@ int init_game()
     add_nl1bsparkle=false;
     add_nl2asparkle=false;
     add_nl2bsparkle=false;
-    
-    wavy=quakeclk=0;
     cheat_superman=false;
+    wavy=quakeclk=0;
     
     for(int x = 0; x < MAXITEMS; x++)
     {
@@ -910,11 +798,7 @@ int init_game()
                  (get_bit(quest_rules,qr_TRIANGLEWIPE)!=0 ? 4 : 0) |
                  (get_bit(quest_rules,qr_SMASWIPE)!=0 ? 8 : 0);
     identifyCFEnemies();
-                 
-    //  NEWSUBSCR = get_bit(quest_rules,qr_NEWSUBSCR);
-    
-    //  homescr = currscr = DMaps[0].cont;
-    //  currdmap = warpscr = worldscr=0;
+
     if(firstplay)
     {
         game->set_continue_dmap(zinit.start_dmap);
@@ -987,13 +871,12 @@ int init_game()
     
     Link.init();
     Link.resetflags(true);
-    Link.setEntryPoints(LinkX(),LinkY());
+    Link.setEntryPoints(Link.getX(),Link.getY());
     
     loadfullpal();
     ringcolor(false);
     loadlvlpal(DMaps[currdmap].color);
     lighting(false,true);
-    wavy=quakeclk=0;
     
     if(firstplay)
     {
@@ -1061,7 +944,7 @@ int init_game()
     show_subscreen_numbers=true;
     show_subscreen_life=true;
     
-    Playing=true;
+    playing=true;
     
     map_bkgsfx(true);
     openscreen();
@@ -1184,7 +1067,7 @@ int cont_game()
     //    key[i]=0;
     
     update_subscreens();
-    Playing=true;
+    playing=true;
     map_bkgsfx(true);
     openscreen();
     show_subscreen_numbers=true;
@@ -1256,7 +1139,7 @@ void restart_level()
     currcset=DMaps[currdmap].color;
     openscreen();
     map_bkgsfx(true);
-    Link.setEntryPoints(LinkX(),LinkY());
+    Link.setEntryPoints(Link.getX(),Link.getY());
     show_subscreen_numbers=true;
     show_subscreen_life=true;
     loadguys();
@@ -1346,7 +1229,7 @@ void do_magic_casting()
     {
         if(magiccastclk==0)
         {
-            Lwpns.add(new weapon(LinkX(),LinkY(),LinkZ(),wPhantom,pDINSFIREROCKET,0,up, magicitem, Link.getUID()));
+            Lwpns.add(new weapon(Link.getX(),Link.getY(),Link.getZ(),wPhantom,pDINSFIREROCKET,0,up, magicitem, Link.getUID()));
             weapon *w1 = (weapon*)(Lwpns.spr(Lwpns.Count()-1));
             w1->step=4;
             //          Link.tile=(BSZ)?32:29;
@@ -1362,7 +1245,7 @@ void do_magic_casting()
         
         if(magiccastclk==64)
         {
-            Lwpns.add(new weapon((fix)LinkX(),(fix)(-32),(fix)LinkZ(),wPhantom,pDINSFIREROCKETRETURN,0,down, magicitem, Link.getUID()));
+            Lwpns.add(new weapon((fix)Link.getX(),(fix)(-32),(fix)Link.getZ(),wPhantom,pDINSFIREROCKETRETURN,0,down, magicitem, Link.getUID()));
             weapon *w1 = (weapon*)(Lwpns.spr(Lwpns.Count()-1));
             w1->step=4;
             //          Link.tile=29;
@@ -1392,7 +1275,7 @@ void do_magic_casting()
             
             for(int flamecounter=((-1)*(flamemax/2))+1; flamecounter<=((flamemax/2)+1); flamecounter++)
             {
-                Lwpns.add(new weapon((fix)LinkX(),(fix)LinkY(),(fix)LinkZ(),wFire,3,itemsbuf[magicitem].power*DAMAGE_MULTIPLIER,
+                Lwpns.add(new weapon((fix)Link.getX(),(fix)Link.getY(),(fix)Link.getZ(),wFire,3,itemsbuf[magicitem].power*DAMAGE_MULTIPLIER,
                                      (tmpscr->flags7&fSIDEVIEW) ? (flamecounter<flamemax ? left : right) : 0, magicitem, Link.getUID()));
                 weapon *w = (weapon*)(Lwpns.spr(Lwpns.Count()-1));
                 w->step=(itemsbuf[magicitem].misc2/100.0);
@@ -1522,10 +1405,10 @@ void do_magic_casting()
         // See also Link.cpp, LinkClass::checkhit().
         if(magiccastclk==0)
         {
-            Lwpns.add(new weapon(LinkX(),LinkY(),(fix)0,wPhantom,pNAYRUSLOVEROCKET1,0,left, magicitem, Link.getUID()));
+            Lwpns.add(new weapon(Link.getX(),Link.getY(),(fix)0,wPhantom,pNAYRUSLOVEROCKET1,0,left, magicitem, Link.getUID()));
             weapon *w1 = (weapon*)(Lwpns.spr(Lwpns.Count()-1));
             w1->step=4;
-            Lwpns.add(new weapon(LinkX(),LinkY(),(fix)0,wPhantom,pNAYRUSLOVEROCKET2,0,right, magicitem, Link.getUID()));
+            Lwpns.add(new weapon(Link.getX(),Link.getY(),(fix)0,wPhantom,pNAYRUSLOVEROCKET2,0,right, magicitem, Link.getUID()));
             w1 = (weapon*)(Lwpns.spr(Lwpns.Count()-1));
             w1->step=4;
             //          Link.tile=(BSZ)?32:29;
@@ -1541,11 +1424,11 @@ void do_magic_casting()
         
         if(magiccastclk==64)
         {
-            int d=zc_max(LinkX(),256-LinkX())+32;
-            Lwpns.add(new weapon((fix)(LinkX()-d),(fix)LinkY(),(fix)LinkZ(),wPhantom,pNAYRUSLOVEROCKETRETURN1,0,right, magicitem,Link.getUID()));
+            int d=zc_max(Link.getX(),256-Link.getX())+32;
+            Lwpns.add(new weapon((fix)(Link.getX()-d),(fix)Link.getY(),(fix)Link.getZ(),wPhantom,pNAYRUSLOVEROCKETRETURN1,0,right, magicitem,Link.getUID()));
             weapon *w1 = (weapon*)(Lwpns.spr(Lwpns.Count()-1));
             w1->step=4;
-            Lwpns.add(new weapon((fix)(LinkX()+d),(fix)LinkY(),(fix)LinkZ(),wPhantom,pNAYRUSLOVEROCKETRETURN2,0,left, magicitem,Link.getUID()));
+            Lwpns.add(new weapon((fix)(Link.getX()+d),(fix)Link.getY(),(fix)Link.getZ(),wPhantom,pNAYRUSLOVEROCKETRETURN2,0,left, magicitem,Link.getUID()));
             w1 = (weapon*)(Lwpns.spr(Lwpns.Count()-1));
             w1->step=4;
             //          Link.tile=29;
@@ -1817,7 +1700,6 @@ void do_dcounters()
 void game_loop()
 {
 
-    //  walkflagx=0; walkflagy=0;
     if(fadeclk>=0)
     {
         if(fadeclk==0 && currscr<128)
@@ -2055,21 +1937,7 @@ void game_loop()
             draw_lens_over();
             --lensclk;
         }
-        
-        // Earthquake!
-        if(quakeclk>0)
-        {
-            playing_field_offset=56+((int)(sin((double)(--quakeclk*2-frame))*4));
-        }
-        else
-        {
-            playing_field_offset=56;
-        }
-        
-        // Other effects in zcsys.cpp
     }
-    
-    //  putpixel(framebuf, walkflagx, walkflagy+playing_field_offset, vc(int(rand()%16)));
 }
 
 int get_currdmap()
@@ -2368,7 +2236,6 @@ int main(int argc, char* argv[])
     sbig = (screen_scale > 1);
     real_screen = screen;
     
-    set_close_button_callback((void (*)()) hit_close_button);
     set_window_title("Zelda Classic");
 
     packfile_password(DATA_PASSWORD);
@@ -2413,7 +2280,7 @@ int main(int argc, char* argv[])
         }
         
         tmpscr->flags3=0;
-        Playing=false;
+        playing=false;
         
         switch(Quit)
         {

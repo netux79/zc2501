@@ -1599,7 +1599,7 @@ void titlescreen()
     int q=Quit;
     
     Quit=0;
-    Playing=false;
+    playing=false;
     
     if(q==qCONT)
     {
@@ -1853,11 +1853,9 @@ bool save_game(bool savepoint, int type)
         
         //reset_combo_animations();
         clear_bitmap(framebuf);
-        //advanceframe();
         
         if(done2)
         {
-            //Quit = (pos==2) ? qQUIT : 0;
             if(pos==1||pos==0) done=true;
             
             if(pos==0)

@@ -169,7 +169,7 @@ int link_on_wall()
 
 bool tooclose(int x,int y,int d)
 {
-    return (abs(int(LinkX())-x)<d && abs(int(LinkY())-y)<d);
+    return (abs(int(Link.getX())-x)<d && abs(int(Link.getY())-y)<d);
 }
 
 // Returns true iff a combo type or flag precludes enemy movement.
@@ -265,7 +265,7 @@ enemy::enemy(fix X,fix Y,int Id,int Clk) : sprite()
     ceiling=false;
     fading = misc = clk2 = clk3 = stunclk = hclk = sclk = superman = 0;
     grumble = movestatus = posframe = timer = ox = oy = 0;
-    yofs = playing_field_offset - ((tmpscr->flags7&fSIDEVIEW) ? 0 : 2);
+    yofs = PLAYFIELD_OFFSET - ((tmpscr->flags7&fSIDEVIEW) ? 0 : 2);
     did_armos=true;
     script_spawned=false;
     
@@ -3905,7 +3905,7 @@ guy::guy(fix X,fix Y,int Id,int Clk,bool mg) : enemy(X,Y,Id,Clk)
     mainguy=mg;
     canfreeze=false;
     dir=down;
-    yofs=playing_field_offset;
+    yofs=PLAYFIELD_OFFSET;
     hxofs=2;
     hzsz=8;
     hxsz=12;
@@ -4794,18 +4794,14 @@ bool eLeever::animate(int index)
 
 bool eLeever::canplace(int d2)
 {
-    int nx=LinkX();
-    int ny=LinkY();
+    int nx=Link.getX();
+    int ny=Link.getY();
     
     if(d2<left) ny&=0xF0;
     else       nx&=0xF0;
     
     switch(d2)
     {
-//    case up:    ny-=((d->misc1==0)?32:48); break;
-//    case down:  ny+=((d->misc1==0)?32:48); if(ny-LinkY()<32) ny+=((d->misc1==0)?16:0); break;
-//    case left:  nx-=((d->misc1==0)?32:48); break;
-//    case right: nx+=((d->misc1==0)?32:48); if(nx-LinkX()<32) nx+=((d->misc1==0)?16:0); break;
     case up:
         ny-=((dmisc1==0||dmisc1==2)?32:48);
         break;
@@ -4813,7 +4809,7 @@ bool eLeever::canplace(int d2)
     case down:
         ny+=((dmisc1==0||dmisc1==2)?32:48);
         
-        if(ny-LinkY()<32) ny+=((dmisc1==0||dmisc1==2)?16:0);
+        if(ny-Link.getY()<32) ny+=((dmisc1==0||dmisc1==2)?16:0);
         
         break;
         
@@ -4824,7 +4820,7 @@ bool eLeever::canplace(int d2)
     case right:
         nx+=((dmisc1==0||dmisc1==2)?32:48);
         
-        if(nx-LinkX()<32) nx+=((dmisc1==0||dmisc1==2)?16:0);
+        if(nx-Link.getX()<32) nx+=((dmisc1==0||dmisc1==2)?16:0);
         
         break;
     }
@@ -4833,7 +4829,7 @@ bool eLeever::canplace(int d2)
         return false;
         
     if(d2>=left)
-        if(m_walkflag(LinkX(),LinkY(),spw_halfstep)||m_walkflag(LinkX(),LinkY()-8,spw_halfstep))                         /*none*/
+        if(m_walkflag(Link.getX(),Link.getY(),spw_halfstep)||m_walkflag(Link.getX(),Link.getY()-8,spw_halfstep))                         /*none*/
             return false;
             
     x=nx;
@@ -4939,22 +4935,22 @@ bool eWallM::animate(int index)
                 switch(dir)
                 {
                 case up:
-                    y=LinkY()+48-(wallm_cnt&1)*12;
+                    y=Link.getY()+48-(wallm_cnt&1)*12;
                     flip=wall&1;
                     break;
                     
                 case down:
-                    y=LinkY()-48+(wallm_cnt&1)*12;
+                    y=Link.getY()-48+(wallm_cnt&1)*12;
                     flip=((wall&1)^1)+2;
                     break;
                     
                 case left:
-                    x=LinkX()+48-(wallm_cnt&1)*12;
+                    x=Link.getX()+48-(wallm_cnt&1)*12;
                     flip=(wall==up?2:0)+1;
                     break;
                     
                 case right:
-                    x=LinkX()-48+(wallm_cnt&1)*12;
+                    x=Link.getX()-48+(wallm_cnt&1)*12;
                     flip=(wall==up?2:0);
                     break;
                 }
@@ -5044,7 +5040,7 @@ void eWallM::draw(BITMAP *dest)
     
     if(misc>0)
     {
-        masked_draw(dest,16,playing_field_offset+16,224,144);
+        masked_draw(dest,16,PLAYFIELD_OFFSET+16,224,144);
     }
     
     //    enemy::draw(dest);
@@ -5058,7 +5054,7 @@ eTrap::eTrap(fix X,fix Y,int Id,int Clk) : enemy(X,Y,Id,Clk)
     
     if(get_bit(quest_rules,qr_TRAPPOSFIX))
     {
-        yofs = playing_field_offset;
+        yofs = PLAYFIELD_OFFSET;
     }
     
     mainguy=false;
@@ -5380,7 +5376,7 @@ eTrap2::eTrap2(fix X,fix Y,int Id,int Clk) : enemy(X,Y,Id,Clk)
     
     if(get_bit(quest_rules,qr_TRAPPOSFIX))
     {
-        yofs = playing_field_offset;
+        yofs = PLAYFIELD_OFFSET;
     }
     
     //nets+((id==eTRAP_LR)?540:520);
@@ -7125,7 +7121,7 @@ bool eKeese::animate(int index)
     {
         z=int(step/(dstep/100.0));
         // Some variance in keese flight heights when away from Link
-        z+=int(step*zc_max(0,(distance(x,y,LinkX(),LinkY())-128)/10));
+        z+=int(step*zc_max(0,(distance(x,y,Link.getX(),Link.getY())-128)/10));
     }
     
     return enemy::animate(index);
@@ -7926,7 +7922,7 @@ eAquamentus::eAquamentus(fix X,fix Y,int Id,int Clk) : enemy((fix)176,(fix)64,Id
         }
     }
     
-    yofs=playing_field_offset+1;
+    yofs=PLAYFIELD_OFFSET+1;
     clk3=32;
     clk2=0;
     clk4=clk;
@@ -8095,7 +8091,7 @@ eGohma::eGohma(fix X,fix Y,int Id,int Clk) : enemy((fix)128,(fix)48,Id,0)
     hxofs=-16;
     hxsz=48;
     clk4=0;
-    yofs=playing_field_offset+1;
+    yofs=PLAYFIELD_OFFSET+1;
     dir=rand()%3+1;
     
     //nets+5340;
@@ -8696,14 +8692,14 @@ void eGanon::draw_guts(BITMAP *dest)
 {
     int c = zc_min(clk>>3,8);
     tile = clk<24 ? 74 : 75;
-    overtile16(dest,tile,x+8,y+c+playing_field_offset,9,0);
-    overtile16(dest,tile,x+8,y+16-c+playing_field_offset,9,0);
-    overtile16(dest,tile,x+c,y+8+playing_field_offset,9,0);
-    overtile16(dest,tile,x+16-c,y+8+playing_field_offset,9,0);
-    overtile16(dest,tile,x+c,y+c+playing_field_offset,9,0);
-    overtile16(dest,tile,x+16-c,y+c+playing_field_offset,9,0);
-    overtile16(dest,tile,x+c,y+16-c+playing_field_offset,9,0);
-    overtile16(dest,tile,x+16-c,y+16-c+playing_field_offset,9,0);
+    overtile16(dest,tile,x+8,y+c+PLAYFIELD_OFFSET,9,0);
+    overtile16(dest,tile,x+8,y+16-c+PLAYFIELD_OFFSET,9,0);
+    overtile16(dest,tile,x+c,y+8+PLAYFIELD_OFFSET,9,0);
+    overtile16(dest,tile,x+16-c,y+8+PLAYFIELD_OFFSET,9,0);
+    overtile16(dest,tile,x+c,y+c+PLAYFIELD_OFFSET,9,0);
+    overtile16(dest,tile,x+16-c,y+c+PLAYFIELD_OFFSET,9,0);
+    overtile16(dest,tile,x+c,y+16-c+PLAYFIELD_OFFSET,9,0);
+    overtile16(dest,tile,x+16-c,y+16-c+PLAYFIELD_OFFSET,9,0);
 }
 
 void eGanon::draw_flash(BITMAP *dest)
@@ -8711,14 +8707,14 @@ void eGanon::draw_flash(BITMAP *dest)
 
     int c = clk-(clk>>2);
     cs = (frame&3)+6;
-    overtile16(dest,194,x+8,y+8-clk+playing_field_offset,cs,0);
-    overtile16(dest,194,x+8,y+8+clk+playing_field_offset,cs,2);
-    overtile16(dest,195,x+8-clk,y+8+playing_field_offset,cs,0);
-    overtile16(dest,195,x+8+clk,y+8+playing_field_offset,cs,1);
-    overtile16(dest,196,x+8-c,y+8-c+playing_field_offset,cs,0);
-    overtile16(dest,196,x+8+c,y+8-c+playing_field_offset,cs,1);
-    overtile16(dest,196,x+8-c,y+8+c+playing_field_offset,cs,2);
-    overtile16(dest,196,x+8+c,y+8+c+playing_field_offset,cs,3);
+    overtile16(dest,194,x+8,y+8-clk+PLAYFIELD_OFFSET,cs,0);
+    overtile16(dest,194,x+8,y+8+clk+PLAYFIELD_OFFSET,cs,2);
+    overtile16(dest,195,x+8-clk,y+8+PLAYFIELD_OFFSET,cs,0);
+    overtile16(dest,195,x+8+clk,y+8+PLAYFIELD_OFFSET,cs,1);
+    overtile16(dest,196,x+8-c,y+8-c+PLAYFIELD_OFFSET,cs,0);
+    overtile16(dest,196,x+8+c,y+8-c+PLAYFIELD_OFFSET,cs,1);
+    overtile16(dest,196,x+8-c,y+8+c+PLAYFIELD_OFFSET,cs,2);
+    overtile16(dest,196,x+8+c,y+8+c+PLAYFIELD_OFFSET,cs,3);
 }
 
 void getBigTri(int id2)
@@ -8807,7 +8803,7 @@ eMoldorm::eMoldorm(fix X,fix Y,int Id,int Clk) : enemy(X,Y,Id,Clk)
     segid=Id|0x1000;
     clk=0;
     id=guys.Count();
-    yofs=playing_field_offset;
+    yofs=PLAYFIELD_OFFSET;
     tile=o_tile;
     /*
       if (get_bit(quest_rules,qr_NEWENEMYTILES))
@@ -8925,7 +8921,7 @@ esMoldorm::esMoldorm(fix X,fix Y,int Id,int Clk) : enemy(X,Y,Id,Clk)
 {
     x=128;
     y=48;
-    yofs=playing_field_offset;
+    yofs=PLAYFIELD_OFFSET;
     hyofs=4;
     hxsz=hysz=8;
     hxofs=1000;
@@ -9968,7 +9964,7 @@ void eGleeok::draw2(BITMAP *dest)
     // the neck stub
     tile=necktile;
     xofs=0;
-    yofs=playing_field_offset;
+    yofs=PLAYFIELD_OFFSET;
     
     if(get_bit(quest_rules,qr_NEWENEMYTILES))
     {
@@ -10009,7 +10005,7 @@ esGleeok::esGleeok(fix X,fix Y,int Id,int Clk, sprite * prnt) : enemy(X,Y,Id,Clk
     y = yoffset+parent->y;
     hxofs=4;
     hxsz=8;
-    yofs=playing_field_offset;
+    yofs=PLAYFIELD_OFFSET;
     clk2=clk;                                                 // how long to wait before moving first time
     clk=0;
     mainguy=count_enemy=false;
@@ -10237,16 +10233,16 @@ void esGleeok::draw(BITMAP *dest)
                 if(get_bit(quest_rules,qr_NEWENEMYTILES))
                 {
                     if((tmpscr->flags3&fINVISROOM)&& !(current_item(itype_amulet)))
-                        overtilecloaked16(dest,necktile+(i*dmisc7),nx[i]-4,ny[i]+playing_field_offset,0);
+                        overtilecloaked16(dest,necktile+(i*dmisc7),nx[i]-4,ny[i]+PLAYFIELD_OFFSET,0);
                     else
-                        overtile16(dest,necktile+(i*dmisc7),nx[i]-4,ny[i]+playing_field_offset,cs,0);
+                        overtile16(dest,necktile+(i*dmisc7),nx[i]-4,ny[i]+PLAYFIELD_OFFSET,cs,0);
                 }
                 else
                 {
                     if((tmpscr->flags3&fINVISROOM)&& !(current_item(itype_amulet)))
-                        overtilecloaked16(dest,necktile,nx[i]-4,ny[i]+playing_field_offset,0);
+                        overtilecloaked16(dest,necktile,nx[i]-4,ny[i]+PLAYFIELD_OFFSET,0);
                     else
-                        overtile16(dest,necktile,nx[i]-4,ny[i]+playing_field_offset,cs,0);
+                        overtile16(dest,necktile,nx[i]-4,ny[i]+PLAYFIELD_OFFSET,cs,0);
                 }
             }
         }
@@ -10359,7 +10355,7 @@ bool ePatra::animate(int index)
             
             if(!dmisc4)
             {
-                //maybe playing_field_offset here?
+                //maybe PLAYFIELD_OFFSET here?
                 if(loopcnt>0)
                 {
                     guys.spr(i)->x =  cos(a2+PI/2)*56*size - sin(pos2*PI*2/(dmisc1 == 0 ? 1 : dmisc1))*28*size;
@@ -10614,7 +10610,7 @@ esPatra::esPatra(fix X,fix Y,int Id,int Clk) : enemy(X,Y,Id,Clk)
     item_set=0;
     misc=clk;
     clk = -((misc*21)>>1)-1;
-    yofs=playing_field_offset;
+    yofs=PLAYFIELD_OFFSET;
     hyofs=2;
     hxsz=hysz=12;
     hxofs=2;
@@ -10949,7 +10945,7 @@ esPatraBS::esPatraBS(fix X,fix Y,int Id,int Clk) : enemy(X,Y,Id,Clk)
     item_set=0;
     misc=clk;
     clk = -((misc*21)>>1)-1;
-    yofs=playing_field_offset;
+    yofs=PLAYFIELD_OFFSET;
     hyofs=2;
     hxsz=hysz=16;
     bgsfx=-1;
@@ -13426,7 +13422,7 @@ int message_more_y()
 {
     //Is the flag ticked, do we really want a message more y larger than 160?
     int msgy=zc_min((zinit.msg_more_is_offset==0)?zinit.msg_more_y:zinit.msg_more_y+MsgStrings[msgstr].y ,160);
-    msgy+=playing_field_offset;
+    msgy+=PLAYFIELD_OFFSET;
     return msgy;
 }
 

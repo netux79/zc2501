@@ -3,6 +3,9 @@
 #include "custom.h"
 #include "zelda.h"
 #include "maps.h"
+#include "link.h"
+
+extern LinkClass Link;
 
 /***************************************/
 /*******  Decoration Base Class  *******/
@@ -15,7 +18,7 @@ decoration::decoration(fix X,fix Y,int Id,int Clk) : sprite()
     id=Id;
     clk=Clk;
     misc = 0;
-    yofs = playing_field_offset - 2;
+    yofs = PLAYFIELD_OFFSET - 2;
     
 }
 
@@ -480,28 +483,28 @@ dTallGrass::dTallGrass(fix X,fix Y,int Id,int Clk) : decoration(X,Y,Id,Clk)
 bool dTallGrass::animate(int index)
 {
     index=index;  //this is here to bypass compiler warnings about unused arguments
-    return (!isGrassType(COMBOTYPE(LinkX(),LinkY()+15)) || !isGrassType(COMBOTYPE(LinkX()+15,LinkY()+15)) || LinkZ()>8);
+    return (!isGrassType(COMBOTYPE(Link.getX(),Link.getY()+15)) || !isGrassType(COMBOTYPE(Link.getX()+15,Link.getY()+15)) || Link.getZ()>8);
 }
 
 void dTallGrass::draw(BITMAP *dest)
 {
-    if(LinkGetDontDraw())
+    if(Link.getDontDraw())
         return;
         
     int t=wpnsbuf[iwTallGrass].tile*4;
     cs=wpnsbuf[iwTallGrass].csets&15;
     flip=0;
-    x=LinkX();
-    y=LinkY()+10;
+    x=Link.getX();
+    y=Link.getY()+10;
     
 //  if (BSZ)
     if(zinit.linkanimationstyle==las_bszelda)
     {
-        tile=t+(anim_3_4(LinkLStep(),7)*2);
+        tile=t+(anim_3_4(Link.getLStep(),7)*2);
     }
     else
     {
-        tile=t+((LinkLStep()>=6)?2:0);
+        tile=t+((Link.getLStep()>=6)?2:0);
     }
     
     decoration::draw8(dest);
@@ -520,20 +523,20 @@ bool dRipples::animate(int index)
 {
     index=index;  //this is here to bypass compiler warnings about unused arguments
     clk++;
-    return ((COMBOTYPE(LinkX(),LinkY()+15)!=cSHALLOWWATER)||
-            (COMBOTYPE(LinkX()+15,LinkY()+15)!=cSHALLOWWATER) || LinkZ() != 0);
+    return ((COMBOTYPE(Link.getX(),Link.getY()+15)!=cSHALLOWWATER)||
+            (COMBOTYPE(Link.getX()+15,Link.getY()+15)!=cSHALLOWWATER) || Link.getZ() != 0);
 }
 
 void dRipples::draw(BITMAP *dest)
 {
-    if(LinkGetDontDraw())
+    if(Link.getDontDraw())
         return;
         
     int t=wpnsbuf[iwRipples].tile*4;
     cs=wpnsbuf[iwRipples].csets&15;
     flip=0;
-    x=LinkX();
-    y=LinkY()+10;
+    x=Link.getX();
+    y=Link.getY()+10;
     tile=t+(((clk/8)%3)*2);
     decoration::draw8(dest);
     x+=8;
@@ -553,8 +556,8 @@ void dHover::draw(BITMAP *dest)
     int t=wpnsbuf[wpnid].tile*4;
     cs=wpnsbuf[wpnid].csets&15;
     flip=0;
-    x=LinkX();
-    y=LinkY()+10-LinkZ();
+    x=Link.getX();
+    y=Link.getY()+10-Link.getZ();
     tile=t+(((clk/8)%3)*2);
     decoration::draw8(dest);
     x+=8;
@@ -566,7 +569,7 @@ bool dHover::animate(int index)
 {
     index=index;  //this is here to bypass compiler warnings about unused arguments
     clk++;
-    return LinkHoverClk()<=0;
+    return Link.getHoverClk()<=0;
 }
 
 dNayrusLoveShield::dNayrusLoveShield(fix X,fix Y,int Id,int Clk) : decoration(X,Y,Id,Clk)
@@ -579,7 +582,7 @@ bool dNayrusLoveShield::animate(int index)
 {
     index=index;  //this is here to bypass compiler warnings about unused arguments
     clk++;
-    return LinkNayrusLoveShieldClk()<=0;
+    return Link.getNayrusLoveShieldClk()<=0;
 }
 
 
@@ -604,11 +607,11 @@ void dNayrusLoveShield::realdraw(BITMAP *dest, int draw_what)
     bool flickering = (itemsbuf[current_item_id(itype_nayruslove)].flags & ITEM_FLAG4) != 0;
     bool translucent = (itemsbuf[current_item_id(itype_nayruslove)].flags & ITEM_FLAG3) != 0;
     
-    if(((LinkNayrusLoveShieldClk()&0x20)||(LinkNayrusLoveShieldClk()&0xF00))&&(!flickering ||((misc==1)?(frame&1):(!(frame&1)))))
+    if(((Link.getNayrusLoveShieldClk()&0x20)||(Link.getNayrusLoveShieldClk()&0xF00))&&(!flickering ||((misc==1)?(frame&1):(!(frame&1)))))
 {
         drawstyle=translucent?1:0;
-        x=LinkX()-8;
-        y=LinkY()-8-LinkZ();
+        x=Link.getX()-8;
+        y=Link.getY()-8-Link.getZ();
         tile=t;
         
         if(fr>0&&spd>0)

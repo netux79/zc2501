@@ -50,16 +50,16 @@ void getdraggeditem(int j)
     if(it==NULL)
         return;
         
-    it->x = LinkX();
-    it->y = LinkY();
-    it->z = LinkZ();
-    LinkCheckItems();
+    it->x = Link.getX();
+    it->y = Link.getY();
+    it->z = Link.getZ();
+    Link.checkitems();
 }
 
 void weapon::seekLink()
 {
     angular = true;
-    angle = atan2(double(LinkY()-y),double(LinkX()-x));
+    angle = atan2(double(Link.getY()-y),double(Link.getX()-x));
     
     if(angle==-PI || angle==PI) dir=left;
     else if(angle==-PI/2) dir=up;
@@ -70,8 +70,8 @@ void weapon::seekLink()
     else if(angle>(PI/2))   dir=l_down;
     else                  dir=r_down;
     
-    if(z>LinkZ()) z--;
-    else if(z<LinkZ()) z++;
+    if(z>Link.getZ()) z--;
+    else if(z<Link.getZ()) z++;
 }
 
 void weapon::seekEnemy(int j)
@@ -80,16 +80,15 @@ void weapon::seekEnemy(int j)
     fix mindistance=(fix)1000000;
     fix tempdistance;
     
-    if((j==-1)||(j>=GuyCount()))
+    if((j==-1)||(j>=guys.Count()))
     {
         j=-1;
         
-        for(int i=0; i<GuyCount(); i++)
+        for(int i=0; i<guys.Count(); i++)
         {
-            //        tempdistance=sqrt(pow(abs(x-GuyX(i)),2)+pow(abs(y-GuyY(i)),2));
-            tempdistance=distance(x,y,GuyX(i),GuyY(i));
+            tempdistance=distance(x,y,guys.getX(i),guys.getY(i));
             
-            if((tempdistance<mindistance)&&(GuyID(i)>=10) && !GuySuperman(i))
+            if((tempdistance<mindistance)&&(guys.getID(i)>=10) && !GuySuperman(i))
             {
                 mindistance=tempdistance;
                 j=i;
@@ -102,7 +101,7 @@ void weapon::seekEnemy(int j)
         return;
     }
     
-    angle = atan2(double(GuyY(j)-y),double(GuyX(j)-x));
+    angle = atan2(double(guys.getY(j)-y),double(guys.getX(j)-x));
     
     if(angle==-PI || angle==PI) dir=left;
     else if(angle==-PI/2) dir=up;
@@ -120,16 +119,15 @@ int weapon::seekEnemy2(int j)
     fix mindistance=(fix)1000000;
     fix tempdistance;
     
-    if((j==-1)||(j>=GuyCount()))
+    if((j==-1)||(j>=guys.Count()))
     {
         j=-1;
         
-        for(int i=0; i<GuyCount(); i++)
+        for(int i=0; i<guys.Count(); i++)
         {
-            //        tempdistance=sqrt(pow(abs(x-GuyX(i)),2)+pow(abs(y-GuyY(i)),2));
-            tempdistance=distance(dummy_fix[0],dummy_fix[1],GuyX(i),GuyY(i));
+            tempdistance=distance(dummy_fix[0],dummy_fix[1],guys.getX(i),guys.getY(i));
             
-            if((tempdistance<mindistance)&&(GuyID(i)>=10) && !GuySuperman(i))
+            if((tempdistance<mindistance)&&(guys.getID(i)>=10) && !GuySuperman(i))
             {
                 mindistance=tempdistance;
                 j=i;
@@ -142,7 +140,7 @@ int weapon::seekEnemy2(int j)
         return j;
     }
     
-    angle = atan2(double(GuyY(j)-dummy_fix[1]),double(GuyX(j)-dummy_fix[0]));
+    angle = atan2(double(guys.getY(j)-dummy_fix[1]),double(guys.getX(j)-dummy_fix[0]));
     
     if(angle==-PI || angle==PI) dir=left;
     else if(angle==-PI/2) dir=up;
@@ -287,7 +285,7 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
     step=0;
     dead=-1;
     bounce=ignoreLink=false;
-    yofs=playing_field_offset - 2;
+    yofs=PLAYFIELD_OFFSET - 2;
     dragging=-1;
     hxsz=15;
     hysz=15;
@@ -458,7 +456,7 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
             update_weapon_frame(((frames>1)?frames:1),o_tile);
             hxofs=2;
             hxsz=12;
-            yofs = playing_field_offset+(BSZ ? 3 : 1);
+            yofs = PLAYFIELD_OFFSET+(BSZ ? 3 : 1);
             break;
         }
         
@@ -498,7 +496,7 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
             
         case right: /*tile=o_tile+((frames>1)?frames:1)*/
             update_weapon_frame(((frames>1)?frames:1),o_tile);
-            yofs=playing_field_offset + 1;
+            yofs=PLAYFIELD_OFFSET + 1;
             hyofs=2;
             hysz=14;
             hxofs=2;
@@ -734,7 +732,7 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
         case left:
             flip=1; /*tile=o_tile+((frames>1)?frames:1)*/update_weapon_frame(((frames>1)?frames:1),o_tile);
             xofs+=2;
-            yofs=playing_field_offset+4;
+            yofs=PLAYFIELD_OFFSET+4;
             hxofs=2;
             hxsz=12;
             break;
@@ -742,7 +740,7 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
         case right: /*tile=o_tile+((frames>1)?frames:1)*/
             update_weapon_frame(((frames>1)?frames:1),o_tile);
             xofs-=2;
-            yofs=playing_field_offset+4;
+            yofs=PLAYFIELD_OFFSET+4;
             hxofs=2;
             hxsz=12;
             break;
@@ -785,7 +783,7 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
         case left:
             flip=1; /*tile=o_tile+((frames>1)?frames:1)*/update_weapon_frame(((frames>1)?frames:1),o_tile);
             xofs+=2;
-            yofs=playing_field_offset+4;
+            yofs=PLAYFIELD_OFFSET+4;
             hxofs=2;
             hxsz=12;
             break;
@@ -793,7 +791,7 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
         case right: /*tile=o_tile+((frames>1)?frames:1)*/
             update_weapon_frame(((frames>1)?frames:1),o_tile);
             xofs-=2;
-            yofs=playing_field_offset+4;
+            yofs=PLAYFIELD_OFFSET+4;
             hxofs=2;
             hxsz=12;
             break;
@@ -832,13 +830,13 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
         case left:
             LOADGFX(defaultw);
             xofs+=10;
-            yofs=playing_field_offset+4;
+            yofs=PLAYFIELD_OFFSET+4;
             break;
             
         case right:
             LOADGFX(defaultw);
             xofs-=10;
-            yofs=playing_field_offset+4;
+            yofs=PLAYFIELD_OFFSET+4;
             break;
         }
     }
@@ -992,7 +990,7 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
             
         case right: /*tile=o_tile+((frames>1)?frames:1)*/
             update_weapon_frame(((frames>1)?frames:1),o_tile);
-            yofs=playing_field_offset+1;
+            yofs=PLAYFIELD_OFFSET+1;
             break;
         }
         
@@ -1029,7 +1027,7 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
             
         case right: /*tile=o_tile+((frames>1)?frames:1)*/
             update_weapon_frame(((frames>1)?frames:1),o_tile);
-            yofs=playing_field_offset+1;
+            yofs=PLAYFIELD_OFFSET+1;
             break;
         }
         
@@ -1067,7 +1065,7 @@ weapon::weapon(fix X,fix Y,fix Z,int Id,int Type,int pow,int Dir, int Parentitem
             
         case right: /*tile=o_tile+((frames>1)?frames:1)*/
             update_weapon_frame(((frames>1)?frames:1),o_tile);
-            yofs=playing_field_offset+1;
+            yofs=PLAYFIELD_OFFSET+1;
             break;
         }
         
@@ -1532,7 +1530,7 @@ bool weapon::animate(int)
     case wSword:
     case wWand:
     case wHammer:
-        if(LinkAction()!=attacking && LinkAction()!=ischarging && !LinkCharged())
+        if(Link.getAction()!=attacking && Link.getAction()!=ischarging && !Link.isCharged())
         {
             dead=0;
         }
@@ -1570,9 +1568,9 @@ bool weapon::animate(int)
         else
             dir=up;
             
-        x = (fix)((double)LinkX() + xdiff);
-        y = (fix)((double)LinkY() + ydiff);
-        z = LinkZ();
+        x = (fix)((double)Link.getX() + xdiff);
+        y = (fix)((double)Link.getY() + ydiff);
+        z = Link.getZ();
         
         if(parentitem>-1)
             sfx(itemsbuf[parentitem].usesound,pan(int(x)),true,false);
@@ -1844,7 +1842,7 @@ bool weapon::animate(int)
         {
             dead=2;
         }
-        else if(LinkAction() !=inwind && ((dir==right && x>=240) || (dir==down && y>=160) || (dir==left && x<=0) || (dir==up && y<=0)))
+        else if(Link.getAction() !=inwind && ((dir==right && x>=240) || (dir==down && y>=160) || (dir==left && x<=0) || (dir==up && y<=0)))
         {
             stop_sfx(WAV_ZN1WHIRLWIND);
             dead=1;
@@ -2270,11 +2268,11 @@ bool weapon::animate(int)
         
         if(misc==1)                                           // returning
         {
-            if((abs(LinkY()-y)<7 && abs(LinkX()-x)<7)||dead==-2)
+            if((abs(Link.getY()-y)<7 && abs(Link.getX()-x)<7)||dead==-2)
             {
                 if(dead!=-2)
                 {
-                    CatchBrang();
+                    Link.Catch();
                 }
                 
                 if(Lwpns.idCount(wBrang)<=1 && (!get_bit(quest_rules, qr_MORESOUNDS) || !Ewpns.idCount(ewBrang)))
@@ -2318,7 +2316,7 @@ bool weapon::animate(int)
         {
             int maxlength=parentitem>-1 ? 16*itemsbuf[parentitem].misc1 : 0;
             
-            if((abs(LinkX()-x)>maxlength)||(abs(LinkY()-y)>maxlength))
+            if((abs(Link.getX()-x)>maxlength)||(abs(Link.getY()-y)>maxlength))
             {
                 dead=1;
             }
@@ -2439,7 +2437,7 @@ bool weapon::animate(int)
         
         if(misc==1)                                           // returning
         {
-            if((dir<left && abs(LinkY()-y)<9) || (dir >= left && abs(LinkX()-x)<9))
+            if((dir<left && abs(Link.getY()-y)<9) || (dir >= left && abs(Link.getX()-x)<9))
             {
                 hookshot_used=false;
                 
@@ -2450,7 +2448,7 @@ bool weapon::animate(int)
                 
                 pull_link=false;
                 chainlinks.clear();
-                CatchBrang();
+                Link.Catch();
                 
                 if(parentitem>-1)
                 {
@@ -3070,7 +3068,7 @@ mirrors:
                     
                 seekEnemy(index);
                 
-                if((abs(x-GuyX(index))<7)&&(abs(y-GuyY(index))<7))
+                if((abs(x-guys.getX(index))<7)&&(abs(y-guys.getY(index))<7))
                 {
                     if(get_bit(quest_rules,qr_MORESOUNDS) && !Lwpns.idCount(wBrang) && Ewpns.idCount(ewBrang)<=1)
                     {
@@ -3576,7 +3574,7 @@ void weapon::draw(BITMAP *dest)
     {
     case wSword:
     case wHammer:
-        if((get_bit(quest_rules,qr_LINKFLICKER)&&((getClock()||LinkHClk())&&(frame&1))) ||
+        if((get_bit(quest_rules,qr_LINKFLICKER)&&((Link.getClock()||Link.getHClk())&&(frame&1))) ||
                 Link.getDontDraw() || tmpscr->flags3&fINVISLINK)
             return;
             
@@ -3598,13 +3596,13 @@ void weapon::draw(BITMAP *dest)
         if(type2==3 && (f&2))
             ++tile;
             
-        if(!type2 || f==0 || (type2>1 && f==3)) overtile16(dest,tile,x-2-ofs,y+playing_field_offset-2-ofs-(z+zofs),cs,0);
+        if(!type2 || f==0 || (type2>1 && f==3)) overtile16(dest,tile,x-2-ofs,y+PLAYFIELD_OFFSET-2-ofs-(z+zofs),cs,0);
         
-        if(!type2 || f==2 || (type2>1 && f==1)) overtile16(dest,tile,x+2+ofs,y+playing_field_offset-2-ofs-(z+zofs),cs,1);
+        if(!type2 || f==2 || (type2>1 && f==1)) overtile16(dest,tile,x+2+ofs,y+PLAYFIELD_OFFSET-2-ofs-(z+zofs),cs,1);
         
-        if(!type2 || f==1 || (type2>1 && f==2)) overtile16(dest,tile,x-2-ofs,y+playing_field_offset+2+ofs-(z+zofs),cs,2);
+        if(!type2 || f==1 || (type2>1 && f==2)) overtile16(dest,tile,x-2-ofs,y+PLAYFIELD_OFFSET+2+ofs-(z+zofs),cs,2);
         
-        if(!type2 || f==3 || (type2>1 && f==0)) overtile16(dest,tile,x+2+ofs,y+playing_field_offset+2+ofs-(z+zofs),cs,3);
+        if(!type2 || f==3 || (type2>1 && f==0)) overtile16(dest,tile,x+2+ofs,y+PLAYFIELD_OFFSET+2+ofs-(z+zofs),cs,3);
     }
     
     return;                                               // don't draw sword

@@ -127,10 +127,8 @@ enum {ENC_METHOD_192B104=0, ENC_METHOD_192B105, ENC_METHOD_192B185, ENC_METHOD_2
 #define CV_SFX             5
 #define CV_FAVORITES       1
 
-extern int original_playing_field_offset;
-extern int playing_field_offset;
-extern int passive_subscreen_height;
-extern int passive_subscreen_offset;
+#define SUBSCREEN_HEIGHT   56
+#define PLAYFIELD_OFFSET   56
 
 extern int CSET_SIZE;
 extern int CSET_SHFT;
@@ -162,10 +160,7 @@ extern bool fake_pack_writing;
 #define NEWMAXTILES         (TILES_PER_PAGE*TILE_PAGES)     // 32760 tiles
 #define NEWTILE_SIZE2       (NEWMAXTILES*SINGLE_TILE_SIZE)  // 4193280 bytes (new packed format, 6 pages)
 #define OLDTILE_SIZE2       (OLDMAXTILES*SINGLE_TILE_SIZE)  // 199680 bytes (new packed format, 6 pages)
-// 133120 bytes (new packed format, 4 pages)
-#define OLDTILE_SIZE        (TILES_PER_PAGE*4*SINGLE_TILE_SIZE)
-//#define NEWTILE_SIZE      (260*6*128) // 199680 bytes (new packed format, 6 pages)
-//#define OLDTILE_SIZE      (260*4*128) // 133120 bytes (new packed format, 4 pages)
+#define OLDTILE_SIZE        (TILES_PER_PAGE*4*SINGLE_TILE_SIZE)  // 133120 bytes (new packed format, 4 pages)
 #define TILEBUF_SIZE        (320*480)                       // 153600 bytes (old unpacked format)
 
 #define COMBOS_PER_ROW      20

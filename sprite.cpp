@@ -17,7 +17,7 @@ sprite::sprite()
     id=-1;
     hxsz=hysz=16;
     hzsz=1;
-    yofs=playing_field_offset;
+    yofs=PLAYFIELD_OFFSET;
     dir=down;
     angular=canfreeze=false;
     drawstyle=0;

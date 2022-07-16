@@ -18,6 +18,7 @@ extern int draw_screen_clip_rect_x2;
 extern int draw_screen_clip_rect_y1;
 extern int draw_screen_clip_rect_y2;
 extern bool global_wait;
+extern LinkClass Link;
 
 int link_count = -1;
 int link_animation_speed = 1; //lower is faster animation
@@ -645,7 +646,7 @@ void LinkClass::init()
     attackid=-1;
     action=none;
     xofs=0;
-    yofs=playing_field_offset;
+    yofs=PLAYFIELD_OFFSET;
     cs=6;
     pushing=fairyclk=0;
     id=0;
@@ -683,12 +684,12 @@ void LinkClass::draw_under(BITMAP* dest)
     {
         if(((dir==left) || (dir==right)) && (get_bit(quest_rules,qr_RLFIX)))
         {
-            overtile16(dest, itemsbuf[c_raft].tile, x, y+playing_field_offset+4,
+            overtile16(dest, itemsbuf[c_raft].tile, x, y+PLAYFIELD_OFFSET+4,
                        itemsbuf[c_raft].csets&15, rotate_value((itemsbuf[c_raft].misc>>2)&3)^3);
         }
         else
         {
-            overtile16(dest, itemsbuf[c_raft].tile, x, y+playing_field_offset+4,
+            overtile16(dest, itemsbuf[c_raft].tile, x, y+PLAYFIELD_OFFSET+4,
                        itemsbuf[c_raft].csets&15, (itemsbuf[c_raft].misc>>2)&3);
         }
     }
@@ -697,12 +698,12 @@ void LinkClass::draw_under(BITMAP* dest)
     {
         if((ladderdir>=left) && (get_bit(quest_rules,qr_RLFIX)))
         {
-            overtile16(dest, itemsbuf[c_ladder].tile, ladderx, laddery+playing_field_offset,
+            overtile16(dest, itemsbuf[c_ladder].tile, ladderx, laddery+PLAYFIELD_OFFSET,
                        itemsbuf[c_ladder].csets&15, rotate_value((itemsbuf[iRaft].misc>>2)&3)^3);
         }
         else
         {
-            overtile16(dest, itemsbuf[c_ladder].tile, ladderx, laddery+playing_field_offset,
+            overtile16(dest, itemsbuf[c_ladder].tile, ladderx, laddery+PLAYFIELD_OFFSET,
                        itemsbuf[c_ladder].csets&15, (itemsbuf[c_ladder].misc>>2)&3);
         }
     }
@@ -1186,8 +1187,6 @@ attack:
                     tile+=item_tile_mod(shieldModify);
                 }
                 
-                tile+=dmap_tile_mod();
-                
                 // Stone of Agony
                 if(agony)
                 {
@@ -1604,7 +1603,7 @@ attack:
     
     if(action==won)
     {
-        yofs=playing_field_offset - 2;
+        yofs=PLAYFIELD_OFFSET - 2;
     }
     
     if(action==landhold1 || action==landhold2)
@@ -1626,8 +1625,6 @@ attack:
             tile+=item_tile_mod(shieldModify);
         }
     }
-    
-    tile+=dmap_tile_mod();
     
     // Stone of Agony
     if(agony)
@@ -1699,7 +1696,7 @@ attack:
         }
         
         double tx = cos(a2)*53  +nx;
-        double ty = -sin(a2)*53 +ny+playing_field_offset;
+        double ty = -sin(a2)*53 +ny+PLAYFIELD_OFFSET;
         overtile8(dest,htile,int(tx),int(ty),1,0);
         a2-=PI/4;
         ++hearts;
@@ -1715,15 +1712,15 @@ void LinkClass::masked_draw(BITMAP* dest)
     if(isdungeon() && currscr<128 && (x<16 || x>224 || y<18 || y>146) && !get_bit(quest_rules,qr_FREEFORM))
     {
         // clip under doorways
-        BITMAP *sub=create_sub_bitmap(dest,16,playing_field_offset+16,224,144);
+        BITMAP *sub=create_sub_bitmap(dest,16,PLAYFIELD_OFFSET+16,224,144);
         
         if(sub!=NULL)
         {
-            yofs -= (playing_field_offset+16);
+            yofs -= (PLAYFIELD_OFFSET+16);
             xofs -= 16;
             sprite::draw(sub);
             xofs=0;
-            yofs += (playing_field_offset+16);
+            yofs += (PLAYFIELD_OFFSET+16);
             destroy_bitmap(sub);
         }
     }
@@ -4570,11 +4567,9 @@ bool LinkClass::startwpn(int itemid)
             potion_life = game->get_life();
             potion_magic = game->get_magic();
             
-            //add a quest rule or an item option that lets you specify whether or not to pause music during refilling
-            //music_pause();
             while(refill())
             {
-                put_passive_subscr(framebuf,&QMisc,0,passive_subscreen_offset,false,sspUP);
+                put_passive_subscr(framebuf,&QMisc,0,0,false,sspUP);
                 advanceframe(true);
             }
             
@@ -5304,13 +5299,6 @@ bool LinkClass::doattack()
                 attackclk=1;
                 sfx(itemsbuf[current_item_id(spins>5 ? itype_spinscroll2 : itype_spinscroll)].usesound,pan(int(x)));
             }
-            /*
-            else if(attack==wWand)
-            {
-                //Not reachable.. yet
-                spins=1;
-            }
-            */
             else if(attack==wHammer && sideviewhammerpound())
             {
                 spins=1; //signifies the quake hammer
@@ -5319,12 +5307,12 @@ bool LinkClass::doattack()
                 quakeclk=(itemsbuf[current_item_id(super ? itype_quakescroll2 : itype_quakescroll)].misc1);
                 
                 // general area stun
-                for(int i=0; i<GuyCount(); i++)
+                for(int i=0; i<guys.Count(); i++)
                 {
-                    if(!isflier(GuyID(i)))
+                    if(!isflier(guys.getID(i)))
                     {
                         StunGuy(i,(itemsbuf[current_item_id(super ? itype_quakescroll2 : itype_quakescroll)].misc2)-
-                                distance(x,y,GuyX(i),GuyY(i)));
+                                distance(x,y,guys.getX(i),guys.getY(i)));
                     }
                 }
             }
@@ -5437,7 +5425,7 @@ void do_lens()
     if(itemid<0)
         return;
         
-    if(isWpnPressed(itype_lens) && !LinkItemClk() && !lensclk && checkmagiccost(itemid))
+    if(isWpnPressed(itype_lens) && !Link.getItemClk() && !lensclk && checkmagiccost(itemid))
     {
         if(lensid<0)
         {
@@ -5460,7 +5448,7 @@ void do_lens()
     {
         did_scriptl=false;
         
-        if(lensid>-1 && !(isWpnPressed(itype_lens) && !LinkItemClk() && checkmagiccost(itemid)))
+        if(lensid>-1 && !(isWpnPressed(itype_lens) && !Link.getItemClk() && checkmagiccost(itemid)))
         {
             lensid=-1;
             lensclk = 0;
@@ -11432,7 +11420,7 @@ void LinkClass::walkdown(bool opening) //entering cave
 {
     if(opening)
     {
-        close_black_opening(x+8, y+8+playing_field_offset, false);
+        close_black_opening(x+8, y+8+PLAYFIELD_OFFSET, false);
     }
     
     hclk=0;
@@ -11489,7 +11477,7 @@ void LinkClass::walkdown2(bool opening) //exiting cave 2
     
     if(opening)
     {
-        open_black_opening(x+8, y+8+playing_field_offset+16, false);
+        open_black_opening(x+8, y+8+PLAYFIELD_OFFSET+16, false);
     }
     
     hclk=0;
@@ -11543,7 +11531,7 @@ void LinkClass::walkup(bool opening) //exiting cave
     
     if(opening)
     {
-        open_black_opening(x+8, y+8+playing_field_offset-16, false);
+        open_black_opening(x+8, y+8+PLAYFIELD_OFFSET-16, false);
     }
     
     hclk=0;
@@ -11591,7 +11579,7 @@ void LinkClass::walkup2(bool opening) //entering cave2
 {
     if(opening)
     {
-        close_black_opening(x+8, y+8+playing_field_offset, false);
+        close_black_opening(x+8, y+8+PLAYFIELD_OFFSET, false);
     }
     
     hclk=0;
@@ -12812,13 +12800,13 @@ fade((specialcave > 0) ? (specialcave >= GUYCAVE) ? 10 : 11 : currcset, true, fa
         switch(scrolldir)
         {
         case up:
-            if(newscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, newscr, 0, playing_field_offset, 2);
+            if(newscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, newscr, 0, PLAYFIELD_OFFSET, 2);
             
-            if(oldscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, oldscr, 0, -176+playing_field_offset, 3);
+            if(oldscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, oldscr, 0, -176+PLAYFIELD_OFFSET, 3);
             
-            if(newscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, newscr, 0, playing_field_offset, 2);
+            if(newscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, newscr, 0, PLAYFIELD_OFFSET, 2);
             
-            if(oldscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, oldscr, 0, -176+playing_field_offset, 3);
+            if(oldscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, oldscr, 0, -176+PLAYFIELD_OFFSET, 3);
             
             // Draw both screens' background layer primitives together, after both layers' combos.
             // Not ideal, but probably good enough for all realistic purposes.
@@ -12831,13 +12819,13 @@ fade((specialcave > 0) ? (specialcave >= GUYCAVE) ? 10 : 11 : currcset, true, fa
             break;
             
         case down:
-            if(newscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, newscr, 0, -176+playing_field_offset, 2);
+            if(newscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, newscr, 0, -176+PLAYFIELD_OFFSET, 2);
             
-            if(oldscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, oldscr, 0, playing_field_offset, 3);
+            if(oldscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, oldscr, 0, PLAYFIELD_OFFSET, 3);
             
-            if(newscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, newscr, 0, -176+playing_field_offset, 2);
+            if(newscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, newscr, 0, -176+PLAYFIELD_OFFSET, 2);
             
-            if(oldscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, oldscr, 0, playing_field_offset, 3);
+            if(oldscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, oldscr, 0, PLAYFIELD_OFFSET, 3);
             
             if(newscr->flags7&fLAYER2BG || oldscr->flags7&fLAYER2BG) do_primitives(scrollbuf, 2, newscr, sx, sy);
             
@@ -12848,13 +12836,13 @@ fade((specialcave > 0) ? (specialcave >= GUYCAVE) ? 10 : 11 : currcset, true, fa
             break;
             
         case left:
-            if(newscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, newscr, 0, playing_field_offset, 2);
+            if(newscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, newscr, 0, PLAYFIELD_OFFSET, 2);
             
-            if(oldscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, oldscr, -256, playing_field_offset, 3);
+            if(oldscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, oldscr, -256, PLAYFIELD_OFFSET, 3);
             
-            if(newscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, newscr, 0, playing_field_offset, 2);
+            if(newscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, newscr, 0, PLAYFIELD_OFFSET, 2);
             
-            if(oldscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, oldscr, -256, playing_field_offset, 3);
+            if(oldscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, oldscr, -256, PLAYFIELD_OFFSET, 3);
             
             if(newscr->flags7&fLAYER2BG || oldscr->flags7&fLAYER2BG) do_primitives(scrollbuf, 2, newscr, sx, sy);
             
@@ -12865,13 +12853,13 @@ fade((specialcave > 0) ? (specialcave >= GUYCAVE) ? 10 : 11 : currcset, true, fa
             break;
             
         case right:
-            if(newscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, newscr, -256, playing_field_offset, 2);
+            if(newscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, newscr, -256, PLAYFIELD_OFFSET, 2);
             
-            if(oldscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, oldscr, 0, playing_field_offset, 3);
+            if(oldscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, oldscr, 0, PLAYFIELD_OFFSET, 3);
             
-            if(newscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, newscr, -256, playing_field_offset, 2);
+            if(newscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, newscr, -256, PLAYFIELD_OFFSET, 2);
             
-            if(oldscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, oldscr, 0, playing_field_offset, 3);
+            if(oldscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, oldscr, 0, PLAYFIELD_OFFSET, 3);
             
             if(newscr->flags7&fLAYER2BG || oldscr->flags7&fLAYER2BG) do_primitives(scrollbuf, 2, newscr, sx, sy);
             
@@ -12882,8 +12870,8 @@ fade((specialcave > 0) ? (specialcave >= GUYCAVE) ? 10 : 11 : currcset, true, fa
             break;
         }
         
-        blit(scrollbuf, framebuf, sx, sy, 0, playing_field_offset, 256, 168);
-        do_primitives(framebuf, 0, newscr, 0, playing_field_offset);
+        blit(scrollbuf, framebuf, sx, sy, 0, PLAYFIELD_OFFSET, 256, 168);
+        do_primitives(framebuf, 0, newscr, 0, PLAYFIELD_OFFSET);
         
         do_layer(framebuf, 0, oldscr, tx2, ty2, 3);
         
@@ -12902,8 +12890,8 @@ fade((specialcave > 0) ? (specialcave >= GUYCAVE) ? 10 : 11 : currcset, true, fa
             do_layer(framebuf, -3, newscr, tx, ty, 2, true);
         }
         
-        putscrdoors(framebuf, 0-tx2, 0-ty2+playing_field_offset, oldscr);
-        putscrdoors(framebuf, 0-tx,  0-ty+playing_field_offset, newscr);
+        putscrdoors(framebuf, 0-tx2, 0-ty2+PLAYFIELD_OFFSET, oldscr);
+        putscrdoors(framebuf, 0-tx,  0-ty+PLAYFIELD_OFFSET, newscr);
         linkstep();
         
         if(z > 0 && (!get_bit(quest_rules,qr_SHADOWSFLICKER) || frame&1))
@@ -12936,12 +12924,12 @@ fade((specialcave > 0) ? (specialcave >= GUYCAVE) ? 10 : 11 : currcset, true, fa
         do_layer(framebuf, 5, newscr, tx, ty, 2, false, true); //layer 5
         
         if(msgdisplaybuf->clip == 0)
-            masked_blit(msgdisplaybuf, framebuf, tx2, ty2, 0, playing_field_offset, 256, 168);
+            masked_blit(msgdisplaybuf, framebuf, tx2, ty2, 0, PLAYFIELD_OFFSET, 256, 168);
             
-        put_passive_subscr(framebuf, &QMisc, 0, passive_subscreen_offset, false, sspUP);
+        put_passive_subscr(framebuf, &QMisc, 0, 0, false, sspUP);
         
         if(get_bit(quest_rules,qr_SUBSCREENOVERSPRITES))
-            do_primitives(framebuf, 7, newscr, 0, playing_field_offset);
+            do_primitives(framebuf, 7, newscr, 0, PLAYFIELD_OFFSET);
             
         //end drawing
         
@@ -13935,7 +13923,7 @@ void getitem(int id, bool nosound)
     {
     case itype_clock:
     {
-        setClock(watch=true);
+        Link.setClock(watch=true);
         
         for(int i=0; i<eMAXGUYS; i++)
             clock_zoras[i]=0;
@@ -13962,15 +13950,15 @@ void getitem(int id, bool nosound)
     {
         if(itemsbuf[id].flags & ITEM_FLAG1)
         {
-            if(LinkSwordClk()==-1) setSwordClk(150);  // Let's not bother applying the divisor.
+            if(Link.getSwordClk()==-1) Link.setSwordClk(150);  // Let's not bother applying the divisor.
             
-            if(LinkItemClk()==-1) setItemClk(150);  // Let's not bother applying the divisor.
+            if(Link.getItemClk()==-1) Link.setItemClk(150);  // Let's not bother applying the divisor.
         }
         
         if(itemsbuf[id].power==0)
         {
-            setSwordClk(0);
-            setItemClk(0);
+            Link.setSwordClk(0);
+            Link.setItemClk(0);
         }
         
         break;
@@ -14615,11 +14603,6 @@ void LinkClass::getTriforce(int id2)
         }
         
         draw_screen(tmpscr);
-        //this causes bugs
-        //the subscreen appearing over the curtain effect should now be fixed in draw_screen
-        //so this is not necessary -DD
-        //put_passive_subscr(framebuf,&QMisc,0,passive_subscreen_offset,false,false);
-        
         advanceframe(true);
         ++f;
     }
@@ -14660,9 +14643,9 @@ void red_shift()
     {
         for(int x=0; x<256; x++)
         {
-            int c = framebuf->line[y+playing_field_offset][x];
+            int c = framebuf->line[y+PLAYFIELD_OFFSET][x];
             int r = zc_min(int(RAMpal[c].r*0.4 + RAMpal[c].g*0.6 + RAMpal[c].b*0.4)>>1,31);
-            framebuf->line[y+playing_field_offset][x] = (c ? (r+tnum+CSET(2)) : 0);
+            framebuf->line[y+PLAYFIELD_OFFSET][x] = (c ? (r+tnum+CSET(2)) : 0);
         }
     }
     
@@ -14676,13 +14659,13 @@ void setup_red_screen_old()
     clear_bitmap(framebuf);
     rectfill(scrollbuf, 0, 0, 255, 167, 0);
     
-    if(tmpscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, tmpscr, 0, playing_field_offset, 2);
+    if(tmpscr->flags7&fLAYER2BG) do_layer(scrollbuf,1, tmpscr, 0, PLAYFIELD_OFFSET, 2);
     
-    if(tmpscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, tmpscr, 0, playing_field_offset, 2);
+    if(tmpscr->flags7&fLAYER3BG) do_layer(scrollbuf,2, tmpscr, 0, PLAYFIELD_OFFSET, 2);
     
     putscr(scrollbuf, 0, 0, tmpscr);
     putscrdoors(scrollbuf,0,0,tmpscr);
-    blit(scrollbuf, framebuf, 0, 0, 0, playing_field_offset, 256, 168);
+    blit(scrollbuf, framebuf, 0, 0, 0, PLAYFIELD_OFFSET, 256, 168);
     do_layer(framebuf,0, tmpscr, 0, 0, 2);
     
     if(!(tmpscr->flags7&fLAYER2BG)) do_layer(framebuf,1, tmpscr, 0, 0, 2);
@@ -14691,12 +14674,12 @@ void setup_red_screen_old()
     
     if(!(msgdisplaybuf->clip))
     {
-        masked_blit(msgdisplaybuf, framebuf,0,0,0,playing_field_offset, 256,168);
+        masked_blit(msgdisplaybuf, framebuf,0,0,0,PLAYFIELD_OFFSET, 256,168);
     }
     
     if(!(pricesdisplaybuf->clip))
     {
-        masked_blit(pricesdisplaybuf, framebuf,0,0,0,playing_field_offset, 256,168);
+        masked_blit(pricesdisplaybuf, framebuf,0,0,0,PLAYFIELD_OFFSET, 256,168);
     }
     
     //red shift
@@ -14705,14 +14688,14 @@ void setup_red_screen_old()
     {
         for(int x=0; x<256; x++)
         {
-            int c = framebuf->line[y+playing_field_offset][x];
+            int c = framebuf->line[y+PLAYFIELD_OFFSET][x];
             int r = zc_min(int(RAMpal[c].r*0.4 + RAMpal[c].g*0.6 + RAMpal[c].b*0.4)>>1,31);
-            framebuf->line[y+playing_field_offset][x] = (c ? (r+CSET(2)) : 0);
+            framebuf->line[y+PLAYFIELD_OFFSET][x] = (c ? (r+CSET(2)) : 0);
         }
     }
     
     //  Link->draw(framebuf);
-    blit(framebuf,scrollbuf, 0, playing_field_offset, 256, playing_field_offset, 256, 168);
+    blit(framebuf,scrollbuf, 0, PLAYFIELD_OFFSET, 256, PLAYFIELD_OFFSET, 256, 168);
     
     clear_bitmap(framebuf);
     
@@ -14736,17 +14719,17 @@ void setup_red_screen_old()
             {
                 for(int x=0; x<256; x++)
                 {
-                    int c1 = framebuf->line[y+playing_field_offset][x];
+                    int c1 = framebuf->line[y+PLAYFIELD_OFFSET][x];
                     int c2 = msgdisplaybuf->line[y][x];
                     int c3 = pricesdisplaybuf->line[y][x];
                     
                     if(c1 && c3)
                     {
-                        framebuf->line[y+playing_field_offset][x] = c3;
+                        framebuf->line[y+PLAYFIELD_OFFSET][x] = c3;
                     }
                     else if(c1 && c2)
                     {
-                        framebuf->line[y+playing_field_offset][x] = c2;
+                        framebuf->line[y+PLAYFIELD_OFFSET][x] = c2;
                     }
                 }
             }
@@ -14758,14 +14741,14 @@ void setup_red_screen_old()
         {
             for(int x=0; x<256; x++)
             {
-                int c = framebuf->line[y+playing_field_offset][x];
+                int c = framebuf->line[y+PLAYFIELD_OFFSET][x];
                 int r = zc_min(int(RAMpal[c].r*0.4 + RAMpal[c].g*0.6 + RAMpal[c].b*0.4)>>1,31);
-                framebuf->line[y+playing_field_offset][x] = r+CSET(2);
+                framebuf->line[y+PLAYFIELD_OFFSET][x] = r+CSET(2);
             }
         }
     }
     
-    blit(framebuf,scrollbuf, 0, playing_field_offset, 0, playing_field_offset, 256, 168);
+    blit(framebuf,scrollbuf, 0, PLAYFIELD_OFFSET, 0, PLAYFIELD_OFFSET, 256, 168);
     
     // set up the new palette
     for(int i=CSET(2); i < CSET(4); i++)
@@ -14798,7 +14781,7 @@ void LinkClass::gameover()
     int f=0;
     
     action=none;
-    Playing=false;
+    playing=false;
     
     game->set_deaths(zc_min(game->get_deaths()+1,999));
     dir=down;
@@ -14818,7 +14801,6 @@ void LinkClass::gameover()
     chainlinks.clear();
     decorations.clear();
     
-    playing_field_offset=56; // otherwise, red_shift() may go past the bottom of the screen
     quakeclk=wavy=0;
     
     //in original Z1, Link marker vanishes at death.
@@ -14827,12 +14809,10 @@ void LinkClass::gameover()
     //Also, subscreen is static after death in Z1.
     int tmp_link_dot = QMisc.colors.link_dot;
     QMisc.colors.link_dot = 255;
-    //doesn't work
-    //scrollbuf is tampered with by draw_screen()
-    //put_passive_subscr(scrollbuf, &QMisc, 256, passive_subscreen_offset, false, false);//save this and reuse it.
+
     BITMAP *subscrbmp = create_bitmap_ex(8, framebuf->w, framebuf->h);
     clear_bitmap(subscrbmp);
-    put_passive_subscr(subscrbmp, &QMisc, 0, passive_subscreen_offset, false, sspUP);
+    put_passive_subscr(subscrbmp, &QMisc, 0, 0, false, sspUP);
     QMisc.colors.link_dot = tmp_link_dot;
     
     do
@@ -14899,7 +14879,7 @@ void LinkClass::gameover()
                         draw_screen(tmpscr);
                         //reuse our static subscreen
                         set_clip_rect(framebuf, 0, 0, framebuf->w, framebuf->h);
-                        blit(subscrbmp,framebuf,0,0,0,0,256,passive_subscreen_height);
+                        blit(subscrbmp,framebuf,0,0,0,0,256,SUBSCREEN_HEIGHT);
                     }
                     
                     if(f==60)
@@ -14920,7 +14900,7 @@ void LinkClass::gameover()
                     {
                         draw_screen(tmpscr);
                         //reuse our static subscreen
-                        blit(subscrbmp,framebuf,0,0,0,0,256,passive_subscreen_height);
+                        blit(subscrbmp,framebuf,0,0,0,0,256,SUBSCREEN_HEIGHT);
                         red_shift();
                         
                     }
@@ -14957,9 +14937,9 @@ void LinkClass::gameover()
                     }
                     
                     //draw only link. otherwise black layers might cover him.
-                    rectfill(framebuf,0,playing_field_offset,255,167+playing_field_offset,0);
+                    rectfill(framebuf,0,PLAYFIELD_OFFSET,255,167+PLAYFIELD_OFFSET,0);
                     draw(framebuf);
-                    blit(subscrbmp,framebuf,0,0,0,0,256,passive_subscreen_height);
+                    blit(subscrbmp,framebuf,0,0,0,0,256,SUBSCREEN_HEIGHT);
                 }
             }
             else //!qr_FADE
@@ -15038,22 +15018,22 @@ void LinkClass::gameover()
                 {
                     draw_screen(tmpscr);
                     //reuse our static subscreen
-                    blit(subscrbmp,framebuf,0,0,0,0,256,passive_subscreen_height);
+                    blit(subscrbmp,framebuf,0,0,0,0,256,SUBSCREEN_HEIGHT);
                 }
                 else
                 {
                     //draw only link. otherwise black layers might cover him.
-                    rectfill(framebuf,0,playing_field_offset,255,167+playing_field_offset,0);
+                    rectfill(framebuf,0,PLAYFIELD_OFFSET,255,167+PLAYFIELD_OFFSET,0);
                     draw(framebuf);
-                    blit(subscrbmp,framebuf,0,0,0,0,256,passive_subscreen_height);
+                    blit(subscrbmp,framebuf,0,0,0,0,256,SUBSCREEN_HEIGHT);
                 }
             }
         }
         else if(f<350)//draw 'GAME OVER' text
         {
             clear_bitmap(framebuf);
-            blit(subscrbmp,framebuf,0,0,0,0,256,passive_subscreen_height);
-            textout_ex(framebuf,zfont,"GAME OVER",96,playing_field_offset+80,1,-1);
+            blit(subscrbmp,framebuf,0,0,0,0,256,SUBSCREEN_HEIGHT);
+            textout_ex(framebuf,zfont,"GAME OVER",96,PLAYFIELD_OFFSET+80,1,-1);
         }
         else
         {
@@ -15199,7 +15179,7 @@ void LinkClass::ganon_intro()
 
 void LinkClass::saved_Zelda()
 {
-    Playing=false;
+    playing=false;
     action=won;
     Quit=qWON;
     hclk=0;
@@ -15476,9 +15456,9 @@ void LinkClass::setNayrusLoveShieldClk(int newclk)
     
     if(decorations.idCount(dNAYRUSLOVESHIELD)==0)
     {
-        decorations.add(new dNayrusLoveShield(LinkX(), LinkY(), dNAYRUSLOVESHIELD, 0));
+        decorations.add(new dNayrusLoveShield(getX(), getY(), dNAYRUSLOVESHIELD, 0));
         decorations.spr(decorations.Count()-1)->misc=0;
-        decorations.add(new dNayrusLoveShield(LinkX(), LinkY(), dNAYRUSLOVESHIELD, 0));
+        decorations.add(new dNayrusLoveShield(getX(), getY(), dNAYRUSLOVESHIELD, 0));
         decorations.spr(decorations.Count()-1)->misc=1;
     }
 }

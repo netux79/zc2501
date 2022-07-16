@@ -1264,7 +1264,7 @@ int combo_tile(const newcombo &c, int x, int y)
         
     case 1: //cOLD_EYEBALL_A
     {
-        double ddir=atan2((double)(y-Link.getModifiedY()-playing_field_offset), (double)(Link.getModifiedX()-x));
+        double ddir=atan2((double)(y-Link.getModifiedY()-PLAYFIELD_OFFSET), (double)(Link.getModifiedX()-x));
         
         if((ddir<=(((-5)*PI)/8))&&(ddir>(((-7)*PI)/8)))
         {
@@ -1304,7 +1304,7 @@ int combo_tile(const newcombo &c, int x, int y)
     
     case 3: // 4-way Eyeball (up-down-left-right)
     {
-        double ddir=atan2((double)(y-Link.getModifiedY()-playing_field_offset), (double)(Link.getModifiedX()-x));
+        double ddir=atan2((double)(y-Link.getModifiedY()-PLAYFIELD_OFFSET), (double)(Link.getModifiedX()-x));
         
         if((ddir<=(((-2)*PI)/8))&&(ddir>(((-6)*PI)/8)))
         {
@@ -1328,7 +1328,7 @@ int combo_tile(const newcombo &c, int x, int y)
     
     case 2: //cOLD_EYEBALL_B
     {
-        double ddir=atan2((double)(y-Link.getModifiedY()-playing_field_offset), (double)(Link.getModifiedX()-x));
+        double ddir=atan2((double)(y-Link.getModifiedY()-PLAYFIELD_OFFSET), (double)(Link.getModifiedX()-x));
         
         if((ddir<=(((-6)*PI)/8))&&(ddir>(((-8)*PI)/8)))
         {
