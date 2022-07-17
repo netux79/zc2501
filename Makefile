@@ -1,4 +1,4 @@
-AUDIO_LIBS = -lgme -lalogg -lalmp3 -laldmb -ldumb
+AUDIO_LIBS = -lgme -lalogg -lalmp3
 IMAGE_LIBS = 
 #LINKOPTS = -pg -g
 #OPTS = -pg -g

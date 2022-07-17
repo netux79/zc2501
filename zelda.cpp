@@ -2232,7 +2232,7 @@ int main(int argc, char* argv[])
         Z_error(allegro_error);
     }
     
-    Z_message("set gfx mode succsessful at -%d %dbpp %d x %d \n", tempmode, get_color_depth(), resx, resy);
+    Z_message("set gfx mode successful at -%d %dbpp %d x %d \n", tempmode, get_color_depth(), resx, resy);
     sbig = (screen_scale > 1);
     real_screen = screen;
     

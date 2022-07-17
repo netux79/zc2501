@@ -54,8 +54,6 @@ void load_game_configs()
     sfx_volume = get_config_int(cfg_sect,"sfx",248);
     emusic_volume = get_config_int(cfg_sect,"emusic",248);
     pan_style = get_config_int(cfg_sect,"pan",1);
-    // 1 <= zcmusic_bufsz <= 128
-    zcmusic_bufsz = vbound(get_config_int(cfg_sect,"zcmusic_bufsz",64),1,128);
     Throttlefps = get_config_int(cfg_sect,"throttlefps",1)!=0;
     TransLayers = get_config_int(cfg_sect,"translayers",1)!=0;
     ShowFPS = get_config_int(cfg_sect,"showfps",0)!=0;
@@ -96,7 +94,6 @@ void save_game_configs()
     set_config_int(cfg_sect,"sfx",sfx_volume);
     set_config_int(cfg_sect,"emusic",emusic_volume);
     set_config_int(cfg_sect,"pan",pan_style);
-    set_config_int(cfg_sect,"zcmusic_bufsz",zcmusic_bufsz);
     set_config_int(cfg_sect,"throttlefps", (int)Throttlefps);
     set_config_int(cfg_sect,"translayers",(int)TransLayers);
     set_config_int(cfg_sect,"showfps",(int)ShowFPS);
