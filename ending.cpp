@@ -484,14 +484,7 @@ void ending()
     }
     while(!rSbtn());
     
-    stop_midi();
-    
-    if(zcmusic != NULL)
-    {
-        zcmusic_stop(zcmusic);
-        zcmusic_unload_file(zcmusic);
-        zcmusic = NULL;
-    }
+    music_stop();
     
     saves[currgame] = *game;
     load_game_icon(game);

@@ -30,7 +30,7 @@ extern ZCMUSIC const * zcmusic_load_file(char *filename);
 extern bool zcmusic_play(ZCMUSIC* zcm, int vol);
 extern bool zcmusic_pause(ZCMUSIC* zcm, int pause);
 extern bool zcmusic_stop(ZCMUSIC* zcm);
-extern void zcmusic_unload_file(ZCMUSIC* &zcm);
+extern void zcmusic_unload_file(ZCMUSIC* zcm);
 extern int zcmusic_get_tracks(ZCMUSIC* zcm);
 extern int zcmusic_change_track(ZCMUSIC* zcm, int tracknum);
 

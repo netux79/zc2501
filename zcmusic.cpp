@@ -1,7 +1,6 @@
 #include <string.h>
 #include <alogg.h>
 #include <almp3.h>
-#include <vector>
 #include <gme/Nsf_Emu.h>
 #include <gme/Gbs_Emu.h>
 #include <gme/Spc_Emu.h>
@@ -35,7 +34,7 @@ typedef struct GMEFILE : public ZCMUSICBASE
     int samples;
 } GMEFILE;
 
-static std::vector<ZCMUSIC*> playlist;
+static ZCMUSIC *cur_zcm;
 
 // forward declarations
 OGGFILE *load_ogg_file(char *filename);
@@ -68,39 +67,28 @@ bool zcmusic_init(void)
 
 bool zcmusic_poll(void)
 {
-    std::vector<ZCMUSIC*>::iterator b = playlist.begin();
-    
-    while(b != playlist.end())
+    if (!cur_zcm)
+        return false;
+
+    if(cur_zcm->playing==ZCM_PLAYING)
     {
-        switch((*b)->playing)
+        cur_zcm->position++;
+        
+        switch(cur_zcm->type)
         {
-            case ZCM_STOPPED:
-                // if it has stopped, remove it from playlist;
-                b = playlist.erase(b);
+            case ZCMF_OGG:
+                poll_ogg_file((OGGFILE*)cur_zcm);
                 break;
                 
-            case ZCM_PLAYING:
-                (*b)->position++;
+            case ZCMF_MP3:
+                poll_mp3_file((MP3FILE*)cur_zcm);
+                break;
                 
-                switch((*b)->type)
-                {
-                    case ZCMF_OGG:
-                        poll_ogg_file((OGGFILE*)*b);
-                        break;
-                        
-                    case ZCMF_MP3:
-                        poll_mp3_file((MP3FILE*)*b);
-                        break;
-                        
-                    case ZCMF_GME:
-                        if(((GMEFILE*)*b)->emu)
-                            poll_gme_file((GMEFILE*)*b);
-                            
-                        break;
-                }
-                
-            case ZCM_PAUSED:
-                b++;
+            case ZCMF_GME:
+                if(((GMEFILE*)cur_zcm)->emu)
+                    poll_gme_file((GMEFILE*)cur_zcm);
+                    
+                break;
         }
     }
     
@@ -109,15 +97,11 @@ bool zcmusic_poll(void)
 
 void zcmusic_exit(void)
 {
-    std::vector<ZCMUSIC*>::iterator b = playlist.begin();
-    
-    while(b != playlist.end())
-    {
-        zcmusic_unload_file(*b);
-        b = playlist.erase(b);
-    }
-    
-    playlist.clear();
+    if (!cur_zcm)
+        return;
+
+    zcmusic_unload_file(cur_zcm);
+    cur_zcm = NULL;
 }
 
 ZCMUSIC const * zcmusic_load_file(char *filename)
@@ -224,9 +208,7 @@ bool zcmusic_play(ZCMUSIC* zcm, int vol) /* = FALSE */
 {
     // the libraries require polling
     // of individual streams, so here we must keep
-    // record of each file which is
-    // playing, so we can iterate over all of them
-    // when zcmusic_poll() is called.
+    // a pointer to the current ZCMUSIC playing.
     //
     // In addition, any music library which actually
     // has a 'play' function or similar will be
@@ -312,7 +294,7 @@ bool zcmusic_play(ZCMUSIC* zcm, int vol) /* = FALSE */
         {
             zcm->position=0;
             zcm->playing = ZCM_PLAYING;
-            playlist.push_back(zcm);
+            cur_zcm=zcm;
         }
     }
     
@@ -421,32 +403,12 @@ bool zcmusic_stop(ZCMUSIC* zcm)
     return TRUE;
 }
 
-void zcmusic_unload_file(ZCMUSIC* &zcm)
+void zcmusic_unload_file(ZCMUSIC* zcm)
 {
     // this will unload and destroy all of the data/etc.
-    // associated with 'zcm'. Also sets the pointer to
-    // NULL so you don't try to use it later.
+    // associated with 'zcm'.
+
     if(zcm == NULL) return;
-    
-    // explicitly remove it from the playlist since we're
-    // freeing the memory which holds the ZCM struct.
-    // don't want to leave an soon-to-be invalid pointers
-    // lying around to cause crashes.
-    {
-        std::vector<ZCMUSIC*>::iterator b = playlist.begin();
-        
-        while(b != playlist.end())
-        {
-            if(*b == zcm)
-            {
-                b = playlist.erase(b);
-            }
-            else
-            {
-                b++;
-            }
-        }
-    }
     
     switch(zcm->type)
     {
@@ -462,8 +424,7 @@ void zcmusic_unload_file(ZCMUSIC* &zcm)
         unload_gme_file((GMEFILE*)zcm);
         break;
     }
-    
-    zcm = NULL;
+
     return;
 }
 

@@ -3076,26 +3076,21 @@ int TriforceCount()
 
 void music_pause()
 {
-    //al_pause_duh(tmplayer);
     zcmusic_pause(zcmusic, ZCM_PAUSE);
     midi_pause();
 }
 
 void music_resume()
 {
-    //al_resume_duh(tmplayer);
     zcmusic_pause(zcmusic, ZCM_RESUME);
     midi_resume();
 }
 
 void music_stop()
 {
-    //al_stop_duh(tmplayer);
-    //unload_duh(tmusic);
-    //tmusic=NULL;
-    //tmplayer=NULL;
     zcmusic_stop(zcmusic);
     zcmusic_unload_file(zcmusic);
+    zcmusic=NULL;
     stop_midi();
     currmidi=0;
 }
