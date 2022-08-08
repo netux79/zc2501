@@ -8,7 +8,7 @@ ALLEG_LIB = `allegro-config --libs --static`
 SFLAG = -s
 ZC_PLATFORM = Linux
 CC = g++ 
-CFLAG =
+CFLAG = -std=gnu++11
 
 ZELDA_PREFIX = zelda
 

@@ -741,78 +741,57 @@ bool sprite_list::del(int j)
 
 void sprite_list::draw(BITMAP* dest,bool lowfirst)
 {
-    switch(lowfirst)
+    if (lowfirst)
     {
-    case true:
         for(int i=0; i<count; i++)
-        {
             sprites[i]->draw(dest);
-        }
-        
-        break;
-        
-    case false:
+    }
+    else
+    {
         for(int i=count-1; i>=0; i--)
-        {
             sprites[i]->draw(dest);
-        }
-        
-        break;
     }
 }
 
 void sprite_list::drawshadow(BITMAP* dest,bool translucent, bool lowfirst)
 {
-    switch(lowfirst)
+    if (lowfirst)
     {
-    case true:
         for(int i=0; i<count; i++)
             sprites[i]->drawshadow(dest,translucent);
-            
-        break;
-        
-    case false:
+    }
+    else
+    {
         for(int i=count-1; i>=0; i--)
             sprites[i]->drawshadow(dest,translucent);
-            
-        break;
     }
 }
 
 void sprite_list::draw2(BITMAP* dest,bool lowfirst)
 {
-    switch(lowfirst)
+    if (lowfirst)
     {
-    case true:
         for(int i=0; i<count; i++)
             sprites[i]->draw2(dest);
-            
-        break;
-        
-    case false:
+    }
+    else
+    {
         for(int i=count-1; i>=0; i--)
             sprites[i]->draw2(dest);
-            
-        break;
     }
 }
 
 void sprite_list::drawcloaked2(BITMAP* dest,bool lowfirst)
 {
-    switch(lowfirst)
+    if (lowfirst)
     {
-    case true:
         for(int i=0; i<count; i++)
             sprites[i]->drawcloaked2(dest);
-            
-        break;
-        
-    case false:
-    
+    }
+    else
+    {
         for(int i=count-1; i>=0; i--)
             sprites[i]->drawcloaked2(dest);
-            
-        break;
     }
 }
 
