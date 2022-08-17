@@ -1144,22 +1144,21 @@ void do_fasttiler(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
 
 void do_fastcombor(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
 {
-    /* layer, x, y, tile, color opacity */
-    
     int opacity = sdci[6] / 10000;
     int x1 = sdci[2] / 10000;
     int y1 = sdci[3] / 10000;
-    int index = sdci[4]/10000;
-    
-    //if( index >= MAXCOMBOS ) return; //bleh.
-    const newcombo & c = combobuf[index];
-    
-    if(opacity < 128)
-        overtiletranslucent16(bmp, combo_tile(c, x1, y1), xoffset+x1, yoffset+y1, sdci[5]/10000, (int)c.flip, opacity);
-    else
-        overtile16(bmp, combo_tile(c, x1, y1), xoffset+x1, yoffset+y1, sdci[5]/10000, (int)c.flip);
-}
+    /* int index = sdci[4]/10000; */
 
+    if(opacity < 128)
+    {
+        overcomboblocktranslucent(bmp, xoffset+x1, yoffset+y1, sdci[4]/10000, sdci[5]/10000, 1, 1, 128);
+
+    }
+    else
+    {
+        overcomboblock(bmp, xoffset+x1, yoffset+y1, sdci[4]/10000, sdci[5]/10000, 1, 1);
+    }
+}
 
 
 void do_drawcharr(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
@@ -1209,13 +1208,13 @@ void do_drawcharr(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
             }
             else //this is faster
             {
-                BITMAP *pbmp2 = script_drawing_commands.AquireSubBitmap(w,h);
-                
-                textprintf_ex(pbmp, get_zc_font(font_index), 0, 0, color, bg_color, "%c", glyph);
-                stretch_sprite(pbmp2, pbmp, 0, 0, w, h);
-                draw_trans_sprite(bmp, pbmp2, x+xoffset, y+yoffset);
-                
-                script_drawing_commands.ReleaseSubBitmap(pbmp2);
+            BITMAP *pbmp2 = script_drawing_commands.AquireSubBitmap(w,h);
+            
+            textprintf_ex(pbmp, get_zc_font(font_index), 0, 0, color, bg_color, "%c", glyph);
+            stretch_sprite(pbmp2, pbmp, 0, 0, w, h);
+            draw_trans_sprite(bmp, pbmp2, x+xoffset, y+yoffset);
+            
+            script_drawing_commands.ReleaseSubBitmap(pbmp2);
             }
         }
         else // no opacity
@@ -1223,7 +1222,6 @@ void do_drawcharr(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
             textprintf_ex(pbmp, get_zc_font(font_index), 0, 0, color, bg_color, "%c", glyph);
             stretch_sprite(bmp, pbmp, x+xoffset, y+yoffset, w, h);
         }
-        
     }
     else //no stretch
     {
@@ -1266,7 +1264,6 @@ void do_drawintr(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
     int bg_color=sdci[6]/10000; //-1 = transparent
     int w=sdci[7]/10000;
     int h=sdci[8]/10000;
-    float number=static_cast<float>(sdci[9])/10000.0f;
     int decplace=sdci[10]/10000;
     int opacity=sdci[11]/10000;
     
@@ -1281,31 +1278,36 @@ void do_drawintr(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
     
     switch(decplace)
     {
-    default:
-    case 0:
-        sprintf(numbuf,"%d",int(number));
+        default:
+        case 0:
+        sprintf(numbuf,"%d",(sdci[9]/10000));   //For some reason, static casting for zero decimal places was
+        break;                                  //reducing the value by -1, so 8.000 printed as '7'. -Z
+        
+        case 1:
+        //sprintf(numbuf,"%.01f",number);
+        sprintf(numbuf,"%.01f",(static_cast<float>(sdci[9])/10000.0f)); //Would this be slower? 
         break;
         
-    case 1:
-        sprintf(numbuf,"%.01f",number);
+        case 2:
+        //sprintf(numbuf,"%.02f",number);
+        sprintf(numbuf,"%.02f",(static_cast<float>(sdci[9])/10000.0f));
         break;
         
-    case 2:
-        sprintf(numbuf,"%.02f",number);
+        case 3:
+        //sprintf(numbuf,"%.03f",number);
+        sprintf(numbuf,"%.03f",(static_cast<float>(sdci[9])/10000.0f));
         break;
         
-    case 3:
-        sprintf(numbuf,"%.03f",number);
-        break;
-        
-    case 4:
-        sprintf(numbuf,"%.04f",number);
+        case 4:
+        //sprintf(numbuf,"%.04f",number);
+        sprintf(numbuf,"%.04f",(static_cast<float>(sdci[9])/10000.0f));
         break;
     }
     
     if(w>0&&h>0)//stretch
     {
-        BITMAP *pbmp = script_drawing_commands.GetSmallTextureBitmap(1,1);
+        BITMAP *pbmp = create_sub_bitmap(prim_bmp, 0, 0, text_length(get_zc_font(font_index), numbuf)+1, text_height(get_zc_font(font_index)));
+        clear_bitmap(pbmp);
         
         if(opacity < 128)
         {
@@ -1340,10 +1342,11 @@ void do_drawintr(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
     {
         if(opacity < 128)
         {
-            BITMAP *pbmp = create_sub_bitmap(prim_bmp,0,0,16,16);
+            FONT* font = get_zc_font(font_index);
+            BITMAP *pbmp = create_sub_bitmap(prim_bmp, 0, 0, text_length(font, numbuf), text_height(font));
             clear_bitmap(pbmp);
             
-            textout_ex(pbmp, get_zc_font(font_index), numbuf, 0, 0, color, bg_color);
+            textout_ex(pbmp, font, numbuf, 0, 0, color, bg_color);
             draw_trans_sprite(bmp, pbmp, x+xoffset, y+yoffset);
             
             destroy_bitmap(pbmp);
@@ -1355,7 +1358,6 @@ void do_drawintr(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
     }
 }
 
-
 void do_drawstringr(BITMAP *bmp, int i, int *sdci, int xoffset, int yoffset)
 {
     //sdci[1]=layer
@@ -1365,8 +1367,8 @@ void do_drawstringr(BITMAP *bmp, int i, int *sdci, int xoffset, int yoffset)
     //sdci[5]=color
     //sdci[6]=bg color
     //sdci[7]=format_option
-    //sdci[8]=opacity
-    //sdci[9]=char
+    //sdci[8]=string
+    //sdci[9]=opacity
     
     std::string* str = (std::string*)script_drawing_commands[i].GetPtr();
     
@@ -1378,7 +1380,7 @@ void do_drawstringr(BITMAP *bmp, int i, int *sdci, int xoffset, int yoffset)
     
     int x=sdci[2]/10000;
     int y=sdci[3]/10000;
-    int font_index=sdci[4]/10000;
+    FONT* font=get_zc_font(sdci[4]/10000);
     int color=sdci[5]/10000;
     int bg_color=sdci[6]/10000; //-1 = transparent
     int format_type=sdci[7]/10000;
@@ -1389,23 +1391,33 @@ void do_drawstringr(BITMAP *bmp, int i, int *sdci, int xoffset, int yoffset)
     if(bg_color < -1) bg_color = -1;
     
     if(opacity < 128)
-        drawing_mode(DRAW_MODE_TRANS, NULL, 0, 0);
-        
-    if(format_type == 2)   // right-sided text
     {
-        textout_right_ex(bmp, get_zc_font(font_index), str->c_str(), x+xoffset, y+yoffset, color, bg_color);
+        int width=zc_min(text_length(font, str->c_str()), 512);
+        BITMAP *pbmp = create_sub_bitmap(prim_bmp, 0, 0, width, text_height(font));
+        clear_bitmap(pbmp);
+        textout_ex(pbmp, font, str->c_str(), 0, 0, color, bg_color);
+        if(format_type == 2)   // right-sided text
+            x-=width;
+        else if(format_type == 1)   // centered text
+            x-=width/2;
+        draw_trans_sprite(bmp, pbmp, x+xoffset, y+yoffset);
+        destroy_bitmap(pbmp);
     }
-    else if(format_type == 1)   // centered text
+    else // no opacity
     {
-        textout_centre_ex(bmp, get_zc_font(font_index), str->c_str(), x+xoffset, y+yoffset, color, bg_color);
+        if(format_type == 2)   // right-sided text
+        {
+            textout_right_ex(bmp, font, str->c_str(), x+xoffset, y+yoffset, color, bg_color);
+        }
+        else if(format_type == 1)   // centered text
+        {
+            textout_centre_ex(bmp, font, str->c_str(), x+xoffset, y+yoffset, color, bg_color);
+        }
+        else // standard left-sided text
+        {
+            textout_ex(bmp, font, str->c_str(), x+xoffset, y+yoffset, color, bg_color);
+        }
     }
-    else // standard left-sided text
-    {
-        textout_ex(bmp, get_zc_font(font_index), str->c_str(), x+xoffset, y+yoffset, color, bg_color);
-    }
-    
-    if(opacity < 128)
-        drawing_mode(DRAW_MODE_SOLID, NULL, 0, 0);
 }
 
 
@@ -1464,15 +1476,19 @@ void do_drawquadr(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
     
     if(((w-1) & w) != 0 || ((h-1) & h) != 0)
     {
-        Z_message("Quad() : PO2 error with %i, %i.", w, h);
+        Z_message("Quad() : Args h, w, must be in powers of two! Power of 2 error with %i, %i.", w, h);
         return; //non power of two error
     }
     
     int tex_width = w*16;
     int tex_height = h*16;
     
+    BITMAP *tex;
+    
     bool mustDestroyBmp = false;
-    BITMAP *tex = script_drawing_commands.GetSmallTextureBitmap(w,h);
+    
+	if ( tile > 65519 ) tex = zscriptDrawingRenderTarget->GetBitmapPtr(tile - 65519);
+	else tex = script_drawing_commands.GetSmallTextureBitmap(w,h);
     
     if(!tex)
     {
@@ -1495,11 +1511,12 @@ void do_drawquadr(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
         col[0]=col[1]=col[2]=col[3]=color;
     }
     
-    if(tile > 0)   // TILE
+    if(tile > 0 && tile <= 65519)   // TILE
     {
         TileHelper::OverTile(tex, tile, 0, 0, w, h, color, flip);
     }
-    else        // COMBO
+    
+    if ( tile < 0 )        // COMBO
     {
         const newcombo & c = combobuf[ vbound(abs(tile), 0, 0xffff) ];
         const int tiletodraw = combo_tile(c, x1, y1);
@@ -1607,6 +1624,19 @@ void do_drawtriangler(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
 
 void do_drawbitmapr(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
 {
+    //sdci[1]=layer
+    //sdci[2]=bitmap
+    //sdci[3]=sourcex
+    //sdci[4]=sourcey
+    //sdci[5]=sourcew
+    //sdci[6]=sourceh
+    //sdci[7]=destx
+    //sdci[8]=desty
+    //sdci[9]=destw
+    //sdci[10]=desth
+    //sdci[11]=rotation
+    //sdci[12]=mask
+
     int bitmapIndex = sdci[2]/10000;
     int sx = sdci[3]/10000;
     int sy = sdci[4]/10000;
@@ -1619,11 +1649,11 @@ void do_drawbitmapr(BITMAP *bmp, int *sdci, int xoffset, int yoffset)
     float rot = sdci[11]/10000;
     bool masked = (sdci[12] != 0);
 
-	//bugfix
-	sx = vbound(sx, 0, 512);
-	sy = vbound(sy, 0, 512);
-	sw = vbound(sw, 0, 512 - sx); //keep the w/h within range as well
-	sh = vbound(sh, 0, 512 - sy);
+    //bugfix
+    sx = vbound(sx, 0, 512);
+    sy = vbound(sy, 0, 512);
+    sw = vbound(sw, 0, 512 - sx); //keep the w/h within range as well
+    sh = vbound(sh, 0, 512 - sy);
 
     
     if(sx >= ZScriptDrawingRenderTarget::BitmapWidth || sy >= ZScriptDrawingRenderTarget::BitmapHeight)
@@ -1904,16 +1934,19 @@ void draw_mapscr(BITMAP *b, const mapscr& m, int x, int y, bool transparent)
     {
         const int x2 = ((i&15)<<4) + x;
         const int y2 = (i&0xF0) + y;
-        
-        const newcombo & c = combobuf[ m.data[i] ];
-        const int tile = combo_tile(c, x2, y2);
-        
+
         if(transparent)
-            overtiletranslucent16(b, tile, x2, y2, m.cset[i], c.flip, 128);
+        {
+            overcomboblocktranslucent(b, x2, y2, m.data[i], m.cset[i], 1, 1, 128);
+        }
         else
-            overtile16(b, tile, x2, y2, m.cset[i], c.flip);
+        {
+            overcomboblock(b, x2, y2, m.data[i], m.cset[i], 1, 1);
+        }
     }
 }
+
+
 
 
 void do_drawlayerr(BITMAP *bmp, int *sdci, int xoffset, int yoffset, bool isOffScreen)
@@ -1940,9 +1973,12 @@ void do_drawlayerr(BITMAP *bmp, int *sdci, int xoffset, int yoffset, bool isOffS
     const unsigned int index = (unsigned int)(map * MAPSCRS + scrn);
     const mapscr* m = getmapscreen(map, scrn, sourceLayer);
     
-    if(!m || index >= TheMaps.size())
+    if(!m) //no need to log it.
+        return;
+
+    if(index >= TheMaps.size())
     {
-        Z_message("DrawLayer: invalid map, layer, or screen index. \n");
+        Z_message("DrawLayer: invalid map index \"%i\". Map count is %ld.\n", index, TheMaps.size());
         return;
     }
     
@@ -1986,8 +2022,6 @@ void do_drawlayerr(BITMAP *bmp, int *sdci, int xoffset, int yoffset, bool isOffS
             }
         }
     }
-    
-    //putscr
 }
 
 

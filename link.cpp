@@ -1043,11 +1043,6 @@ void LinkClass::positionSword(weapon *w, int itemid)
 
 void LinkClass::draw(BITMAP* dest)
 {
-    /*{
-    	char buf[36];
-    	//sprintf(buf,"%d %d %d %d %d %d %d",dir, action, attack, attackclk, charging, spins, tapping);
-    	textout_shadowed_ex(framebuf,font, buf, 2,72,WHITE,BLACK,-1);
-    }*/
     int oxofs, oyofs;
     bool shieldModify = false;
     
